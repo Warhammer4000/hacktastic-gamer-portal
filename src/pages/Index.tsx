@@ -12,7 +12,7 @@ const Index = () => {
   return (
     <div className="min-h-screen dark:bg-gray-900">
       <Navbar />
-      <main className="pt-24">
+      <main className="mt-16"> {/* Changed from pt-24 to mt-16 for consistency */}
         <Hero />
         <Features />
         <Stats />
