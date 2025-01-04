@@ -7,10 +7,21 @@ import { AddNewsPost } from "./AddNewsPost";
 import { NewsList } from "./NewsList";
 import { SearchBar } from "./SearchBar";
 
+type NewsPost = {
+  id: string;
+  title: string;
+  content: string;
+  tags: string[] | null;
+  status: 'draft' | 'published';
+  created_at: string;
+  published_at: string | null;
+};
+
 export function NewsTab() {
   const [showAddPost, setShowAddPost] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [editingPost, setEditingPost] = useState<NewsPost | null>(null);
 
   const { data: posts, isLoading } = useQuery({
     queryKey: ["news-posts"],
@@ -32,11 +43,19 @@ export function NewsTab() {
     return matchesSearch && matchesTags;
   });
 
+  const handleEdit = (post: NewsPost) => {
+    setEditingPost(post);
+    setShowAddPost(true);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">News Posts</h2>
-        <Button size="sm" onClick={() => setShowAddPost(true)}>
+        <Button size="sm" onClick={() => {
+          setEditingPost(null);
+          setShowAddPost(true);
+        }}>
           <Plus className="h-4 w-4 mr-2" />
           Add Post
         </Button>
@@ -50,9 +69,17 @@ export function NewsTab() {
         availableTags={Array.from(new Set(posts?.flatMap(post => post.tags || []) || []))}
       />
 
-      <NewsList posts={filteredPosts || []} isLoading={isLoading} />
+      <NewsList 
+        posts={filteredPosts || []} 
+        isLoading={isLoading} 
+        onEdit={handleEdit}
+      />
       
-      <AddNewsPost open={showAddPost} onOpenChange={setShowAddPost} />
+      <AddNewsPost 
+        open={showAddPost} 
+        onOpenChange={setShowAddPost}
+        editingPost={editingPost}
+      />
     </div>
   );
 }

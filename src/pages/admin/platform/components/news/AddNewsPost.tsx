@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Eye, X } from "lucide-react";
+import { Eye } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,6 +15,13 @@ import { NewsPreview } from "./preview/NewsPreview";
 type AddNewsPostProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  editingPost?: {
+    id: string;
+    title: string;
+    content: string;
+    tags: string[] | null;
+    publishDate?: string;
+  } | null;
 };
 
 type FormValues = {
@@ -24,7 +31,7 @@ type FormValues = {
   publishDate: string;
 };
 
-export function AddNewsPost({ open, onOpenChange }: AddNewsPostProps) {
+export function AddNewsPost({ open, onOpenChange, editingPost }: AddNewsPostProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
   const queryClient = useQueryClient();
@@ -39,33 +46,70 @@ export function AddNewsPost({ open, onOpenChange }: AddNewsPostProps) {
     },
   });
 
+  useEffect(() => {
+    if (editingPost) {
+      form.reset({
+        title: editingPost.title,
+        content: editingPost.content,
+        tags: editingPost.tags || [],
+        publishDate: editingPost.publishDate || new Date().toISOString().split('T')[0]
+      });
+    } else {
+      form.reset({
+        title: "",
+        content: "",
+        tags: [],
+        publishDate: new Date().toISOString().split('T')[0]
+      });
+    }
+  }, [editingPost, form]);
+
   const onSubmit = async (values: FormValues) => {
     try {
       setIsSubmitting(true);
 
-      const { error } = await supabase.from("news_posts").insert({
-        title: values.title,
-        content: values.content,
-        tags: values.tags,
-        status: "draft",
-        published_at: values.publishDate ? new Date(values.publishDate).toISOString() : null,
-      });
+      if (editingPost) {
+        const { error } = await supabase
+          .from("news_posts")
+          .update({
+            title: values.title,
+            content: values.content,
+            tags: values.tags,
+            published_at: values.publishDate ? new Date(values.publishDate).toISOString() : null,
+          })
+          .eq("id", editingPost.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "News post created successfully",
-      });
+        toast({
+          title: "Success",
+          description: "News post updated successfully",
+        });
+      } else {
+        const { error } = await supabase.from("news_posts").insert({
+          title: values.title,
+          content: values.content,
+          tags: values.tags,
+          status: "draft",
+          published_at: values.publishDate ? new Date(values.publishDate).toISOString() : null,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "News post created successfully",
+        });
+      }
 
       queryClient.invalidateQueries({ queryKey: ["news-posts"] });
       onOpenChange(false);
       form.reset();
     } catch (error) {
-      console.error("Error creating news post:", error);
+      console.error("Error saving news post:", error);
       toast({
         title: "Error",
-        description: "Failed to create news post",
+        description: "Failed to save news post",
         variant: "destructive",
       });
     } finally {
@@ -78,17 +122,15 @@ export function AddNewsPost({ open, onOpenChange }: AddNewsPostProps) {
       <DialogContent className="sm:max-w-[1200px] h-[80vh] flex flex-col">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle>Create News Post</DialogTitle>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 p-0"
-                onClick={() => setIsPreview(!isPreview)}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-            </div>
+            <DialogTitle>{editingPost ? "Edit News Post" : "Create News Post"}</DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 p-0"
+              onClick={() => setIsPreview(!isPreview)}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
 
@@ -175,7 +217,7 @@ export function AddNewsPost({ open, onOpenChange }: AddNewsPostProps) {
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Post"}
+                {isSubmitting ? (editingPost ? "Updating..." : "Creating...") : (editingPost ? "Update Post" : "Create Post")}
               </Button>
             </div>
           </form>
