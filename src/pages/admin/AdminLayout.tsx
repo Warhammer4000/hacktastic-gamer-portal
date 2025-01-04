@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import { Users, Settings, BarChart3, LogOut, User, UserCheck } from "lucide-react";
+import { Users, Settings, BarChart3, LogOut, User, UserCheck, Cpu } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "next-themes";
@@ -68,6 +68,11 @@ const AdminLayout = () => {
       icon: UserCheck,
       path: "/admin/mentors",
       badge: pendingMentorsCount,
+    },
+    {
+      title: "Platform",
+      icon: Cpu,
+      path: "/admin/platform",
     },
     {
       title: "Users",
