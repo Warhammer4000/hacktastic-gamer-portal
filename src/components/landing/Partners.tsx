@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Building, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function Partners() {
@@ -40,23 +40,29 @@ export default function Partners() {
             Collaborating with industry leaders to drive innovation
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {partners?.map((partner) => (
-            <Card key={partner.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Building className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>{partner.name}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <img
-                  src={partner.icon_url}
-                  alt={partner.name}
-                  className="h-12 object-contain mx-auto"
-                />
-                <div className="flex justify-center">
-                  <Button variant="outline" asChild>
+            <Card 
+              key={partner.id} 
+              className="group hover:shadow-xl transition-all duration-300 border-none bg-white/50 backdrop-blur-sm dark:bg-gray-800/50"
+            >
+              <CardContent className="p-8">
+                <div className="flex flex-col items-center space-y-6">
+                  <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <img
+                      src={partner.icon_url}
+                      alt={partner.name}
+                      className="h-12 w-12 object-contain"
+                    />
+                  </div>
+                  <h3 className="text-xl font-semibold text-center group-hover:text-primary transition-colors duration-300">
+                    {partner.name}
+                  </h3>
+                  <Button 
+                    variant="outline" 
+                    className="group-hover:bg-primary group-hover:text-white transition-colors duration-300"
+                    asChild
+                  >
                     <a
                       href={partner.website_url}
                       target="_blank"

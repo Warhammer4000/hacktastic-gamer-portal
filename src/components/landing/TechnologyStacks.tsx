@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Code, ExternalLink } from "lucide-react";
+import { Code } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function TechnologyStacks() {
   const { data: stacks, isLoading } = useQuery({
-    queryKey: ["techStacks"], // Updated to match the admin panel query key
+    queryKey: ["techStacks"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("technology_stacks")
@@ -17,7 +17,7 @@ export default function TechnologyStacks() {
         console.error("Error fetching tech stacks:", error);
         throw error;
       }
-      console.log("Fetched tech stacks:", data); // Added for debugging
+      console.log("Fetched tech stacks:", data);
       return data;
     },
   });
@@ -58,21 +58,25 @@ export default function TechnologyStacks() {
             Explore the cutting-edge technologies we support
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {stacks?.map((stack) => (
-            <Card key={stack.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Code className="h-6 w-6 text-primary" />
+            <Card 
+              key={stack.id} 
+              className="group hover:shadow-lg transition-all duration-300 border-none bg-white/50 backdrop-blur-sm dark:bg-gray-800/50"
+            >
+              <CardContent className="p-6">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <img
+                      src={stack.icon_url}
+                      alt={stack.name}
+                      className="h-10 w-10 object-contain"
+                    />
+                  </div>
+                  <h3 className="text-lg font-semibold text-center group-hover:text-primary transition-colors duration-300">
+                    {stack.name}
+                  </h3>
                 </div>
-                <CardTitle>{stack.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <img
-                  src={stack.icon_url}
-                  alt={stack.name}
-                  className="h-12 object-contain mx-auto"
-                />
               </CardContent>
             </Card>
           ))}
