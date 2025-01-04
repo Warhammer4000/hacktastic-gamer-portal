@@ -7,7 +7,6 @@ import MentorApproval from "./pages/admin/mentors/MentorApproval";
 import Platform from "./pages/admin/platform/Platform";
 import UsersPage from "./pages/admin/users/UsersPage";
 import Index from "./pages/Index";
-import Login from "./pages/auth/Login";
 import Register from "./pages/Register";
 import ParticipantRegister from "./pages/participant/Register";
 import MentorRegister from "./pages/mentor/Register";
@@ -24,9 +23,7 @@ import MentorsPage from "./pages/public/mentors/MentorsPage";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Index />}>
-        <Route path="login" element={<Login />} />
-      </Route>
+      <Route path="/" element={<Index />} />
       <Route path="/register" element={<Register />} />
       <Route path="/participant/register" element={<ParticipantRegister />} />
       <Route path="/mentor/register" element={<MentorRegister />} />
