@@ -1,11 +1,10 @@
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -20,14 +19,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import type { TechnologyStacksTable } from "@/integrations/supabase/types/tables/technology-stacks";
 
 type TechStack = TechnologyStacksTable["Row"];
 
-const techStackSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+const formSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
   icon_url: z.string().url("Must be a valid URL"),
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface EditTechnologyStackProps {
   stack: TechStack | null;
@@ -35,26 +38,41 @@ interface EditTechnologyStackProps {
 }
 
 export const EditTechnologyStack = ({ stack, onClose }: EditTechnologyStackProps) => {
+  const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<z.infer<typeof techStackSchema>>({
-    resolver: zodResolver(techStackSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      name: stack?.name || "",
-      icon_url: stack?.icon_url || "",
+      name: "",
+      icon_url: "",
     },
   });
 
-  const editTechStack = useMutation({
-    mutationFn: async (values: z.infer<typeof techStackSchema>) => {
-      if (!stack?.id) return;
-      
+  // Update form values when stack changes
+  useEffect(() => {
+    if (stack) {
+      form.reset({
+        name: stack.name,
+        icon_url: stack.icon_url,
+      });
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  }, [stack, form]);
+
+  const updateStack = useMutation({
+    mutationFn: async (values: FormValues) => {
+      if (!stack) throw new Error("No stack selected");
+
       const { error } = await supabase
         .from("technology_stacks")
         .update({
           name: values.name,
           icon_url: values.icon_url,
+          updated_at: new Date().toISOString(),
         })
         .eq("id", stack.id);
 
@@ -62,12 +80,11 @@ export const EditTechnologyStack = ({ stack, onClose }: EditTechnologyStackProps
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["techStacks"] });
-      onClose();
-      form.reset();
       toast({
         title: "Success",
         description: "Technology stack updated successfully",
       });
+      handleClose();
     },
     onError: (error) => {
       toast({
@@ -78,12 +95,18 @@ export const EditTechnologyStack = ({ stack, onClose }: EditTechnologyStackProps
     },
   });
 
-  const onSubmit = (values: z.infer<typeof techStackSchema>) => {
-    editTechStack.mutate(values);
+  const handleClose = () => {
+    setOpen(false);
+    form.reset();
+    onClose();
+  };
+
+  const onSubmit = (values: FormValues) => {
+    updateStack.mutate(values);
   };
 
   return (
-    <Dialog open={!!stack} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Technology Stack</DialogTitle>
@@ -97,7 +120,7 @@ export const EditTechnologyStack = ({ stack, onClose }: EditTechnologyStackProps
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="React" {...field} />
+                    <Input {...field} placeholder="Enter technology name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -110,13 +133,27 @@ export const EditTechnologyStack = ({ stack, onClose }: EditTechnologyStackProps
                 <FormItem>
                   <FormLabel>Icon URL</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/icon.svg" {...field} />
+                    <Input {...field} placeholder="Enter icon URL" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">Update Stack</Button>
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={updateStack.isPending}
+              >
+                {updateStack.isPending ? "Updating..." : "Update"}
+              </Button>
+            </div>
           </form>
         </Form>
       </DialogContent>
