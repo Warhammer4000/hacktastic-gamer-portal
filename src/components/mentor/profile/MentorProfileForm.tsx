@@ -36,18 +36,24 @@ export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: Men
   };
 
   const validateGithub = async () => {
+    const githubUsername = form.getValues('github_username')?.trim();
+    if (!githubUsername) return;
+
     setIsValidatingGithub(true);
     try {
-      await validateProfiles({ ...form.getValues(), github_username: form.getValues('github_username') });
+      await validateProfiles({ ...form.getValues(), github_username: githubUsername });
     } finally {
       setIsValidatingGithub(false);
     }
   };
 
   const validateLinkedin = async () => {
+    const linkedinId = form.getValues('linkedin_profile_id')?.trim();
+    if (!linkedinId) return;
+
     setIsValidatingLinkedin(true);
     try {
-      await validateProfiles({ ...form.getValues(), linkedin_profile_id: form.getValues('linkedin_profile_id') });
+      await validateProfiles({ ...form.getValues(), linkedin_profile_id: linkedinId });
     } finally {
       setIsValidatingLinkedin(false);
     }
@@ -127,7 +133,7 @@ export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: Men
                   type="button"
                   variant="outline"
                   onClick={validateLinkedin}
-                  disabled={isValidatingLinkedin || !field.value}
+                  disabled={isValidatingLinkedin || !field.value?.trim()}
                   className="shrink-0"
                 >
                   {isValidatingLinkedin ? (
@@ -161,7 +167,7 @@ export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: Men
                   type="button"
                   variant="outline"
                   onClick={validateGithub}
-                  disabled={isValidatingGithub || !field.value}
+                  disabled={isValidatingGithub || !field.value?.trim()}
                   className="shrink-0"
                 >
                   {isValidatingGithub ? (
