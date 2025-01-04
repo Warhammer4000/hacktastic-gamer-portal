@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Users, Settings, BarChart3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ProfileMenu } from "@/components/ProfileMenu";
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +14,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 // Menu items for the admin sidebar
@@ -71,7 +71,10 @@ const AdminDashboard = () => {
         <Sidebar>
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Admin Dashboard</SidebarGroupLabel>
+              <div className="flex items-center justify-between px-4 py-2">
+                <SidebarGroupLabel>Admin Dashboard</SidebarGroupLabel>
+                <ProfileMenu />
+              </div>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {sidebarItems.map((item) => (
@@ -95,15 +98,15 @@ const AdminDashboard = () => {
         <main className="flex-1 p-6">
           <h1 className="text-2xl font-bold mb-6">Welcome to Admin Dashboard</h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 bg-white rounded-lg shadow">
+            <div className="p-6 bg-white rounded-lg shadow dark:bg-gray-800">
               <h3 className="font-semibold mb-2">Total Users</h3>
               <p className="text-2xl font-bold">Loading...</p>
             </div>
-            <div className="p-6 bg-white rounded-lg shadow">
+            <div className="p-6 bg-white rounded-lg shadow dark:bg-gray-800">
               <h3 className="font-semibold mb-2">Active Mentors</h3>
               <p className="text-2xl font-bold">Loading...</p>
             </div>
-            <div className="p-6 bg-white rounded-lg shadow">
+            <div className="p-6 bg-white rounded-lg shadow dark:bg-gray-800">
               <h3 className="font-semibold mb-2">Total Participants</h3>
               <p className="text-2xl font-bold">Loading...</p>
             </div>
