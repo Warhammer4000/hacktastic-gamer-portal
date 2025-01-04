@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import * as z from "zod";
 
 export const profileSchema = z.object({
@@ -22,12 +21,13 @@ export function useMentorProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
       
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
       
+      if (error) throw error;
       return profile;
     },
   });
@@ -46,10 +46,6 @@ export function useMentorProfile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mentor-profile'] });
-      toast.success("Profile updated successfully");
-    },
-    onError: (error) => {
-      toast.error("Failed to update profile: " + error.message);
     },
   });
 

@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { MentorProfileForm } from "@/components/mentor/profile/MentorProfileForm";
 import { useMentorProfile } from "@/hooks/useMentorProfile";
+import { toast } from "sonner";
 
 export default function MentorProfile() {
   const { profile, isLoading, updateProfile } = useMentorProfile();
@@ -12,6 +13,14 @@ export default function MentorProfile() {
       </div>
     );
   }
+
+  const handleSubmit = async (values: any) => {
+    toast.promise(updateProfile.mutateAsync(values), {
+      loading: 'Saving profile...',
+      success: 'Profile saved successfully!',
+      error: (error) => `Failed to save profile: ${error.message}`
+    });
+  };
 
   return (
     <div className="container max-w-2xl mx-auto p-6">
@@ -25,7 +34,7 @@ export default function MentorProfile() {
           github_username: profile?.github_username || "",
           email: profile?.email || "",
         }}
-        onSubmit={(values) => updateProfile.mutate(values)}
+        onSubmit={handleSubmit}
         isSubmitting={updateProfile.isPending}
       />
 
