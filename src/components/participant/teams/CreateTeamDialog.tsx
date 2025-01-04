@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -36,6 +37,7 @@ import { toast } from "sonner";
 
 const createTeamSchema = z.object({
   name: z.string().min(3, "Team name must be at least 3 characters"),
+  description: z.string().optional(),
   techStackId: z.string().uuid("Please select a technology stack"),
 });
 
@@ -72,6 +74,7 @@ export function CreateTeamDialog() {
         .from('teams')
         .insert({
           name: data.name,
+          description: data.description,
           tech_stack_id: data.techStackId,
           join_code: joinCode,
           leader_id: (await supabase.auth.getUser()).data.user?.id,
@@ -124,6 +127,24 @@ export function CreateTeamDialog() {
                   <FormLabel>Team Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter team name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Describe your team and project idea..."
+                      className="resize-none"
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
