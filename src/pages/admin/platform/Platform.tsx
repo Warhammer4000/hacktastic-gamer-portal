@@ -3,6 +3,7 @@ import { TechnologyStacksTab } from "./components/technology/TechnologyStacksTab
 import { PartnersTab } from "./components/partners/PartnersTab";
 import { FAQTab } from "./components/faq/FAQTab";
 import { PrivacyPolicyTab } from "./components/privacy/PrivacyPolicyTab";
+import { TermsAndConditionsTab } from "./components/terms/TermsAndConditionsTab";
 
 const Platform = () => {
   return (
@@ -31,9 +32,7 @@ const Platform = () => {
         </TabsContent>
 
         <TabsContent value="terms">
-          <div className="text-muted-foreground">
-            Terms & Conditions management coming soon...
-          </div>
+          <TermsAndConditionsTab />
         </TabsContent>
 
         <TabsContent value="privacy">
@@ -42,6 +41,6 @@ const Platform = () => {
       </Tabs>
     </div>
   );
-};
+}
 
 export default Platform;

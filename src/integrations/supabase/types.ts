@@ -561,6 +561,53 @@ export type Database = {
         }
         Relationships: []
       }
+      terms_and_conditions: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          published_at: string | null
+          status:
+            | Database["public"]["Enums"]["terms_and_conditions_status"]
+            | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          status?:
+            | Database["public"]["Enums"]["terms_and_conditions_status"]
+            | null
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          status?:
+            | Database["public"]["Enums"]["terms_and_conditions_status"]
+            | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "terms_and_conditions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -605,6 +652,7 @@ export type Database = {
       profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
       team_status: "draft" | "open" | "locked" | "pending_mentor" | "active"
       tech_stack_status: "active" | "inactive"
+      terms_and_conditions_status: "draft" | "published"
       user_role: "participant" | "mentor" | "admin" | "organizer" | "moderator"
     }
     CompositeTypes: {

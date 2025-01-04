@@ -5,6 +5,7 @@ import { UserRolesTable } from './tables/user-roles';
 import { TechnologyStacksTable } from './tables/technology-stacks';
 import { PartnersTable } from './tables/partners';
 import { GalleryPostsTable } from './tables/gallery-posts';
+import { TermsAndConditionsTable } from './tables/terms-and-conditions';
 
 export type Json =
   | string
@@ -24,6 +25,7 @@ export interface Database {
       technology_stacks: TechnologyStacksTable;
       partners: PartnersTable;
       gallery_posts: GalleryPostsTable;
+      terms_and_conditions: TermsAndConditionsTable;
     };
     Views: {
       [_ in never]: never;
@@ -35,6 +37,7 @@ export interface Database {
       user_role: "participant" | "mentor" | "admin" | "organizer" | "moderator";
       tech_stack_status: "active" | "inactive";
       partner_status: "active" | "inactive";
+      terms_and_conditions_status: "draft" | "published";
     };
     CompositeTypes: {
       [_ in never]: never;
