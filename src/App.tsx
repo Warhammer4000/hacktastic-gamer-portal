@@ -32,6 +32,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/public/mentors" element={<MentorsPage />} />
+      <Route path="/mentors" element={<MentorsPage />} /> {/* Added this line */}
       
       <Route path="/mentor" element={<PrivateRoute><MentorLayout /></PrivateRoute>}>
         <Route index element={<MentorDashboard />} />
