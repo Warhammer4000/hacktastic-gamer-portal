@@ -1,116 +1,65 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
   UserCircle, 
+  Users, 
   Calendar,
-  Users,
-  MessageSquare,
-  LogOut
+  MessageSquare
 } from "lucide-react";
+import { MentorNavigationItem } from "./navigation/MentorNavigationItem";
+import { LogoutButton } from "./navigation/LogoutButton";
+import { useMentorNavigationProfile } from "@/hooks/useMentorNavigationProfile";
 
 export default function MentorNavigation() {
   const location = useLocation();
-  const navigate = useNavigate();
+  const { isApproved } = useMentorNavigationProfile();
   
-  const { data: profile } = useQuery({
-    queryKey: ['mentor-profile'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-      
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      return profile;
-    },
-  });
-
-  const isApproved = profile?.status === 'approved';
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast.success("Logged out successfully");
-      navigate("/");
-    } catch (error) {
-      toast.error("Error logging out");
-    }
-  };
-
   const navItems = [
     {
+      to: "/mentor/dashboard",
+      icon: LayoutDashboard,
       label: "Dashboard",
-      icon: <LayoutDashboard className="w-4 h-4 mr-2" />,
-      href: "/mentor/dashboard",
       requiresApproval: true
     },
     {
+      to: "/mentor/profile",
+      icon: UserCircle,
       label: "Profile",
-      icon: <UserCircle className="w-4 h-4 mr-2" />,
-      href: "/mentor/profile",
       requiresApproval: false
     },
     {
-      label: "Schedule",
-      icon: <Calendar className="w-4 h-4 mr-2" />,
-      href: "/mentor/schedule",
+      to: "/mentor/mentees",
+      icon: Users,
+      label: "Mentees",
       requiresApproval: true
     },
     {
-      label: "Participants",
-      icon: <Users className="w-4 h-4 mr-2" />,
-      href: "/mentor/participants",
+      to: "/mentor/sessions",
+      icon: Calendar,
+      label: "Sessions",
       requiresApproval: true
     },
     {
+      to: "/mentor/messages",
+      icon: MessageSquare,
       label: "Messages",
-      icon: <MessageSquare className="w-4 h-4 mr-2" />,
-      href: "/mentor/messages",
       requiresApproval: true
     }
   ];
 
   return (
-    <nav className="space-y-2 px-4 py-6">
-      {navItems.map((item) => {
-        const isDisabled = item.requiresApproval && !isApproved;
-        const isActive = location.pathname === item.href;
-        
-        return (
-          <Link
-            key={item.href}
-            to={isDisabled ? "#" : item.href}
-            className={`w-full`}
-            onClick={(e) => {
-              if (isDisabled) e.preventDefault();
-            }}
-          >
-            <Button
-              variant={isActive ? "secondary" : "ghost"}
-              className={`w-full justify-start ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isDisabled}
-            >
-              {item.icon}
-              {item.label}
-            </Button>
-          </Link>
-        );
-      })}
-      <Button
-        variant="ghost"
-        className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-        onClick={handleLogout}
-      >
-        <LogOut className="w-4 h-4 mr-2" />
-        Logout
-      </Button>
-    </nav>
+    <div className="space-y-2">
+      {navItems.map((item) => (
+        <MentorNavigationItem
+          key={item.to}
+          to={item.to}
+          icon={item.icon}
+          label={item.label}
+          isActive={location.pathname === item.to}
+          isDisabled={item.requiresApproval && !isApproved}
+        />
+      ))}
+      <LogoutButton />
+    </div>
   );
 }
