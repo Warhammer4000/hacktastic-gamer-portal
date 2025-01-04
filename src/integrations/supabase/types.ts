@@ -66,6 +66,45 @@ export type Database = {
         }
         Relationships: []
       }
+      registration_settings: {
+        Row: {
+          admin_registration_enabled: boolean | null
+          created_at: string
+          id: string
+          mentor_registration_enabled: boolean | null
+          mentor_registration_end: string | null
+          mentor_registration_start: string | null
+          participant_registration_enabled: boolean | null
+          participant_registration_end: string | null
+          participant_registration_start: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_registration_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          mentor_registration_enabled?: boolean | null
+          mentor_registration_end?: string | null
+          mentor_registration_start?: string | null
+          participant_registration_enabled?: boolean | null
+          participant_registration_end?: string | null
+          participant_registration_start?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_registration_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          mentor_registration_enabled?: boolean | null
+          mentor_registration_end?: string | null
+          mentor_registration_start?: string | null
+          participant_registration_enabled?: boolean | null
+          participant_registration_end?: string | null
+          participant_registration_start?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
