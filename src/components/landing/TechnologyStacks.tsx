@@ -7,6 +7,15 @@ export default function TechnologyStacks() {
     queryKey: ["techStacks"],
     queryFn: async () => {
       console.log("Fetching tech stacks...");
+      
+      // First, let's check if we can query the table at all
+      const { data: allStacks, error: countError } = await supabase
+        .from("technology_stacks")
+        .select("*");
+      
+      console.log("All stacks (before filter):", allStacks);
+
+      // Now let's get the active ones
       const { data, error } = await supabase
         .from("technology_stacks")
         .select("*")
@@ -18,7 +27,8 @@ export default function TechnologyStacks() {
         throw error;
       }
       
-      console.log("Fetched tech stacks:", data);
+      console.log("Active tech stacks:", data);
+      console.log("Active tech stacks count:", data?.length);
       return data;
     },
     retry: 3,
@@ -78,6 +88,9 @@ export default function TechnologyStacks() {
             <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
               No Technology Stacks Available
             </h2>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              Please check back later
+            </p>
           </div>
         </div>
       </section>
