@@ -10,6 +10,8 @@ export default function TermsAndConditionsPage() {
         .from('terms_and_conditions')
         .select('*')
         .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) throw error;
