@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { ChevronLeft } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -91,6 +92,15 @@ export default function AdminRegister() {
 
   return (
     <div className="container max-w-md mx-auto mt-20 p-6">
+      <Button
+        variant="ghost"
+        className="mb-6"
+        onClick={() => navigate("/")}
+      >
+        <ChevronLeft className="mr-2 h-4 w-4" />
+        Back to Home
+      </Button>
+
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold">Admin Registration</h1>
         <p className="text-muted-foreground mt-2">

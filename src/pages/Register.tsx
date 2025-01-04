@@ -1,13 +1,22 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserRound, Lightbulb } from "lucide-react";
+import { UserRound, Lightbulb, ChevronLeft } from "lucide-react";
 
 export default function Register() {
   const navigate = useNavigate();
 
   return (
     <div className="container max-w-4xl mx-auto mt-20 p-6">
+      <Button
+        variant="ghost"
+        className="mb-6"
+        onClick={() => navigate("/")}
+      >
+        <ChevronLeft className="mr-2 h-4 w-4" />
+        Back to Home
+      </Button>
+
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold">Join Our Community</h1>
         <p className="text-muted-foreground mt-2">

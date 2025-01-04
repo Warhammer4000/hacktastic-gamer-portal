@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { ChevronLeft } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -84,10 +85,19 @@ export default function ParticipantRegister() {
 
   return (
     <div className="container max-w-md mx-auto mt-20 p-6">
+      <Button
+        variant="ghost"
+        className="mb-6"
+        onClick={() => navigate("/register")}
+      >
+        <ChevronLeft className="mr-2 h-4 w-4" />
+        Back to Registration Options
+      </Button>
+
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold">Register as Participant</h1>
+        <h1 className="text-3xl font-bold">Participant Registration</h1>
         <p className="text-muted-foreground mt-2">
-          Start your learning journey today
+          Join as a participant and start your journey
         </p>
       </div>
 
@@ -138,17 +148,6 @@ export default function ParticipantRegister() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Creating account..." : "Create account"}
           </Button>
-
-          <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Button
-              variant="link"
-              className="p-0"
-              onClick={() => navigate("/login")}
-            >
-              Sign in
-            </Button>
-          </p>
         </form>
       </Form>
     </div>
