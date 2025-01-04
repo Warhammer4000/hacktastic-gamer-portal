@@ -69,6 +69,39 @@ export type Database = {
         }
         Relationships: []
       }
+      partners: {
+        Row: {
+          created_at: string
+          icon_url: string
+          id: string
+          name: string
+          sort_order: number
+          status: Database["public"]["Enums"]["partner_status"] | null
+          updated_at: string
+          website_url: string
+        }
+        Insert: {
+          created_at?: string
+          icon_url: string
+          id?: string
+          name: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["partner_status"] | null
+          updated_at?: string
+          website_url: string
+        }
+        Update: {
+          created_at?: string
+          icon_url?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["partner_status"] | null
+          updated_at?: string
+          website_url?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -209,6 +242,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      partner_status: "active" | "inactive"
       profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
       tech_stack_status: "active" | "inactive"
       user_role: "participant" | "mentor" | "admin" | "organizer" | "moderator"

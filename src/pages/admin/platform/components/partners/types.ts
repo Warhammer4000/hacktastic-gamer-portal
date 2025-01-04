@@ -1,12 +1,4 @@
-export interface Partner {
-  id: string;
-  name: string;
-  icon_url: string;
-  website_url: string;
-  sort_order: number;
-  status: "active" | "inactive";
-  created_at: string;
-  updated_at: string;
-}
+import type { Database } from "@/integrations/supabase/types/database";
 
+export type Partner = Database["public"]["Tables"]["partners"]["Row"];
 export type PartnerFormData = Pick<Partner, "name" | "icon_url" | "website_url">;
