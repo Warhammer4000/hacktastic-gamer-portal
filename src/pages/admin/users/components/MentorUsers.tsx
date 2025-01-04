@@ -3,18 +3,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Database } from "@/integrations/supabase/types";
+
+type MentorWithProfile = {
+  user_id: string;
+  profiles: {
+    id: string;
+    full_name: string | null;
+    email: string;
+    avatar_url: string | null;
+  } | null;
+};
 
 export default function MentorUsers() {
   const { toast } = useToast();
 
-  const { data: mentors, isLoading, refetch } = useQuery({
+  const { data: mentors, isLoading, refetch } = useQuery<MentorWithProfile[]>({
     queryKey: ["mentor-users"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("user_roles")
         .select(`
           user_id,
-          profiles:user_id (
+          profiles!user_roles_user_id_fkey (
             id,
             full_name,
             email,
