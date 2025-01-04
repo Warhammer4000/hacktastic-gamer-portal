@@ -15,6 +15,7 @@ type MultiSelectProps = {
   onChange: (selected: string[]) => void;
   placeholder?: string;
   className?: string;
+  creatable?: boolean;
 };
 
 export function MultiSelect({
@@ -23,6 +24,7 @@ export function MultiSelect({
   onChange,
   placeholder = "Select options...",
   className,
+  creatable = false,
 }: MultiSelectProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
@@ -39,6 +41,11 @@ export function MultiSelect({
         if (input.value === "" && selected.length > 0) {
           handleUnselect(selected[selected.length - 1]);
         }
+      }
+      if (e.key === "Enter" && creatable && inputValue && !options.find(opt => opt.value === inputValue)) {
+        e.preventDefault();
+        onChange([...selected, inputValue]);
+        setInputValue("");
       }
       if (e.key === "Escape") {
         input.blur();
@@ -94,7 +101,7 @@ export function MultiSelect({
         </div>
       </div>
       <div className="relative mt-2">
-        {open && selectables.length > 0 ? (
+        {open && (selectables.length > 0 || (creatable && inputValue)) ? (
           <div className="absolute w-full z-10 top-0 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
             <CommandGroup className="h-full overflow-auto">
               {selectables.map((option) => {
@@ -115,6 +122,21 @@ export function MultiSelect({
                   </CommandItem>
                 );
               })}
+              {creatable && inputValue && !options.find(opt => opt.value === inputValue) && (
+                <CommandItem
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onSelect={() => {
+                    setInputValue("");
+                    onChange([...selected, inputValue]);
+                  }}
+                  className={"cursor-pointer"}
+                >
+                  Create "{inputValue}"
+                </CommandItem>
+              )}
             </CommandGroup>
           </div>
         ) : null}
