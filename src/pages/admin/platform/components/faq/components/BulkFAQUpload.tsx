@@ -17,6 +17,8 @@ type Props = {
   onOpenChange: (open: boolean) => void;
 };
 
+type FAQStatus = "draft" | "published";
+
 export function BulkFAQUpload({ open, onOpenChange }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
@@ -70,7 +72,7 @@ export function BulkFAQUpload({ open, onOpenChange }: Props) {
               .from("faq_categories")
               .insert({
                 title: categoryTitle,
-                status: "draft",
+                status: "draft" as FAQStatus,
               })
               .select()
               .single();
@@ -81,6 +83,8 @@ export function BulkFAQUpload({ open, onOpenChange }: Props) {
           }
 
           if (categoryId) {
+            const status = (values[3]?.trim().toLowerCase() === "published" ? "published" : "draft") as FAQStatus;
+            
             // Then create the FAQ item
             await supabase
               .from("faq_items")
@@ -88,7 +92,7 @@ export function BulkFAQUpload({ open, onOpenChange }: Props) {
                 category_id: categoryId,
                 question: values[1],
                 answer: values[2],
-                status: values[3] || "draft",
+                status: status,
               });
           }
         }
