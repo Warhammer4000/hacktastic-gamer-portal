@@ -3,15 +3,42 @@ import { ProfileFormValues } from "@/hooks/useMentorProfile";
 import { LinkedInValidationField } from "./validation/LinkedInValidationField";
 import { GitHubValidationField } from "./validation/GitHubValidationField";
 
-interface SocialProfileFieldsProps {
-  form: UseFormReturn<ProfileFormValues>;
+interface ValidationState {
+  isGithubValid: boolean;
+  isLinkedInValid: boolean;
 }
 
-export function SocialProfileFields({ form }: SocialProfileFieldsProps) {
+interface SocialProfileFieldsProps {
+  form: UseFormReturn<ProfileFormValues>;
+  onValidationChange: (state: ValidationState) => void;
+  validationState: ValidationState;
+}
+
+export function SocialProfileFields({ form, onValidationChange, validationState }: SocialProfileFieldsProps) {
+  const handleGithubValidation = (isValid: boolean) => {
+    onValidationChange({
+      ...validationState,
+      isGithubValid: isValid,
+    });
+  };
+
+  const handleLinkedInValidation = (isValid: boolean) => {
+    onValidationChange({
+      ...validationState,
+      isLinkedInValid: isValid,
+    });
+  };
+
   return (
     <>
-      <LinkedInValidationField form={form} />
-      <GitHubValidationField form={form} />
+      <LinkedInValidationField 
+        form={form} 
+        onValidationChange={handleLinkedInValidation}
+      />
+      <GitHubValidationField 
+        form={form} 
+        onValidationChange={handleGithubValidation}
+      />
     </>
   );
 }

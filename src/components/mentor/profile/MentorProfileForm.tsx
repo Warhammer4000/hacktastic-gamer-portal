@@ -7,6 +7,7 @@ import { profileSchema, type ProfileFormValues } from "@/hooks/useMentorProfile"
 import { BasicInfoFields } from "./fields/BasicInfoFields";
 import { AvatarField } from "./fields/AvatarField";
 import { SocialProfileFields } from "./fields/SocialProfileFields";
+import { useState } from "react";
 
 interface MentorProfileFormProps {
   defaultValues: Partial<ProfileFormValues>;
@@ -14,7 +15,17 @@ interface MentorProfileFormProps {
   isSubmitting: boolean;
 }
 
+interface ValidationState {
+  isGithubValid: boolean;
+  isLinkedInValid: boolean;
+}
+
 export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: MentorProfileFormProps) {
+  const [validationState, setValidationState] = useState<ValidationState>({
+    isGithubValid: false,
+    isLinkedInValid: false,
+  });
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues,
@@ -24,16 +35,22 @@ export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: Men
     onSubmit(values);
   };
 
+  const isFormValid = validationState.isGithubValid && validationState.isLinkedInValid;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <BasicInfoFields form={form} />
         <AvatarField form={form} />
-        <SocialProfileFields form={form} />
+        <SocialProfileFields 
+          form={form} 
+          onValidationChange={setValidationState}
+          validationState={validationState}
+        />
 
         <Button 
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !isFormValid}
           className="w-full"
         >
           {isSubmitting ? (

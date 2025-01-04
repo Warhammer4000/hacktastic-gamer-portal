@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface GitHubValidationFieldProps {
   form: UseFormReturn<ProfileFormValues>;
+  onValidationChange: (isValid: boolean) => void;
 }
 
 interface ValidationState {
@@ -18,7 +19,7 @@ interface ValidationState {
   error: string | null;
 }
 
-export function GitHubValidationField({ form }: GitHubValidationFieldProps) {
+export function GitHubValidationField({ form, onValidationChange }: GitHubValidationFieldProps) {
   const [validation, setValidation] = useState<ValidationState>({
     isValidating: false,
     isValid: false,
@@ -37,12 +38,14 @@ export function GitHubValidationField({ form }: GitHubValidationFieldProps) {
         isValid: isValid, 
         error: isValid ? null : "Invalid GitHub username" 
       });
+      onValidationChange(isValid);
     } catch (error) {
       setValidation({ 
         isValidating: false, 
         isValid: false, 
         error: "Failed to validate GitHub username" 
       });
+      onValidationChange(false);
     }
   };
 

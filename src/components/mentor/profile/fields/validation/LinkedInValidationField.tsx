@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface LinkedInValidationFieldProps {
   form: UseFormReturn<ProfileFormValues>;
+  onValidationChange: (isValid: boolean) => void;
 }
 
 interface ValidationState {
@@ -18,7 +19,7 @@ interface ValidationState {
   error: string | null;
 }
 
-export function LinkedInValidationField({ form }: LinkedInValidationFieldProps) {
+export function LinkedInValidationField({ form, onValidationChange }: LinkedInValidationFieldProps) {
   const [validation, setValidation] = useState<ValidationState>({
     isValidating: false,
     isValid: false,
@@ -37,12 +38,14 @@ export function LinkedInValidationField({ form }: LinkedInValidationFieldProps) 
         isValid: isValid, 
         error: isValid ? null : "Invalid LinkedIn profile ID" 
       });
+      onValidationChange(isValid);
     } catch (error) {
       setValidation({ 
         isValidating: false, 
         isValid: false, 
         error: "Failed to validate LinkedIn profile ID" 
       });
+      onValidationChange(false);
     }
   };
 
