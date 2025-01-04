@@ -1,22 +1,13 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { EditGalleryPost } from "./EditGalleryPost";
 import { BulkActions } from "./components/BulkActions";
-import { GalleryActions } from "./components/GalleryActions";
+import { GalleryCard } from "./components/GalleryCard";
 import type { GalleryPost, GalleryListProps } from "./types";
 
 export function GalleryList({ posts, isLoading }: GalleryListProps) {
@@ -164,13 +155,7 @@ export function GalleryList({ posts, isLoading }: GalleryListProps) {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[1, 2, 3].map((i) => (
           <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-[200px] w-full" />
-            </CardContent>
+            <Skeleton className="h-[400px]" />
           </Card>
         ))}
       </div>
@@ -204,44 +189,15 @@ export function GalleryList({ posts, isLoading }: GalleryListProps) {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((post) => (
-          <Card key={post.id}>
-            <CardHeader className="relative">
-              <div className="absolute top-4 left-4">
-                <Checkbox
-                  checked={selectedPosts.includes(post.id)}
-                  onCheckedChange={() => handleSelect(post.id)}
-                />
-              </div>
-              <CardTitle>{post.title}</CardTitle>
-              {post.description && (
-                <CardDescription>{post.description}</CardDescription>
-              )}
-            </CardHeader>
-            <CardContent>
-              <img
-                src={post.image_url}
-                alt={post.title}
-                className="w-full h-[200px] object-cover rounded-md mb-4"
-              />
-              {post.tags && (
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-            <CardFooter>
-              <GalleryActions
-                post={post}
-                onEdit={setEditingPost}
-                onDelete={handleDelete}
-                onStatusChange={handleStatusChange}
-              />
-            </CardFooter>
-          </Card>
+          <GalleryCard
+            key={post.id}
+            post={post}
+            isSelected={selectedPosts.includes(post.id)}
+            onSelect={handleSelect}
+            onEdit={setEditingPost}
+            onDelete={handleDelete}
+            onStatusChange={handleStatusChange}
+          />
         ))}
       </div>
 
