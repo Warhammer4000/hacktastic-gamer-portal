@@ -384,6 +384,106 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          team_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          id: string
+          join_code: string
+          leader_id: string
+          mentor_id: string | null
+          name: string
+          password: string | null
+          repository_url: string | null
+          status: Database["public"]["Enums"]["team_status"] | null
+          tech_stack_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          join_code: string
+          leader_id: string
+          mentor_id?: string | null
+          name: string
+          password?: string | null
+          repository_url?: string | null
+          status?: Database["public"]["Enums"]["team_status"] | null
+          tech_stack_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          join_code?: string
+          leader_id?: string
+          mentor_id?: string | null
+          name?: string
+          password?: string | null
+          repository_url?: string | null
+          status?: Database["public"]["Enums"]["team_status"] | null
+          tech_stack_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_leader_id_fkey"
+            columns: ["leader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_tech_stack_id_fkey"
+            columns: ["tech_stack_id"]
+            isOneToOne: false
+            referencedRelation: "technology_stacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       technology_stacks: {
         Row: {
           created_at: string
@@ -452,6 +552,7 @@ export type Database = {
       news_status: "draft" | "published"
       partner_status: "active" | "inactive"
       profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
+      team_status: "draft" | "open" | "locked" | "pending_mentor" | "active"
       tech_stack_status: "active" | "inactive"
       user_role: "participant" | "mentor" | "admin" | "organizer" | "moderator"
     }
