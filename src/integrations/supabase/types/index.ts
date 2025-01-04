@@ -3,6 +3,7 @@ export * from './tables/levels';
 export * from './tables/profiles';
 export * from './tables/registration-settings';
 export * from './tables/user-roles';
+export * from './tables/gallery-posts';
 
 import { Database } from './database';
 

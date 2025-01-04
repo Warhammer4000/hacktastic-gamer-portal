@@ -2,10 +2,13 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { GalleryPostsTable } from "@/integrations/supabase/types/tables/gallery-posts";
 import { Button } from "@/components/ui/button";
 import { AddGalleryPost } from "./AddGalleryPost";
 import { GalleryList } from "./GalleryList";
 import { BulkGalleryUpload } from "./BulkGalleryUpload";
+
+type GalleryPost = GalleryPostsTable['Row'];
 
 export function GalleryTab() {
   const [showAddPost, setShowAddPost] = useState(false);

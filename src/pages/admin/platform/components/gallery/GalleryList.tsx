@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Edit, Trash, CheckSquare, XSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { GalleryPostsTable } from "@/integrations/supabase/types/tables/gallery-posts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,15 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { EditGalleryPost } from "./EditGalleryPost";
 
-type GalleryPost = {
-  id: string;
-  title: string;
-  image_url: string;
-  description: string | null;
-  tags: string[] | null;
-  created_at: string;
-  status: 'draft' | 'published';
-};
+type GalleryPost = GalleryPostsTable['Row'];
 
 type Props = {
   posts: GalleryPost[];

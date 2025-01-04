@@ -4,6 +4,7 @@ import { RegistrationSettingsTable } from './tables/registration-settings';
 import { UserRolesTable } from './tables/user-roles';
 import { TechnologyStacksTable } from './tables/technology-stacks';
 import { PartnersTable } from './tables/partners';
+import { GalleryPostsTable } from './tables/gallery-posts';
 
 export type Json =
   | string
@@ -22,6 +23,7 @@ export interface Database {
       user_roles: UserRolesTable;
       technology_stacks: TechnologyStacksTable;
       partners: PartnersTable;
+      gallery_posts: GalleryPostsTable;
     };
     Views: {
       [_ in never]: never;
