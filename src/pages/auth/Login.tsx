@@ -23,14 +23,18 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+interface LoginProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export default function Login() {
+export default function Login({ isOpen, onClose }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -70,6 +74,7 @@ export default function Login() {
         navigate("/participant/dashboard");
       }
 
+      onClose();
     } catch (error) {
       toast({
         variant: "destructive",
@@ -81,15 +86,8 @@ export default function Login() {
     }
   };
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (!open) {
-      navigate("/");
-    }
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">Welcome Back</DialogTitle>
@@ -137,7 +135,7 @@ export default function Login() {
                 <Link
                   to="/forgot-password"
                   className="text-sm text-muted-foreground hover:underline block"
-                  onClick={() => setIsOpen(false)}
+                  onClick={onClose}
                 >
                   Forgot password?
                 </Link>
@@ -146,7 +144,7 @@ export default function Login() {
                   <Link 
                     to="/register" 
                     className="hover:underline text-primary"
-                    onClick={() => setIsOpen(false)}
+                    onClick={onClose}
                   >
                     Register
                   </Link>
