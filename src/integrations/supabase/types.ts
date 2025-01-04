@@ -9,6 +9,74 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      faq_categories: {
+        Row: {
+          created_at: string
+          id: string
+          sort_order: number
+          status: Database["public"]["Enums"]["faq_status"] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["faq_status"] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["faq_status"] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      faq_items: {
+        Row: {
+          answer: string
+          category_id: string
+          created_at: string
+          id: string
+          question: string
+          sort_order: number
+          status: Database["public"]["Enums"]["faq_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category_id: string
+          created_at?: string
+          id?: string
+          question: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["faq_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category_id?: string
+          created_at?: string
+          id?: string
+          question?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["faq_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faq_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "faq_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gallery_posts: {
         Row: {
           created_at: string
@@ -380,6 +448,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      faq_status: "draft" | "published"
       news_status: "draft" | "published"
       partner_status: "active" | "inactive"
       profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
