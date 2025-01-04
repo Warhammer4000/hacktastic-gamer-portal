@@ -2,7 +2,6 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { MultiSelect } from "@/components/ui/multi-select";
 import { NewsEditor } from "../editor/NewsEditor";
 import { NewsPreview } from "../preview/NewsPreview";
 import { Eye } from "lucide-react";
@@ -10,7 +9,7 @@ import { Eye } from "lucide-react";
 type FormValues = {
   title: string;
   content: string;
-  tags: string[];
+  tags: string;
   publishDate: string;
 };
 
@@ -22,12 +21,6 @@ type NewsFormProps = {
   onCancel: () => void;
   onTogglePreview: () => void;
 };
-
-const DEFAULT_TAGS = [
-  { label: "News", value: "news" },
-  { label: "Update", value: "update" },
-  { label: "Announcement", value: "announcement" }
-];
 
 export function NewsForm({ 
   defaultValues, 
@@ -80,15 +73,9 @@ export function NewsForm({
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tags</FormLabel>
+                    <FormLabel>Tags (comma-separated)</FormLabel>
                     <FormControl>
-                      <MultiSelect
-                        placeholder="Select or create tags"
-                        selected={field.value}
-                        options={DEFAULT_TAGS}
-                        onChange={field.onChange}
-                        creatable
-                      />
+                      <Input {...field} placeholder="tag1, tag2, tag3" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -26,13 +26,14 @@ export function AddNewsPost({ open, onOpenChange, editingPost }: AddNewsPostProp
   const defaultValues = {
     title: editingPost?.title || "",
     content: editingPost?.content || "",
-    tags: editingPost?.tags || [],
+    tags: editingPost?.tags ? editingPost.tags.join(", ") : "",
     publishDate: editingPost?.publishDate || new Date().toISOString().split('T')[0]
   };
 
   const handleSubmit = async (values: typeof defaultValues) => {
     try {
       setIsSubmitting(true);
+      const tagsArray = values.tags ? values.tags.split(",").map(tag => tag.trim()) : [];
 
       if (editingPost) {
         const { error } = await supabase
@@ -40,7 +41,7 @@ export function AddNewsPost({ open, onOpenChange, editingPost }: AddNewsPostProp
           .update({
             title: values.title,
             content: values.content,
-            tags: values.tags,
+            tags: tagsArray,
             published_at: values.publishDate ? new Date(values.publishDate).toISOString() : null,
           })
           .eq("id", editingPost.id);
@@ -55,7 +56,7 @@ export function AddNewsPost({ open, onOpenChange, editingPost }: AddNewsPostProp
         const { error } = await supabase.from("news_posts").insert({
           title: values.title,
           content: values.content,
-          tags: values.tags,
+          tags: tagsArray,
           status: "draft",
           published_at: values.publishDate ? new Date(values.publishDate).toISOString() : null,
         });
@@ -71,11 +72,10 @@ export function AddNewsPost({ open, onOpenChange, editingPost }: AddNewsPostProp
       queryClient.invalidateQueries({ queryKey: ["news-posts"] });
       onOpenChange(false);
     } catch (error) {
-      console.error("Error saving news post:", error);
       toast({
+        variant: "destructive",
         title: "Error",
         description: "Failed to save news post",
-        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
