@@ -55,15 +55,21 @@ export default function Login() {
         .maybeSingle();
 
       // Redirect based on role
-      if (userRole?.role === 'mentor') {
-        navigate("/mentor/dashboard");
-      } else if (userRole?.role === 'admin') {
+      if (userRole?.role === 'admin') {
         navigate("/admin/dashboard");
+      } else if (userRole?.role === 'mentor') {
+        navigate("/mentor/dashboard");
       } else {
         navigate("/participant/dashboard");
       }
 
+      toast({
+        title: "Success",
+        description: "You have successfully logged in.",
+      });
+
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         variant: "destructive",
         title: "Error",
