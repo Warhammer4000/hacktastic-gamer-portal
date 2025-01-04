@@ -4,7 +4,8 @@ import {
   UserCircle, 
   GraduationCap,
   Calendar,
-  MessageSquare
+  MessageSquare,
+  Users
 } from "lucide-react";
 import { ParticipantNavigationItem } from "./navigation/ParticipantNavigationItem";
 import { LogoutButton } from "@/components/mentor/navigation/LogoutButton";
@@ -44,6 +45,12 @@ export default function ParticipantNavigation() {
       icon: UserCircle,
       label: "Profile",
       requiresProfile: false
+    },
+    {
+      to: "/participant/team",
+      icon: Users,
+      label: "Team",
+      requiresProfile: true
     },
     {
       to: "/participant/courses",
