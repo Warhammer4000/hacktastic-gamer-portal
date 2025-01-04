@@ -20,7 +20,7 @@ interface Mentor {
   bio: string | null;
   linkedin_profile_id: string | null;
   github_username: string | null;
-  tech_stacks: {
+  mentor_tech_stacks: {
     technology_stacks: {
       id: string;
       name: string;
