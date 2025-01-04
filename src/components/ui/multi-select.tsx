@@ -29,16 +29,10 @@ export function MultiSelect({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
-  const [mounted, setMounted] = React.useState(false);
 
   // Ensure we're working with arrays even if undefined is passed
   const safeOptions = Array.isArray(options) ? options : [];
   const safeSelected = Array.isArray(selected) ? selected : [];
-
-  React.useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
 
   const handleUnselect = (option: string) => {
     onChange(safeSelected.filter((s) => s !== option));
@@ -64,10 +58,6 @@ export function MultiSelect({
   };
 
   const selectables = safeOptions.filter((option) => !safeSelected.includes(option.value));
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <Command
@@ -115,7 +105,7 @@ export function MultiSelect({
         </div>
       </div>
       <div className="relative mt-2">
-        {open && mounted && (selectables.length > 0 || (creatable && inputValue)) ? (
+        {open && (selectables.length > 0 || (creatable && inputValue)) ? (
           <div className="absolute w-full z-10 top-0 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
             <CommandGroup className="h-full overflow-auto">
               {selectables.map((option) => {
