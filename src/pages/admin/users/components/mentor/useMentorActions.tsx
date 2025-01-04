@@ -1,9 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function useMentorActions() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [editingMentorId, setEditingMentorId] = useState<string | null>(null);
 
   const deleteMentor = useMutation({
     mutationFn: async (mentorId: string) => {
@@ -21,8 +25,8 @@ export function useMentorActions() {
   });
 
   const handleEdit = (mentorId: string) => {
-    // Implement edit functionality
-    console.log('Edit mentor:', mentorId);
+    // Navigate to mentor profile edit page
+    navigate(`/admin/mentors/edit/${mentorId}`);
   };
 
   const handleDelete = (mentorId: string) => {
@@ -34,5 +38,6 @@ export function useMentorActions() {
   return {
     handleEdit,
     handleDelete,
+    editingMentorId,
   };
 }
