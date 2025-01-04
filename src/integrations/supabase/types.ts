@@ -300,6 +300,47 @@ export type Database = {
         }
         Relationships: []
       }
+      privacy_policies: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          published_at: string | null
+          status: Database["public"]["Enums"]["privacy_policy_status"] | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["privacy_policy_status"] | null
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["privacy_policy_status"] | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_policies_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -560,6 +601,7 @@ export type Database = {
       faq_status: "draft" | "published"
       news_status: "draft" | "published"
       partner_status: "active" | "inactive"
+      privacy_policy_status: "draft" | "published"
       profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
       team_status: "draft" | "open" | "locked" | "pending_mentor" | "active"
       tech_stack_status: "active" | "inactive"

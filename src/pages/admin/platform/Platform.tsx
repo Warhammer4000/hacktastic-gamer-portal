@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TechnologyStacksTab } from "./components/technology/TechnologyStacksTab";
 import { PartnersTab } from "./components/partners/PartnersTab";
 import { FAQTab } from "./components/faq/FAQTab";
+import { PrivacyPolicyTab } from "./components/privacy/PrivacyPolicyTab";
 
 const Platform = () => {
   return (
@@ -36,9 +37,7 @@ const Platform = () => {
         </TabsContent>
 
         <TabsContent value="privacy">
-          <div className="text-muted-foreground">
-            Privacy Policy management coming soon...
-          </div>
+          <PrivacyPolicyTab />
         </TabsContent>
       </Tabs>
     </div>
