@@ -9,7 +9,8 @@ export default function MentorsPage() {
   const { data: mentors, isLoading } = useQuery({
     queryKey: ["public-mentors"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, get approved mentor profiles
+      const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select(`
           id,
@@ -19,21 +20,41 @@ export default function MentorsPage() {
           bio,
           linkedin_profile_id,
           github_username,
-          mentor_tech_stacks (
+          status
+        `)
+        .eq("status", "approved");
+
+      if (profilesError) throw profilesError;
+
+      // Then, get tech stacks for these mentors
+      const { data: techStacks, error: techStacksError } = await supabase
+        .from("mentor_tech_stacks")
+        .select(`
+          id,
+          mentor_id,
+          tech_stack_id,
+          technology_stacks (
             id,
-            tech_stack_id,
-            technology_stacks (
-              id,
-              name,
-              icon_url
-            )
+            name,
+            icon_url
           )
         `)
-        .eq("status", "approved")
-        .returns<Mentor[]>();
+        .in(
+          "mentor_id",
+          profiles?.map((profile) => profile.id) ?? []
+        );
 
-      if (error) throw error;
-      return data;
+      if (techStacksError) throw techStacksError;
+
+      // Combine the data
+      const mentorsWithTechStacks = profiles?.map((profile) => ({
+        ...profile,
+        tech_stacks: techStacks.filter(
+          (stack) => stack.mentor_id === profile.id
+        ),
+      }));
+
+      return mentorsWithTechStacks as Mentor[];
     },
   });
 
@@ -95,11 +116,11 @@ export default function MentorsPage() {
               </div>
 
               {/* Tech Stacks */}
-              {mentor.mentor_tech_stacks && mentor.mentor_tech_stacks.length > 0 && (
+              {mentor.tech_stacks && mentor.tech_stacks.length > 0 && (
                 <div className="mt-4">
                   <h3 className="text-sm font-medium mb-2">Tech Stack</h3>
                   <div className="flex flex-wrap gap-2">
-                    {mentor.mentor_tech_stacks.map((tech) => (
+                    {mentor.tech_stacks.map((tech) => (
                       tech.technology_stack && (
                         <Badge key={tech.id} variant="secondary">
                           {tech.technology_stack.name}

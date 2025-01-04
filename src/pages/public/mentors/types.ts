@@ -18,5 +18,5 @@ export interface Mentor {
   bio: string | null;
   avatar_url: string | null;
   status: 'pending_approval' | 'approved' | 'flagged' | 'incomplete';
-  mentor_tech_stacks?: MentorTechStack[];
+  tech_stacks?: MentorTechStack[];
 }
