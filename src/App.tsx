@@ -19,6 +19,7 @@ import MentorPreferences from "./pages/mentor/Preferences";
 import ParticipantLayout from "./pages/participant/ParticipantLayout";
 import ParticipantDashboard from "./pages/participant/Dashboard";
 import ParticipantProfile from "./pages/participant/Profile";
+import TeamPage from "./pages/participant/Team";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -61,6 +62,7 @@ function App() {
         <Route index element={<ParticipantDashboard />} />
         <Route path="dashboard" element={<ParticipantDashboard />} />
         <Route path="profile" element={<ParticipantProfile />} />
+        <Route path="team" element={<TeamPage />} />
       </Route>
 
       <Route path="/admin" element={<AdminLayout />}>
