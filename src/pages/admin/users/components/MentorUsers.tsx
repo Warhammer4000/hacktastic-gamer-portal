@@ -1,86 +1,86 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MentorUsers() {
+  const { toast } = useToast();
+
   const { data: mentors, isLoading, refetch } = useQuery({
-    queryKey: ['mentor-users'],
+    queryKey: ["mentor-users"],
     queryFn: async () => {
-      const { data: profiles, error } = await supabase
-        .from('profiles')
+      const { data, error } = await supabase
+        .from("user_roles")
         .select(`
-          id,
-          email,
-          full_name,
-          user_roles!inner (
-            role
+          user_id,
+          profiles:user_id (
+            id,
+            full_name,
+            email,
+            avatar_url
           )
         `)
-        .eq('user_roles.role', 'mentor');
+        .eq("role", "mentor");
 
       if (error) throw error;
-      return profiles;
+      return data;
     },
   });
 
-  const handleDelete = async (mentorId: string) => {
-    if (!window.confirm('Are you sure you want to remove this mentor?')) return;
-
-    const { error: roleError } = await supabase
-      .from('user_roles')
+  const handleDeleteMentor = async (userId: string) => {
+    const { error } = await supabase
+      .from("user_roles")
       .delete()
-      .eq('user_id', mentorId)
-      .eq('role', 'mentor');
+      .eq("user_id", userId)
+      .eq("role", "mentor");
 
-    if (roleError) {
-      toast.error('Failed to remove mentor role');
-      return;
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete mentor role",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Mentor role has been deleted",
+      });
+      refetch();
     }
-
-    toast.success('Mentor role removed successfully');
-    refetch();
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Loading mentors...</div>;
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Mentor Management</h2>
-      </div>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {mentors?.map((mentor) => (
-            <TableRow key={mentor.id}>
-              <TableCell>{mentor.full_name}</TableCell>
-              <TableCell>{mentor.email}</TableCell>
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(mentor.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      {mentors?.map((mentor) => (
+        <Card key={mentor.user_id} className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              {mentor.profiles?.avatar_url && (
+                <img
+                  src={mentor.profiles.avatar_url}
+                  alt={mentor.profiles?.full_name || "Mentor"}
+                  className="w-10 h-10 rounded-full"
+                />
+              )}
+              <div>
+                <h3 className="font-medium">{mentor.profiles?.full_name}</h3>
+                <p className="text-sm text-gray-500">{mentor.profiles?.email}</p>
+              </div>
+            </div>
+            <Button
+              variant="destructive"
+              onClick={() => handleDeleteMentor(mentor.user_id)}
+            >
+              Remove Mentor Role
+            </Button>
+          </div>
+        </Card>
+      ))}
     </div>
   );
 }
