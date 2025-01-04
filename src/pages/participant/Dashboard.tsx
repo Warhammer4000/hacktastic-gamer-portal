@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Users, UserPlus } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateTeamDialog } from "@/components/participant/teams/CreateTeamDialog";
-import { toast } from "sonner";
 import { JoinTeamDialog } from "@/components/participant/teams/JoinTeamDialog";
 
 interface Team {
@@ -24,15 +23,18 @@ export default function ParticipantDashboard() {
   const { data: team, isLoading } = useQuery({
     queryKey: ['participant-team'],
     queryFn: async () => {
-      const { data: teamMember } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data: teamMember, error: teamMemberError } = await supabase
         .from('team_members')
         .select('team_id')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-        .single();
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (!teamMember) return null;
+      if (teamMemberError || !teamMember) return null;
 
-      const { data: team } = await supabase
+      const { data: team, error: teamError } = await supabase
         .from('teams')
         .select(`
           id,
@@ -49,6 +51,7 @@ export default function ParticipantDashboard() {
         .eq('id', teamMember.team_id)
         .single();
 
+      if (teamError) return null;
       return team;
     },
   });
