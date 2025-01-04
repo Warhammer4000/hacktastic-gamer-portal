@@ -18,6 +18,7 @@ export function NewsEditor({ content, onChange }: NewsEditorProps) {
       }
     },
     onUpdate: ({ editor }) => {
+      // Only update the content, don't trigger save
       onChange(editor.getHTML());
     }
   });
@@ -58,6 +59,7 @@ export function NewsEditor({ content, onChange }: NewsEditorProps) {
           size="sm"
           onClick={() => toggleFormat('bold')}
           className={editor.isActive('bold') ? 'bg-muted-foreground/20' : ''}
+          type="button"
         >
           <Bold className="h-4 w-4" />
         </Button>
@@ -66,6 +68,7 @@ export function NewsEditor({ content, onChange }: NewsEditorProps) {
           size="sm"
           onClick={() => toggleFormat('italic')}
           className={editor.isActive('italic') ? 'bg-muted-foreground/20' : ''}
+          type="button"
         >
           <Italic className="h-4 w-4" />
         </Button>
@@ -74,6 +77,7 @@ export function NewsEditor({ content, onChange }: NewsEditorProps) {
           size="sm"
           onClick={() => toggleFormat('strike')}
           className={editor.isActive('strike') ? 'bg-muted-foreground/20' : ''}
+          type="button"
         >
           <Strikethrough className="h-4 w-4" />
         </Button>
@@ -82,6 +86,7 @@ export function NewsEditor({ content, onChange }: NewsEditorProps) {
           size="sm"
           onClick={() => toggleFormat('bullet')}
           className={editor.isActive('bulletList') ? 'bg-muted-foreground/20' : ''}
+          type="button"
         >
           <List className="h-4 w-4" />
         </Button>
@@ -90,6 +95,7 @@ export function NewsEditor({ content, onChange }: NewsEditorProps) {
           size="sm"
           onClick={() => toggleFormat('h1')}
           className={editor.isActive('heading', { level: 1 }) ? 'bg-muted-foreground/20' : ''}
+          type="button"
         >
           <Heading className="h-4 w-4" />
           <span className="ml-1">1</span>
@@ -99,6 +105,7 @@ export function NewsEditor({ content, onChange }: NewsEditorProps) {
           size="sm"
           onClick={() => toggleFormat('h2')}
           className={editor.isActive('heading', { level: 2 }) ? 'bg-muted-foreground/20' : ''}
+          type="button"
         >
           <Heading className="h-4 w-4" />
           <span className="ml-1">2</span>
@@ -108,17 +115,18 @@ export function NewsEditor({ content, onChange }: NewsEditorProps) {
           size="sm"
           onClick={() => toggleFormat('h3')}
           className={editor.isActive('heading', { level: 3 }) ? 'bg-muted-foreground/20' : ''}
+          type="button"
         >
           <Heading className="h-4 w-4" />
           <span className="ml-1">3</span>
         </Button>
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" type="button">
           <Link className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" type="button">
           <Image className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" type="button">
           <Table className="h-4 w-4" />
         </Button>
       </div>

@@ -64,6 +64,62 @@ export function NewsList({ posts, isLoading, onEdit }: Props) {
     }
   };
 
+  const handlePublish = async (post: NewsPost) => {
+    try {
+      const { error } = await supabase
+        .from("news_posts")
+        .update({
+          status: 'published',
+          published_at: new Date().toISOString(),
+        })
+        .eq("id", post.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "News post published successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["news-posts"] });
+    } catch (error) {
+      console.error("Error publishing news post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to publish news post",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUnpublish = async (post: NewsPost) => {
+    try {
+      const { error } = await supabase
+        .from("news_posts")
+        .update({
+          status: 'draft',
+          published_at: null,
+        })
+        .eq("id", post.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "News post unpublished successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["news-posts"] });
+    } catch (error) {
+      console.error("Error unpublishing news post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to unpublish news post",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="grid gap-4">
@@ -105,6 +161,8 @@ export function NewsList({ posts, isLoading, onEdit }: Props) {
               setSelectedPost(post);
               setPreviewDialogOpen(true);
             }}
+            onPublish={handlePublish}
+            onUnpublish={handleUnpublish}
           />
         ))}
       </div>

@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2, Globe2, Archive } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,15 +25,22 @@ type NewsCardProps = {
   onEdit: (post: NewsPost) => void;
   onDelete: (post: NewsPost) => void;
   onPreview: (post: NewsPost) => void;
+  onPublish: (post: NewsPost) => void;
+  onUnpublish: (post: NewsPost) => void;
 };
 
-export function NewsCard({ post, onEdit, onDelete, onPreview }: NewsCardProps) {
+export function NewsCard({ post, onEdit, onDelete, onPreview, onPublish, onUnpublish }: NewsCardProps) {
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle>{post.title}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              {post.title}
+              <Badge variant={post.status === 'published' ? "default" : "secondary"}>
+                {post.status}
+              </Badge>
+            </CardTitle>
             <CardDescription>
               Created on {format(new Date(post.created_at), 'PPP')}
               {post.published_at && ` • Published on ${format(new Date(post.published_at), 'PPP')}`}
@@ -54,6 +61,23 @@ export function NewsCard({ post, onEdit, onDelete, onPreview }: NewsCardProps) {
             >
               <Pencil className="h-4 w-4" />
             </Button>
+            {post.status === 'draft' ? (
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => onPublish(post)}
+              >
+                <Globe2 className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => onUnpublish(post)}
+              >
+                <Archive className="h-4 w-4" />
+              </Button>
+            )}
             <Button 
               variant="outline" 
               size="icon"
