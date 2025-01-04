@@ -41,24 +41,6 @@ export function TeamDetailsDialog({ isOpen, onOpenChange, team }: TeamDetailsDia
     },
   });
 
-  // If team is undefined, don't render the dialog content
-  if (!team) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Error</DialogTitle>
-            <DialogDescription>
-              Team details are not available.
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  const isTeamLeader = team.leader_id === currentUser?.id;
-
   const { data: techStacks, isLoading: isLoadingTechStacks } = useQuery({
     queryKey: ['technology-stacks'],
     queryFn: async () => {
@@ -74,6 +56,8 @@ export function TeamDetailsDialog({ isOpen, onOpenChange, team }: TeamDetailsDia
   });
 
   const handleEdit = async (data: TeamFormValues) => {
+    if (!team) return;
+    
     try {
       const { error } = await supabase
         .from('teams')
@@ -95,69 +79,90 @@ export function TeamDetailsDialog({ isOpen, onOpenChange, team }: TeamDetailsDia
     }
   };
 
+  const isTeamLeader = team && currentUser ? team.leader_id === currentUser.id : false;
+
+  const renderContent = () => {
+    if (!team) {
+      return (
+        <DialogHeader>
+          <DialogTitle>Error</DialogTitle>
+          <DialogDescription>
+            Team details are not available.
+          </DialogDescription>
+        </DialogHeader>
+      );
+    }
+
+    if (isEditing) {
+      return (
+        <>
+          <DialogHeader>
+            <DialogTitle>Edit Team</DialogTitle>
+            <DialogDescription>
+              Update your team's information.
+            </DialogDescription>
+          </DialogHeader>
+          <TeamForm
+            onSubmit={handleEdit}
+            techStacks={techStacks}
+            isLoadingTechStacks={isLoadingTechStacks}
+            defaultValues={{
+              name: team.name,
+              description: team.description || undefined,
+              techStackId: team.tech_stack_id || undefined,
+            }}
+            submitLabel="Save Changes"
+          />
+          <Button
+            variant="outline"
+            onClick={() => setIsEditing(false)}
+            className="mt-2"
+          >
+            Cancel
+          </Button>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <DialogHeader>
+          <DialogTitle>{team.name}</DialogTitle>
+          {team.description && (
+            <DialogDescription>
+              {team.description}
+            </DialogDescription>
+          )}
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="space-y-2">
+            <h4 className="font-medium">Team Details</h4>
+            <p className="text-sm text-muted-foreground">Status: {team.status}</p>
+            {team.tech_stack && (
+              <p className="text-sm text-muted-foreground">
+                Tech Stack: {team.tech_stack.name}
+              </p>
+            )}
+            {team.repository_url && (
+              <p className="text-sm text-muted-foreground">
+                Repository: <a href={team.repository_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View on GitHub</a>
+              </p>
+            )}
+          </div>
+          {isTeamLeader && team.status !== 'locked' && (
+            <Button onClick={() => setIsEditing(true)}>
+              Edit Team
+            </Button>
+          )}
+        </div>
+      </>
+    );
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
-        {isEditing ? (
-          <>
-            <DialogHeader>
-              <DialogTitle>Edit Team</DialogTitle>
-              <DialogDescription>
-                Update your team's information.
-              </DialogDescription>
-            </DialogHeader>
-            <TeamForm
-              onSubmit={handleEdit}
-              techStacks={techStacks}
-              isLoadingTechStacks={isLoadingTechStacks}
-              defaultValues={{
-                name: team.name,
-                description: team.description || undefined,
-                techStackId: team.tech_stack_id || undefined,
-              }}
-              submitLabel="Save Changes"
-            />
-            <Button
-              variant="outline"
-              onClick={() => setIsEditing(false)}
-              className="mt-2"
-            >
-              Cancel
-            </Button>
-          </>
-        ) : (
-          <>
-            <DialogHeader>
-              <DialogTitle>{team.name}</DialogTitle>
-              {team.description && (
-                <DialogDescription>
-                  {team.description}
-                </DialogDescription>
-              )}
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <h4 className="font-medium">Team Details</h4>
-                <p className="text-sm text-muted-foreground">Status: {team.status}</p>
-                {team.tech_stack && (
-                  <p className="text-sm text-muted-foreground">
-                    Tech Stack: {team.tech_stack.name}
-                  </p>
-                )}
-                {team.repository_url && (
-                  <p className="text-sm text-muted-foreground">
-                    Repository: <a href={team.repository_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View on GitHub</a>
-                  </p>
-                )}
-              </div>
-              {isTeamLeader && team.status !== 'locked' && (
-                <Button onClick={() => setIsEditing(true)}>
-                  Edit Team
-                </Button>
-              )}
-            </div>
-          </>
-        )}
+        {renderContent()}
       </DialogContent>
     </Dialog>
   );
