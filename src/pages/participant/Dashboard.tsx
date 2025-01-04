@@ -3,7 +3,7 @@ import { Plus, Users, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { CreateTeamDialog } from "@/components/participant/teams/CreateTeamDialog";
 
 interface Team {
   id: string;
@@ -51,11 +51,6 @@ export default function ParticipantDashboard() {
     },
   });
 
-  const handleCreateTeam = () => {
-    // Will implement in next step
-    toast.info("Team creation coming soon!");
-  };
-
   const handleJoinTeam = () => {
     // Will implement in next step
     toast.info("Team joining coming soon!");
@@ -93,10 +88,7 @@ export default function ParticipantDashboard() {
               <p className="text-muted-foreground mb-4">
                 Start your own team and invite others to join
               </p>
-              <Button onClick={handleCreateTeam}>
-                <Plus className="mr-2" />
-                Create Team
-              </Button>
+              <CreateTeamDialog />
             </CardContent>
           </Card>
 
