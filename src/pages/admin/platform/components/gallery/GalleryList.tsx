@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Edit, Trash, CheckSquare, XSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import type { GalleryPostsTable } from "@/integrations/supabase/types/tables/gallery-posts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,15 +15,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { EditGalleryPost } from "./EditGalleryPost";
+import { BulkActions } from "./components/BulkActions";
+import { GalleryActions } from "./components/GalleryActions";
+import type { GalleryPost, GalleryListProps } from "./types";
 
-type GalleryPost = GalleryPostsTable['Row'];
-
-type Props = {
-  posts: GalleryPost[];
-  isLoading: boolean;
-};
-
-export function GalleryList({ posts, isLoading }: Props) {
+export function GalleryList({ posts, isLoading }: GalleryListProps) {
   const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
   const [editingPost, setEditingPost] = useState<GalleryPost | null>(null);
   const queryClient = useQueryClient();
@@ -51,7 +45,7 @@ export function GalleryList({ posts, isLoading }: Props) {
     try {
       const { error } = await supabase
         .from('gallery_posts')
-        .update({ status: 'published' })
+        .update({ status: 'published' as const })
         .in('id', selectedPosts);
 
       if (error) throw error;
@@ -75,7 +69,7 @@ export function GalleryList({ posts, isLoading }: Props) {
     try {
       const { error } = await supabase
         .from('gallery_posts')
-        .update({ status: 'draft' })
+        .update({ status: 'draft' as const })
         .in('id', selectedPosts);
 
       if (error) throw error;
@@ -119,6 +113,52 @@ export function GalleryList({ posts, isLoading }: Props) {
     }
   };
 
+  const handleStatusChange = async (postId: string, newStatus: 'draft' | 'published') => {
+    try {
+      const { error } = await supabase
+        .from('gallery_posts')
+        .update({ status: newStatus })
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Post ${newStatus === 'published' ? 'published' : 'unpublished'} successfully`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["gallery-posts"] });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update post status",
+      });
+    }
+  };
+
+  const handleDelete = async (postId: string) => {
+    try {
+      const { error } = await supabase
+        .from('gallery_posts')
+        .delete()
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Post deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["gallery-posts"] });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete post",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -147,37 +187,12 @@ export function GalleryList({ posts, isLoading }: Props) {
 
   return (
     <div className="space-y-4">
-      {selectedPosts.length > 0 && (
-        <div className="flex gap-2 items-center bg-muted p-4 rounded-lg">
-          <span className="text-sm font-medium">
-            {selectedPosts.length} items selected
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleBulkPublish}
-          >
-            <CheckSquare className="h-4 w-4 mr-2" />
-            Publish Selected
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleBulkUnpublish}
-          >
-            <XSquare className="h-4 w-4 mr-2" />
-            Unpublish Selected
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleBulkDelete}
-          >
-            <Trash className="h-4 w-4 mr-2" />
-            Delete Selected
-          </Button>
-        </div>
-      )}
+      <BulkActions
+        selectedPosts={selectedPosts}
+        onPublish={handleBulkPublish}
+        onUnpublish={handleBulkUnpublish}
+        onDelete={handleBulkDelete}
+      />
 
       <div className="flex items-center gap-2 mb-4">
         <Checkbox
@@ -218,86 +233,13 @@ export function GalleryList({ posts, isLoading }: Props) {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setEditingPost(post)}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={async () => {
-                    try {
-                      const { error } = await supabase
-                        .from('gallery_posts')
-                        .delete()
-                        .eq('id', post.id);
-
-                      if (error) throw error;
-
-                      toast({
-                        title: "Success",
-                        description: "Post deleted successfully",
-                      });
-                      queryClient.invalidateQueries({ queryKey: ["gallery-posts"] });
-                    } catch (error) {
-                      toast({
-                        variant: "destructive",
-                        title: "Error",
-                        description: "Failed to delete post",
-                      });
-                    }
-                  }}
-                >
-                  <Trash className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const { error } = await supabase
-                      .from('gallery_posts')
-                      .update({ 
-                        status: post.status === 'published' ? 'draft' : 'published' 
-                      })
-                      .eq('id', post.id);
-
-                    if (error) throw error;
-
-                    toast({
-                      title: "Success",
-                      description: `Post ${post.status === 'published' ? 'unpublished' : 'published'} successfully`,
-                    });
-                    queryClient.invalidateQueries({ queryKey: ["gallery-posts"] });
-                  } catch (error) {
-                    toast({
-                      variant: "destructive",
-                      title: "Error",
-                      description: "Failed to update post status",
-                    });
-                  }
-                }}
-              >
-                {post.status === 'published' ? (
-                  <>
-                    <XSquare className="h-4 w-4 mr-2" />
-                    Unpublish
-                  </>
-                ) : (
-                  <>
-                    <CheckSquare className="h-4 w-4 mr-2" />
-                    Publish
-                  </>
-                )}
-              </Button>
+            <CardFooter>
+              <GalleryActions
+                post={post}
+                onEdit={setEditingPost}
+                onDelete={handleDelete}
+                onStatusChange={handleStatusChange}
+              />
             </CardFooter>
           </Card>
         ))}

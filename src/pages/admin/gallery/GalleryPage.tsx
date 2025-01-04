@@ -7,6 +7,7 @@ import { BulkGalleryUpload } from "../platform/components/gallery/BulkGalleryUpl
 import { GalleryList } from "../platform/components/gallery/GalleryList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import type { GalleryPost } from "../platform/components/gallery/types";
 
 const fetchGalleryPosts = async () => {
   const { data, error } = await supabase
@@ -18,7 +19,7 @@ const fetchGalleryPosts = async () => {
     throw error;
   }
 
-  return data;
+  return data as GalleryPost[];
 };
 
 const GalleryPage = () => {
