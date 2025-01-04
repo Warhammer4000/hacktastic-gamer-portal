@@ -1,6 +1,16 @@
 import { useEffect } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import { Users, Settings, BarChart3, LogOut, User, UserCheck, Cpu } from "lucide-react";
+import { 
+  Users, 
+  Settings, 
+  BarChart3, 
+  LogOut, 
+  User, 
+  UserCheck, 
+  Cpu,
+  GalleryHorizontal,
+  Newspaper
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "next-themes";
@@ -62,6 +72,16 @@ const AdminLayout = () => {
       title: "Dashboard",
       icon: BarChart3,
       path: "/admin/dashboard",
+    },
+    {
+      title: "Gallery",
+      icon: GalleryHorizontal,
+      path: "/admin/gallery",
+    },
+    {
+      title: "News",
+      icon: Newspaper,
+      path: "/admin/news",
     },
     {
       title: "Mentor Approval",
