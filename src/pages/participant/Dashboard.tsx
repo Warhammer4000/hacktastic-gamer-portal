@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateTeamDialog } from "@/components/participant/teams/CreateTeamDialog";
+import { toast } from "sonner";
+import { JoinTeamDialog } from "@/components/participant/teams/JoinTeamDialog";
 
 interface Team {
   id: string;
@@ -51,11 +53,6 @@ export default function ParticipantDashboard() {
     },
   });
 
-  const handleJoinTeam = () => {
-    // Will implement in next step
-    toast.info("Team joining coming soon!");
-  };
-
   if (isLoading) {
     return (
       <div className="container p-6">
@@ -100,10 +97,7 @@ export default function ParticipantDashboard() {
               <p className="text-muted-foreground mb-4">
                 Join an existing team using their team code
               </p>
-              <Button onClick={handleJoinTeam} variant="outline">
-                <UserPlus className="mr-2" />
-                Join Team
-              </Button>
+              <JoinTeamDialog />
             </CardContent>
           </Card>
         </div>
