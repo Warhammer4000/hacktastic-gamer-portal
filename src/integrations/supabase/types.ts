@@ -152,6 +152,42 @@ export type Database = {
           },
         ]
       }
+      news_posts: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          published_at: string | null
+          status: Database["public"]["Enums"]["news_status"] | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["news_status"] | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["news_status"] | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partners: {
         Row: {
           created_at: string
@@ -333,6 +369,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      news_status: "draft" | "published"
       partner_status: "active" | "inactive"
       profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
       tech_stack_status: "active" | "inactive"
