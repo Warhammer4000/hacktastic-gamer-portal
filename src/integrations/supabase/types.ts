@@ -81,6 +81,7 @@ export type Database = {
           is_profile_approved: boolean | null
           is_profile_completed: boolean | null
           linkedin_profile_id: string | null
+          status: Database["public"]["Enums"]["profile_status"]
           updated_at: string
         }
         Insert: {
@@ -94,6 +95,7 @@ export type Database = {
           is_profile_approved?: boolean | null
           is_profile_completed?: boolean | null
           linkedin_profile_id?: string | null
+          status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
         }
         Update: {
@@ -107,6 +109,7 @@ export type Database = {
           is_profile_approved?: boolean | null
           is_profile_completed?: boolean | null
           linkedin_profile_id?: string | null
+          status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
         }
         Relationships: []
@@ -179,6 +182,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
       user_role: "participant" | "mentor" | "admin" | "organizer" | "moderator"
     }
     CompositeTypes: {

@@ -2,6 +2,8 @@ import { Loader2 } from "lucide-react";
 import { MentorProfileForm } from "@/components/mentor/profile/MentorProfileForm";
 import { useMentorProfile } from "@/hooks/useMentorProfile";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function MentorProfile() {
   const { profile, isLoading, updateProfile } = useMentorProfile();
@@ -22,6 +24,40 @@ export default function MentorProfile() {
     });
   };
 
+  const renderStatusMessage = () => {
+    switch (profile?.status) {
+      case 'pending_approval':
+        return (
+          <Alert className="mt-8">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Your profile is pending approval from an administrator.
+            </AlertDescription>
+          </Alert>
+        );
+      case 'approved':
+        return (
+          <Alert className="mt-8" variant="default">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>
+              Your profile has been approved.
+            </AlertDescription>
+          </Alert>
+        );
+      case 'flagged':
+        return (
+          <Alert className="mt-8" variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Your profile has been flagged. Please contact an administrator.
+            </AlertDescription>
+          </Alert>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="container max-w-2xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8">Mentor Profile</h1>
@@ -38,13 +74,7 @@ export default function MentorProfile() {
         isSubmitting={updateProfile.isPending}
       />
 
-      {!profile?.is_profile_approved && (
-        <div className="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-          <p className="text-yellow-800 dark:text-yellow-200">
-            Your profile is pending approval from an administrator.
-          </p>
-        </div>
-      )}
+      {renderStatusMessage()}
     </div>
   );
 }
