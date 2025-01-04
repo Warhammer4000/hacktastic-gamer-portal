@@ -1,38 +1,30 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeProvider } from "next-themes";
-import Index from "./pages/Index";
-import Register from "./pages/Register";
-import ParticipantRegister from "./pages/participant/Register";
-import MentorRegister from "./pages/mentor/Register";
-import AdminRegister from "./pages/admin/Register";
+import { Routes, Route } from "react-router-dom";
+import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
-import AdminSettings from "./pages/admin/settings/Settings";
-import AdminProfile from "./pages/admin/Profile";
-
-const queryClient = new QueryClient();
+import Profile from "./pages/admin/Profile";
+import Home from "./pages/Home";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import NotFound from "./pages/NotFound";
+import PrivateRoute from "./components/auth/PrivateRoute";
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <TooltipProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/participant/register" element={<ParticipantRegister />} />
-              <Route path="/mentor/register" element={<MentorRegister />} />
-              <Route path="/admin/register" element={<AdminRegister />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
-              <Route path="/admin/profile" element={<AdminProfile />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="profile" element={<Profile />} />
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
