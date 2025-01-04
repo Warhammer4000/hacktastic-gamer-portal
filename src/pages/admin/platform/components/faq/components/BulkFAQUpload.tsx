@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,9 +9,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Props = {
   open: boolean;
@@ -25,19 +28,114 @@ export function BulkFAQUpload({ open, onOpenChange }: Props) {
   const { toast } = useToast();
 
   const downloadTemplate = () => {
-    const csvContent = "category_title,question,answer,status\nExample Category,What is this?,This is an example answer.,draft";
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "faq_template.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    const workbook = XLSX.utils.book_new();
+    
+    // Create example sheets
+    const categories = [
+      {
+        name: "General FAQ",
+        data: [
+          ["Question", "Answer", "Status"],
+          ["What is this?", "This is an example answer.", "draft"],
+        ],
+      },
+      {
+        name: "Technical FAQ",
+        data: [
+          ["Question", "Answer", "Status"],
+          ["How to use?", "Here's how to use it...", "draft"],
+        ],
+      },
+    ];
+
+    categories.forEach(category => {
+      const worksheet = XLSX.utils.aoa_to_sheet(category.data);
+      XLSX.utils.book_append_sheet(workbook, worksheet, category.name);
+    });
+
+    XLSX.writeFile(workbook, "faq_template.xlsx");
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleExcelUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsLoading(true);
+    try {
+      const reader = new FileReader();
+      
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+
+          // Process each sheet as a category
+          for (const sheetName of workbook.SheetNames) {
+            const worksheet = workbook.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+
+            if (rows.length < 2) continue; // Skip empty sheets
+
+            // Create the category
+            const { data: category, error: categoryError } = await supabase
+              .from("faq_categories")
+              .insert({
+                title: sheetName,
+                status: "draft" as FAQStatus,
+              })
+              .select()
+              .single();
+
+            if (categoryError) throw categoryError;
+
+            // Process FAQ items (skip header row)
+            const faqItems = rows.slice(1).map(row => ({
+              category_id: category.id,
+              question: row[0],
+              answer: row[1],
+              status: (row[2]?.toLowerCase() === "published" ? "published" : "draft") as FAQStatus,
+            })).filter(item => item.question && item.answer);
+
+            if (faqItems.length > 0) {
+              const { error: itemsError } = await supabase
+                .from("faq_items")
+                .insert(faqItems);
+
+              if (itemsError) throw itemsError;
+            }
+          }
+
+          toast({
+            title: "Success",
+            description: "FAQ data imported successfully",
+          });
+
+          queryClient.invalidateQueries({ queryKey: ["faq-categories"] });
+          onOpenChange(false);
+        } catch (error) {
+          console.error("Import error:", error);
+          toast({
+            variant: "destructive",
+            title: "Import failed",
+            description: "Failed to import FAQ data. Please check the file format.",
+          });
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error("File reading error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to read the file",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCSVUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -85,7 +183,6 @@ export function BulkFAQUpload({ open, onOpenChange }: Props) {
           if (categoryId) {
             const status = (values[3]?.trim().toLowerCase() === "published" ? "published" : "draft") as FAQStatus;
             
-            // Then create the FAQ item
             await supabase
               .from("faq_items")
               .insert({
@@ -124,33 +221,67 @@ export function BulkFAQUpload({ open, onOpenChange }: Props) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Bulk Upload FAQ Items</DialogTitle>
+          <DialogDescription>
+            Upload FAQ items in bulk using either Excel or CSV format
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={downloadTemplate}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Download Template
-          </Button>
+        <Tabs defaultValue="excel" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="excel">Excel</TabsTrigger>
+            <TabsTrigger value="csv">CSV</TabsTrigger>
+          </TabsList>
 
-          <div className="grid w-full items-center gap-1.5">
-            <Input
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              disabled={isLoading}
-            />
-          </div>
+          <TabsContent value="excel" className="space-y-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={downloadTemplate}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download Excel Template
+            </Button>
 
-          <div className="text-sm text-muted-foreground">
-            Upload a CSV file with the following columns: category_title,
-            question, answer, status. Status should be either "draft" or
-            "published".
-          </div>
-        </div>
+            <div className="grid w-full items-center gap-1.5">
+              <Input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleExcelUpload}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              Upload an Excel file where each sheet represents a category.
+              Each sheet should have columns: Question, Answer, Status.
+            </div>
+          </TabsContent>
+
+          <TabsContent value="csv" className="space-y-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={downloadTemplate}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download CSV Template
+            </Button>
+
+            <div className="grid w-full items-center gap-1.5">
+              <Input
+                type="file"
+                accept=".csv"
+                onChange={handleCSVUpload}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              Upload a CSV file with columns: category_title, question,
+              answer, status. Status should be either "draft" or "published".
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
