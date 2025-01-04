@@ -7,15 +7,7 @@ import { Search, SortDesc, SortAsc } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import Navbar from "@/components/landing/Navbar";
-
-type GalleryPost = {
-  id: string;
-  title: string;
-  image_url: string;
-  description: string | null;
-  tags: string[] | null;
-  created_at: string;
-};
+import type { GalleryPost } from "@/pages/admin/platform/components/gallery/types";
 
 export default function GalleryPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,6 +19,7 @@ export default function GalleryPage() {
       const { data, error } = await supabase
         .from("gallery_posts")
         .select("*")
+        .eq('status', 'published')
         .order("created_at", { ascending: sortOrder === "asc" });
 
       if (error) throw error;
