@@ -35,6 +35,7 @@ interface TeamFormProps {
   isLoadingTechStacks: boolean;
   defaultValues?: Partial<TeamFormValues>;
   submitLabel?: string;
+  isSubmitting?: boolean;
 }
 
 export function TeamForm({ 
@@ -42,7 +43,8 @@ export function TeamForm({
   techStacks, 
   isLoadingTechStacks, 
   defaultValues,
-  submitLabel = "Create Team" 
+  submitLabel = "Create Team",
+  isSubmitting = false
 }: TeamFormProps) {
   const form = useForm<TeamFormValues>({
     resolver: zodResolver(teamFormSchema),
@@ -120,10 +122,10 @@ export function TeamForm({
 
         <Button
           type="submit"
-          disabled={form.formState.isSubmitting}
+          disabled={isSubmitting}
           className="w-full"
         >
-          {form.formState.isSubmitting && (
+          {isSubmitting && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
           {submitLabel}

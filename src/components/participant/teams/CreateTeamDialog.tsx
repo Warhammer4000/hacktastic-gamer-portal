@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { TeamForm, type TeamFormValues } from "./forms/TeamForm";
 
 interface CreateTeamDialogProps {
@@ -11,7 +10,7 @@ interface CreateTeamDialogProps {
 }
 
 export function CreateTeamDialog({ maxMembers }: CreateTeamDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const { data: techStacks, isLoading: isLoadingTechStacks } = useQuery({
@@ -30,7 +29,7 @@ export function CreateTeamDialog({ maxMembers }: CreateTeamDialogProps) {
 
   const handleSubmit = async (data: TeamFormValues) => {
     try {
-      setIsLoading(true);
+      setIsSubmitting(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
@@ -68,7 +67,7 @@ export function CreateTeamDialog({ maxMembers }: CreateTeamDialogProps) {
       toast.error("Failed to create team. Please try again.");
       console.error("Error creating team:", error);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -78,7 +77,7 @@ export function CreateTeamDialog({ maxMembers }: CreateTeamDialogProps) {
       techStacks={techStacks}
       isLoadingTechStacks={isLoadingTechStacks}
       submitLabel="Create Team"
-      isLoading={isLoading}
+      isSubmitting={isSubmitting}
     />
   );
 }
