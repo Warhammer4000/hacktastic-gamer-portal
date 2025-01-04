@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/sidebar";
 import { useToast } from "@/components/ui/use-toast";
 
-// Menu items for the admin sidebar
 const sidebarItems = [
   {
     title: "Users",
