@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { NewsForm } from "./components/NewsForm";
 
@@ -88,17 +86,7 @@ export function AddNewsPost({ open, onOpenChange, editingPost }: AddNewsPostProp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1200px] h-[80vh] flex flex-col">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>{editingPost ? "Edit News Post" : "Create News Post"}</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 p-0"
-              onClick={() => setIsPreview(!isPreview)}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle>{editingPost ? "Edit News Post" : "Create News Post"}</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto">
@@ -108,6 +96,7 @@ export function AddNewsPost({ open, onOpenChange, editingPost }: AddNewsPostProp
             isPreview={isPreview}
             onSubmit={handleSubmit}
             onCancel={() => onOpenChange(false)}
+            onTogglePreview={() => setIsPreview(!isPreview)}
           />
         </div>
       </DialogContent>
