@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Upload } from "lucide-react";
+import { Upload, Download } from "lucide-react";
 
 interface BulkAdminUploadDialogProps {
   open: boolean;
@@ -106,6 +106,19 @@ export default function BulkAdminUploadDialog({ open, onOpenChange }: BulkAdminU
     reader.readAsText(file);
   };
 
+  const downloadTemplate = () => {
+    const csvContent = "email,full_name\nexample@email.com,John Doe";
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'admin_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -115,6 +128,15 @@ export default function BulkAdminUploadDialog({ open, onOpenChange }: BulkAdminU
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={downloadTemplate}
+              className="w-full"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download Template CSV
+            </Button>
             <Input
               type="file"
               accept=".csv"

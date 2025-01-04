@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { UserPlus, Trash2, Download, Upload } from "lucide-react";
+import { UserPlus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import AddAdminDialog from "./AddAdminDialog";
 import BulkAdminUploadDialog from "./BulkAdminUploadDialog";
@@ -59,19 +59,6 @@ export default function AdminUsers() {
     }
   };
 
-  const downloadTemplate = () => {
-    const csvContent = "email,full_name\nexample@email.com,John Doe";
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'admin_template.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -89,10 +76,6 @@ export default function AdminUsers() {
             Bulk Upload
           </Button>
         </div>
-        <Button variant="outline" onClick={downloadTemplate}>
-          <Download className="mr-2 h-4 w-4" />
-          Download Template
-        </Button>
       </div>
 
       <Table>
