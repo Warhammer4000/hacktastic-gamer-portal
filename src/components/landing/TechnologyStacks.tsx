@@ -1,30 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
-import { Code } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
 
 export default function TechnologyStacks() {
-  const { data: stacks, isLoading } = useQuery({
+  const { data: techStacks, isLoading } = useQuery({
     queryKey: ["techStacks"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("technology_stacks")
         .select("*")
-        .eq("status", "active")
-        .order("name");
+        .eq("status", "active");
       
-      if (error) {
-        console.error("Error fetching tech stacks:", error);
-        throw error;
-      }
-      console.log("Fetched tech stacks:", data);
+      if (error) throw error;
       return data;
     },
   });
 
   if (isLoading) {
     return (
-      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+      <section className="py-16 bg-gray-50 dark:bg-gray-800">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="heading-lg mb-4">Loading Technology Stacks...</h2>
@@ -34,51 +27,24 @@ export default function TechnologyStacks() {
     );
   }
 
-  if (!stacks || stacks.length === 0) {
-    return (
-      <section className="py-16 bg-gray-50 dark:bg-gray-900">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="heading-lg mb-4">Technology Stacks</h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              No technology stacks available at the moment.
-            </p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="py-16 bg-gray-50 dark:bg-gray-900">
-      <div className="container">
+    <section className="py-16 bg-gray-50 dark:bg-gray-800">
+      <div className="container max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="heading-lg mb-4">Technology Stacks</h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Explore the cutting-edge technologies we support
-          </p>
+          <h2 className="heading-lg text-gray-900 dark:text-white uppercase mb-4">Technology Stacks</h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {stacks?.map((stack) => (
-            <Card 
-              key={stack.id} 
-              className="group hover:shadow-lg transition-all duration-300 border-none bg-white/50 backdrop-blur-sm dark:bg-gray-800/50"
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-12 items-center justify-items-center">
+          {techStacks?.map((tech) => (
+            <div
+              key={tech.id}
+              className="w-full max-w-[200px] h-20 flex items-center justify-center group transition-transform duration-300 hover:scale-110"
             >
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <img
-                      src={stack.icon_url}
-                      alt={stack.name}
-                      className="h-10 w-10 object-contain"
-                    />
-                  </div>
-                  <h3 className="text-lg font-semibold text-center group-hover:text-primary transition-colors duration-300">
-                    {stack.name}
-                  </h3>
-                </div>
-              </CardContent>
-            </Card>
+              <img
+                src={tech.icon_url}
+                alt={tech.name}
+                className="max-w-full max-h-full object-contain filter dark:brightness-0 dark:invert transition-all duration-300"
+              />
+            </div>
           ))}
         </div>
       </div>
