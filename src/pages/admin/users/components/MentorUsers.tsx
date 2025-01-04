@@ -22,17 +22,19 @@ export default function MentorUsers() {
         .from("user_roles")
         .select(`
           user_id,
-          profiles:profiles!user_roles_user_id_fkey (
-            id,
-            full_name,
-            email,
-            avatar_url
-          )
+          profiles!user_roles_user_id_fkey (*)
         `)
         .eq("role", "mentor");
 
       if (error) throw error;
-      return data as MentorWithProfile[];
+      
+      // Transform the data to match our expected type
+      const transformedData = data?.map(item => ({
+        user_id: item.user_id,
+        profiles: item.profiles as Profile
+      })) || [];
+
+      return transformedData;
     },
   });
 
