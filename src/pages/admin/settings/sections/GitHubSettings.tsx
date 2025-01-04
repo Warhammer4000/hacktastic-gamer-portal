@@ -33,7 +33,7 @@ export function GitHubSettings() {
       const { data, error } = await supabase
         .from("github_settings")
         .select("*")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -50,7 +50,9 @@ export function GitHubSettings() {
     try {
       const { error } = await supabase
         .from("github_settings")
-        .upsert(data, { onConflict: "id" });
+        .upsert(data)
+        .select()
+        .single();
 
       if (error) throw error;
 
@@ -82,7 +84,7 @@ export function GitHubSettings() {
             <FormItem>
               <FormLabel>Organization Name</FormLabel>
               <FormControl>
-                <Input placeholder="your-org-name" {...field} />
+                <Input placeholder="your-org-name" {...field} value={field.value || ''} />
               </FormControl>
               <FormDescription>
                 The name of your GitHub organization
@@ -99,7 +101,7 @@ export function GitHubSettings() {
             <FormItem>
               <FormLabel>Participant Team Slug</FormLabel>
               <FormControl>
-                <Input placeholder="participants" {...field} />
+                <Input placeholder="participants" {...field} value={field.value || ''} />
               </FormControl>
               <FormDescription>
                 The team slug for participants in your GitHub organization
@@ -116,7 +118,7 @@ export function GitHubSettings() {
             <FormItem>
               <FormLabel>Mentor Team Slug</FormLabel>
               <FormControl>
-                <Input placeholder="mentors" {...field} />
+                <Input placeholder="mentors" {...field} value={field.value || ''} />
               </FormControl>
               <FormDescription>
                 The team slug for mentors in your GitHub organization
@@ -133,7 +135,7 @@ export function GitHubSettings() {
             <FormItem>
               <FormLabel>Admin Team Slug</FormLabel>
               <FormControl>
-                <Input placeholder="admins" {...field} />
+                <Input placeholder="admins" {...field} value={field.value || ''} />
               </FormControl>
               <FormDescription>
                 The team slug for admins in your GitHub organization
@@ -154,6 +156,7 @@ export function GitHubSettings() {
                   type="password"
                   placeholder="ghp_..."
                   {...field}
+                  value={field.value || ''}
                 />
               </FormControl>
               <FormDescription>
