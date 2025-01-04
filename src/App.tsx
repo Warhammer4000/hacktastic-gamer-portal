@@ -5,6 +5,7 @@ import Profile from "./pages/admin/Profile";
 import Settings from "./pages/admin/settings/Settings";
 import MentorApproval from "./pages/admin/mentors/MentorApproval";
 import Platform from "./pages/admin/platform/Platform";
+import UsersPage from "./pages/admin/users/UsersPage";
 import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import Register from "./pages/Register";
@@ -46,6 +47,7 @@ function App() {
         <Route path="platform" element={<Platform />} />
         <Route path="settings" element={<Settings />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="users" element={<UsersPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
