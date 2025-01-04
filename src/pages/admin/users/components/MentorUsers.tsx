@@ -5,15 +5,12 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 
-type MentorWithProfile = {
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+
+interface MentorWithProfile {
   user_id: string;
-  profiles: {
-    id: string;
-    full_name: string | null;
-    email: string;
-    avatar_url: string | null;
-  } | null;
-};
+  profiles: Profile;
+}
 
 export default function MentorUsers() {
   const { toast } = useToast();
@@ -25,7 +22,7 @@ export default function MentorUsers() {
         .from("user_roles")
         .select(`
           user_id,
-          profiles!user_roles_user_id_fkey (
+          profiles:profiles!user_roles_user_id_fkey (
             id,
             full_name,
             email,
@@ -35,7 +32,7 @@ export default function MentorUsers() {
         .eq("role", "mentor");
 
       if (error) throw error;
-      return data;
+      return data as MentorWithProfile[];
     },
   });
 
