@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegistrationSettings } from "./sections/RegistrationSettings";
+import { GitHubSettings } from "./sections/GitHubSettings";
 import {
   Sidebar,
   SidebarContent,
@@ -102,6 +103,7 @@ const AdminSettings = () => {
           <Tabs defaultValue="registration" className="w-full">
             <TabsList className="mb-4">
               <TabsTrigger value="registration">Registration</TabsTrigger>
+              <TabsTrigger value="github">GitHub</TabsTrigger>
               <TabsTrigger value="security">Security</TabsTrigger>
               <TabsTrigger value="notifications">Notifications</TabsTrigger>
             </TabsList>
@@ -110,6 +112,10 @@ const AdminSettings = () => {
               <RegistrationSettings />
             </TabsContent>
             
+            <TabsContent value="github">
+              <GitHubSettings />
+            </TabsContent>
+
             <TabsContent value="security">
               <div className="text-muted-foreground">
                 Security settings coming soon...

@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      github_settings: {
+        Row: {
+          admin_team_slug: string | null
+          created_at: string
+          id: string
+          mentor_team_slug: string | null
+          organization_name: string | null
+          participant_team_slug: string | null
+          personal_access_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_team_slug?: string | null
+          created_at?: string
+          id?: string
+          mentor_team_slug?: string | null
+          organization_name?: string | null
+          participant_team_slug?: string | null
+          personal_access_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_team_slug?: string | null
+          created_at?: string
+          id?: string
+          mentor_team_slug?: string | null
+          organization_name?: string | null
+          participant_team_slug?: string | null
+          personal_access_token?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       levels: {
         Row: {
           created_at: string
