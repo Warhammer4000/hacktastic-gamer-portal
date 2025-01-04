@@ -32,11 +32,18 @@ const formSchema = z.object({
     .min(6, "Admin code is required")
     .refine(async (code) => {
       try {
-        const { data: { secret }, error } = await supabase.functions.invoke('verify-admin-code', {
+        const { data, error } = await supabase.functions.invoke('verify-admin-code', {
           body: { code }
         });
-        return !error && secret === code;
-      } catch {
+        
+        if (error) {
+          console.error("Admin code verification error:", error);
+          return false;
+        }
+        
+        return data?.success === true;
+      } catch (error) {
+        console.error("Admin code verification failed:", error);
         return false;
       }
     }, {
