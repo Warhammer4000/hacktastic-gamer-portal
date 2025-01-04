@@ -387,18 +387,21 @@ export type Database = {
       team_members: {
         Row: {
           id: string
+          is_ready: boolean | null
           joined_at: string
           team_id: string | null
           user_id: string | null
         }
         Insert: {
           id?: string
+          is_ready?: boolean | null
           joined_at?: string
           team_id?: string | null
           user_id?: string | null
         }
         Update: {
           id?: string
+          is_ready?: boolean | null
           joined_at?: string
           team_id?: string | null
           user_id?: string | null
@@ -427,6 +430,7 @@ export type Database = {
           id: string
           join_code: string
           leader_id: string
+          max_members: number | null
           mentor_id: string | null
           name: string
           password: string | null
@@ -441,6 +445,7 @@ export type Database = {
           id?: string
           join_code: string
           leader_id: string
+          max_members?: number | null
           mentor_id?: string | null
           name: string
           password?: string | null
@@ -455,6 +460,7 @@ export type Database = {
           id?: string
           join_code?: string
           leader_id?: string
+          max_members?: number | null
           mentor_id?: string | null
           name?: string
           password?: string | null

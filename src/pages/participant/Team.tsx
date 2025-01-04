@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
 import { CreateTeamDialog } from "@/components/participant/teams/CreateTeamDialog";
 import { JoinTeamDialog } from "@/components/participant/teams/JoinTeamDialog";
 import { TeamCard } from "@/components/participant/teams/TeamCard";
@@ -11,11 +11,20 @@ import { TeamCodeCard } from "@/components/participant/teams/TeamCodeCard";
 import { TeamMentorCard } from "@/components/participant/teams/TeamMentorCard";
 import { TeamDetailsDialog } from "@/components/participant/teams/TeamDetailsDialog";
 import { DeleteTeamDialog } from "@/components/participant/teams/DeleteTeamDialog";
+import { TeamMembersCard } from "@/components/participant/teams/TeamMembersCard";
 
 export default function TeamPage() {
   const [isViewTeamOpen, setIsViewTeamOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
 
   const { data: team, isLoading } = useQuery({
     queryKey: ['participant-team'],
@@ -43,6 +52,7 @@ export default function TeamPage() {
           repository_url,
           description,
           tech_stack_id,
+          max_members,
           tech_stack:tech_stack_id (
             name,
             icon_url
@@ -84,6 +94,25 @@ export default function TeamPage() {
     } catch (error) {
       console.error('Error deleting team:', error);
       toast.error("Failed to delete team");
+    }
+  };
+
+  const handleLockTeam = async () => {
+    if (!team) return;
+
+    try {
+      const { error } = await supabase
+        .from('teams')
+        .update({ status: 'locked' })
+        .eq('id', team.id);
+
+      if (error) throw error;
+
+      toast.success("Team locked successfully");
+      navigate(0);
+    } catch (error) {
+      console.error('Error locking team:', error);
+      toast.error("Failed to lock team");
     }
   };
 
@@ -143,6 +172,13 @@ export default function TeamPage() {
         />
         <TeamCodeCard joinCode={team.join_code} />
         <TeamMentorCard mentorId={team.mentor_id} />
+        <TeamMembersCard
+          teamId={team.id}
+          maxMembers={team.max_members}
+          isLeader={team.leader_id === currentUser?.id}
+          isLocked={team.status === 'locked'}
+          onLockTeam={handleLockTeam}
+        />
       </div>
 
       <TeamDetailsDialog
