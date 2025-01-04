@@ -9,7 +9,7 @@ export default function TermsAndConditionsPage() {
       const { data, error } = await supabase
         .from('terms_and_conditions')
         .select('*')
-        .eq('status', 'published'::terms_and_conditions_status)
+        .eq('status', 'published')
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
