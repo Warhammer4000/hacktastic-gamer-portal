@@ -23,6 +23,12 @@ type NewsFormProps = {
   onTogglePreview: () => void;
 };
 
+const DEFAULT_TAGS = [
+  { label: "News", value: "news" },
+  { label: "Update", value: "update" },
+  { label: "Announcement", value: "announcement" }
+];
+
 export function NewsForm({ 
   defaultValues, 
   isSubmitting, 
@@ -79,8 +85,9 @@ export function NewsForm({
                       <MultiSelect
                         placeholder="Select or create tags"
                         selected={field.value}
-                        options={[]}
+                        options={DEFAULT_TAGS}
                         onChange={field.onChange}
+                        creatable
                       />
                     </FormControl>
                     <FormMessage />
