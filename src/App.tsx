@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import ParticipantRegister from "./pages/participant/Register";
 import MentorRegister from "./pages/mentor/Register";
 import AdminRegister from "./pages/admin/Register";
+import AdminDashboard from "./pages/admin/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/participant/register" element={<ParticipantRegister />} />
           <Route path="/mentor/register" element={<MentorRegister />} />
           <Route path="/admin/register" element={<AdminRegister />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
