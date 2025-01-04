@@ -1,18 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { EditTechnologyStack } from "./EditTechnologyStack";
+import { useState } from "react";
+import type { TechnologyStacksTable } from "@/integrations/supabase/types/tables/technology-stacks";
 
-type TechStack = {
-  id: string;
-  name: string;
-  icon_url: string;
-  status: "active" | "inactive";
-};
+type TechStack = TechnologyStacksTable["Row"];
 
 export const TechnologyStackList = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [editingStack, setEditingStack] = useState<TechStack | null>(null);
 
   const { data: techStacks, isLoading } = useQuery({
     queryKey: ["techStacks"],
@@ -75,17 +76,31 @@ export const TechnologyStackList = () => {
             />
             <span className="font-medium">{stack.name}</span>
           </div>
-          <Switch
-            checked={stack.status === "active"}
-            onCheckedChange={(checked) =>
-              toggleStatus.mutate({
-                id: stack.id,
-                status: checked ? "active" : "inactive",
-              })
-            }
-          />
+          <div className="flex items-center space-x-4">
+            <Switch
+              checked={stack.status === "active"}
+              onCheckedChange={(checked) =>
+                toggleStatus.mutate({
+                  id: stack.id,
+                  status: checked ? "active" : "inactive",
+                })
+              }
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setEditingStack(stack)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       ))}
+      
+      <EditTechnologyStack
+        stack={editingStack}
+        onClose={() => setEditingStack(null)}
+      />
     </div>
   );
 };
