@@ -10,11 +10,9 @@ export default function PrivacyPolicyPage() {
         .from('privacy_policies')
         .select('*')
         .eq('status', 'published')
-        .order('published_at', { ascending: false })
-        .limit(1)
         .single();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') throw error;
       return data;
     },
   });
@@ -50,7 +48,7 @@ export default function PrivacyPolicyPage() {
           Version {privacyPolicy.version} • Published on{" "}
           {new Date(privacyPolicy.published_at).toLocaleDateString()}
         </div>
-        <ScrollArea className="h-[calc(100vh-300px)] rounded-md border p-6">
+        <ScrollArea className="h-[calc(100vh-200px)] rounded-md border p-6">
           <div 
             className="prose dark:prose-invert max-w-none"
             dangerouslySetInnerHTML={{ __html: privacyPolicy.content }}
