@@ -1,10 +1,15 @@
+import { LevelsTable } from './tables/levels';
+import { ProfilesTable } from './tables/profiles';
+import { RegistrationSettingsTable } from './tables/registration-settings';
+import { UserRolesTable } from './tables/user-roles';
+
 export type Json =
   | string
   | number
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export interface Database {
   public: {

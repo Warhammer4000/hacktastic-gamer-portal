@@ -4,6 +4,8 @@ export * from './tables/profiles';
 export * from './tables/registration-settings';
 export * from './tables/user-roles';
 
+import { Database } from './database';
+
 export type Tables<
   PublicTableNameOrOptions extends
     | keyof Database["public"]["Tables"]

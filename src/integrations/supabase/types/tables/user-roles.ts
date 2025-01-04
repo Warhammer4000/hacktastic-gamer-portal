@@ -1,3 +1,5 @@
+import { Database } from '../database';
+
 export interface UserRolesTable {
   Row: {
     created_at: string;
