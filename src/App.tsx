@@ -40,7 +40,6 @@ function App() {
       <Route path="/public/news" element={<NewsPage />} />
       <Route path="/public/news/:id" element={<NewsDetailPage />} />
       <Route path="/mentors" element={<MentorsPage />} />
-      
       <Route path="/mentor" element={<PrivateRoute><MentorLayout /></PrivateRoute>}>
         <Route index element={<MentorDashboard />} />
         <Route path="dashboard" element={<MentorDashboard />} />
