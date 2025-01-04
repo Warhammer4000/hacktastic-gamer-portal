@@ -5,6 +5,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Form,
   FormControl,
   FormField,
@@ -23,6 +30,7 @@ const formSchema = z.object({
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -44,7 +52,6 @@ export default function Login() {
 
       if (signInError) throw signInError;
 
-      // Get the user's role
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
@@ -74,16 +81,25 @@ export default function Login() {
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      navigate("/");
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-md space-y-8 p-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Login</h1>
-          <p className="text-muted-foreground">Welcome back!</p>
-        </div>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-center">Welcome Back</DialogTitle>
+          <DialogDescription className="text-center">
+            Sign in to your account to continue
+          </DialogDescription>
+        </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="email"
@@ -91,7 +107,7 @@ export default function Login() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} />
+                    <Input type="email" placeholder="Enter your email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -105,7 +121,7 @@ export default function Login() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} />
+                    <Input type="password" placeholder="Enter your password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -114,19 +130,24 @@ export default function Login() {
 
             <div className="space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
               
               <div className="text-center space-y-2">
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-muted-foreground hover:underline"
+                  className="text-sm text-muted-foreground hover:underline block"
+                  onClick={() => setIsOpen(false)}
                 >
                   Forgot password?
                 </Link>
                 <div className="text-sm text-muted-foreground">
                   Don't have an account?{" "}
-                  <Link to="/register" className="hover:underline">
+                  <Link 
+                    to="/register" 
+                    className="hover:underline text-primary"
+                    onClick={() => setIsOpen(false)}
+                  >
                     Register
                   </Link>
                 </div>
@@ -134,7 +155,7 @@ export default function Login() {
             </div>
           </form>
         </Form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

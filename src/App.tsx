@@ -24,15 +24,16 @@ import MentorsPage from "./pages/public/mentors/MentorsPage";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Index />}>
+        <Route path="login" element={<Login />} />
+      </Route>
       <Route path="/register" element={<Register />} />
       <Route path="/participant/register" element={<ParticipantRegister />} />
       <Route path="/mentor/register" element={<MentorRegister />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/public/mentors" element={<MentorsPage />} />
-      <Route path="/mentors" element={<MentorsPage />} /> {/* Added this line */}
+      <Route path="/mentors" element={<MentorsPage />} />
       
       <Route path="/mentor" element={<PrivateRoute><MentorLayout /></PrivateRoute>}>
         <Route index element={<MentorDashboard />} />
