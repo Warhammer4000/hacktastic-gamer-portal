@@ -4,7 +4,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { NewsEditor } from "../../news/editor/NewsEditor";
 import { NewsPreview } from "../../news/preview/NewsPreview";
-import { Eye } from "lucide-react";
 
 type FormValues = {
   content: string;
@@ -14,19 +13,15 @@ type FormValues = {
 type PrivacyPolicyFormProps = {
   defaultValues: FormValues;
   isSubmitting: boolean;
-  isPreview: boolean;
   onSubmit: (values: FormValues, status: 'draft' | 'published') => void;
   onCancel: () => void;
-  onTogglePreview: () => void;
 };
 
 export function PrivacyPolicyForm({ 
   defaultValues, 
   isSubmitting, 
-  isPreview,
   onSubmit, 
   onCancel,
-  onTogglePreview 
 }: PrivacyPolicyFormProps) {
   const form = useForm<FormValues>({
     defaultValues,
@@ -57,15 +52,13 @@ export function PrivacyPolicyForm({
               <FormItem>
                 <FormLabel>Content</FormLabel>
                 <FormControl>
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="h-[calc(60vh-16rem)]">
                       <NewsEditor content={field.value} onChange={field.onChange} />
                     </div>
-                    {isPreview && (
-                      <div className="border rounded-lg p-4 h-[calc(60vh-16rem)] overflow-y-auto">
-                        <NewsPreview content={field.value} />
-                      </div>
-                    )}
+                    <div className="border rounded-lg p-4 h-[calc(60vh-16rem)] overflow-y-auto">
+                      <NewsPreview content={field.value} />
+                    </div>
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -81,14 +74,6 @@ export function PrivacyPolicyForm({
             onClick={onCancel}
           >
             Cancel
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onTogglePreview}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            {isPreview ? 'Hide Preview' : 'Show Preview'}
           </Button>
           <Button 
             type="button"

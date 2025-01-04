@@ -19,7 +19,6 @@ type AddPrivacyPolicyProps = {
 
 export function AddPrivacyPolicy({ open, onOpenChange, editingPolicy }: AddPrivacyPolicyProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPreview, setIsPreview] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -88,10 +87,8 @@ export function AddPrivacyPolicy({ open, onOpenChange, editingPolicy }: AddPriva
           <PrivacyPolicyForm
             defaultValues={defaultValues}
             isSubmitting={isSubmitting}
-            isPreview={isPreview}
             onSubmit={handleSubmit}
             onCancel={() => onOpenChange(false)}
-            onTogglePreview={() => setIsPreview(!isPreview)}
           />
         </div>
       </DialogContent>
