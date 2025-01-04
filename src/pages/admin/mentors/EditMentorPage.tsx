@@ -1,11 +1,14 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MentorProfileForm } from "@/components/mentor/profile/MentorProfileForm";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function EditMentorPage() {
   const { mentorId } = useParams();
+  const navigate = useNavigate();
 
   const { data: mentor, isLoading } = useQuery({
     queryKey: ['mentor', mentorId],
@@ -30,6 +33,7 @@ export default function EditMentorPage() {
 
       if (error) throw error;
       toast.success('Mentor profile updated successfully');
+      navigate('/admin/users');
     } catch (error) {
       console.error('Error updating mentor:', error);
       toast.error('Failed to update mentor profile');
@@ -46,7 +50,17 @@ export default function EditMentorPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Edit Mentor Profile</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/admin/users')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Users
+        </Button>
+        <h1 className="text-2xl font-bold">Edit Mentor Profile</h1>
+      </div>
       <MentorProfileForm
         defaultValues={mentor}
         onSubmit={handleSubmit}
