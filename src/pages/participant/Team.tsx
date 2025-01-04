@@ -12,8 +12,9 @@ import { TeamMentorCard } from "@/components/participant/teams/TeamMentorCard";
 import { TeamDetailsDialog } from "@/components/participant/teams/TeamDetailsDialog";
 import { DeleteTeamDialog } from "@/components/participant/teams/DeleteTeamDialog";
 import { TeamMembersCard } from "@/components/participant/teams/TeamMembersCard";
+import { AvailableTeamsCard } from "@/components/participant/teams/AvailableTeamsCard";
 
-const MAX_TEAM_MEMBERS = 3; // New constant for max team members
+const MAX_TEAM_MEMBERS = 3;
 
 export default function TeamPage() {
   const [isViewTeamOpen, setIsViewTeamOpen] = useState(false);
@@ -28,21 +29,21 @@ export default function TeamPage() {
     },
   });
 
-  const { data: team, isLoading } = useQuery({
+  const { data: team } = useQuery({
     queryKey: ['participant-team'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const { data: teamMember, error: teamMemberError } = await supabase
+      const { data: teamMember } = await supabase
         .from('team_members')
         .select('team_id')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (teamMemberError || !teamMember) return null;
+      if (!teamMember) return null;
 
-      const { data: team, error: teamError } = await supabase
+      const { data: team } = await supabase
         .from('teams')
         .select(`
           id,
@@ -62,7 +63,6 @@ export default function TeamPage() {
         .eq('id', teamMember.team_id)
         .single();
 
-      if (teamError) return null;
       return team;
     },
   });
@@ -98,42 +98,11 @@ export default function TeamPage() {
     }
   };
 
-  const handleLockTeam = async () => {
-    if (!team) return;
-
-    try {
-      const { error } = await supabase
-        .from('teams')
-        .update({ status: 'locked' })
-        .eq('id', team.id);
-
-      if (error) throw error;
-
-      toast.success("Team locked successfully");
-      navigate(0);
-    } catch (error) {
-      console.error('Error locking team:', error);
-      toast.error("Failed to lock team");
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="container p-6">
-        <h1 className="text-3xl font-bold mb-8">Team</h1>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="animate-pulse">
-            <div className="h-32 bg-muted"></div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (!team) {
-    return (
-      <div className="container p-6">
-        <h1 className="text-3xl font-bold mb-8">Team</h1>
+  return (
+    <div className="container p-6">
+      <h1 className="text-3xl font-bold mb-8">Team</h1>
+      
+      {!team ? (
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <div className="p-6">
@@ -154,46 +123,34 @@ export default function TeamPage() {
               <JoinTeamDialog />
             </div>
           </Card>
-        </div>
-      </div>
-    );
-  }
 
-  return (
-    <div className="container p-6">
-      <h1 className="text-3xl font-bold mb-8">Team</h1>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <TeamCard
-          team={team}
-          onViewTeam={() => setIsViewTeamOpen(true)}
-          onDeleteTeam={() => setIsDeleteDialogOpen(true)}
-          isLocked={team.status === 'locked'}
-        />
-        <TeamCodeCard joinCode={team.join_code} />
-        <TeamMentorCard mentorId={team.mentor_id} />
-        <TeamMembersCard
-          teamId={team.id}
-          maxMembers={MAX_TEAM_MEMBERS}
-          isLeader={team.leader_id === currentUser?.id}
-          isLocked={team.status === 'locked'}
-          onLockTeam={handleLockTeam}
-        />
-      </div>
+          <div className="md:col-span-2">
+            <AvailableTeamsCard />
+          </div>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <TeamCard
+            team={team}
+            onViewTeam={() => setIsViewTeamOpen(true)}
+            onDeleteTeam={() => setIsDeleteDialogOpen(true)}
+            isLocked={team.status === 'locked'}
+          />
+          <TeamCodeCard joinCode={team.join_code} />
+          <TeamMentorCard mentorId={team.mentor_id} />
+          <TeamMembersCard
+            teamId={team.id}
+            maxMembers={MAX_TEAM_MEMBERS}
+            isLeader={team.leader_id === currentUser?.id}
+            isLocked={team.status === 'locked'}
+          />
+        </div>
+      )}
 
       <TeamDetailsDialog
         isOpen={isViewTeamOpen}
         onOpenChange={setIsViewTeamOpen}
-        team={{
-          id: team.id,
-          name: team.name,
-          description: team.description,
-          status: team.status,
-          tech_stack: team.tech_stack,
-          tech_stack_id: team.tech_stack_id,
-          repository_url: team.repository_url,
-          leader_id: team.leader_id,
-        }}
+        team={team!}
       />
 
       <DeleteTeamDialog
