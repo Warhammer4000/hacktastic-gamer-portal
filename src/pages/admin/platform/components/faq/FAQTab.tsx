@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { FAQCategoriesList } from "./components/FAQCategoriesList";
 import { AddFAQCategory } from "./components/AddFAQCategory";
 import { BulkFAQUpload } from "./components/BulkFAQUpload";
+import { ExportFAQButton } from "./components/ExportFAQButton";
 
 export function FAQTab() {
   const [showAddCategory, setShowAddCategory] = useState(false);
@@ -29,6 +30,7 @@ export function FAQTab() {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">FAQ Management</h2>
         <div className="flex gap-2">
+          <ExportFAQButton />
           <Button
             variant="outline"
             onClick={() => setShowBulkUpload(true)}
