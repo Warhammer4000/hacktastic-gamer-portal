@@ -69,6 +69,59 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          team_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          team_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          team_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mentor_tech_stacks: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          tech_stack_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          tech_stack_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          tech_stack_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_tech_stacks_tech_stack_id_fkey"
+            columns: ["tech_stack_id"]
+            isOneToOne: false
+            referencedRelation: "technology_stacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           created_at: string
