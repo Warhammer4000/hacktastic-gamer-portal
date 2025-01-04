@@ -6,6 +6,7 @@ export default function TermsAndConditionsPage() {
   const { data: termsAndConditions, isLoading } = useQuery({
     queryKey: ['terms-and-conditions'],
     queryFn: async () => {
+      console.log('Fetching terms and conditions...');
       const { data, error } = await supabase
         .from('terms_and_conditions')
         .select('*')
@@ -18,6 +19,8 @@ export default function TermsAndConditionsPage() {
         console.error('Error fetching terms:', error);
         throw error;
       }
+      
+      console.log('Terms and conditions response:', { data, error });
       return data;
     },
   });
