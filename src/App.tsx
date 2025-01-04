@@ -3,7 +3,7 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import Profile from "./pages/admin/Profile";
 import Settings from "./pages/admin/settings/Settings";
-import Home from "./pages/Home";
+import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import Register from "./pages/Register";
 import ParticipantRegister from "./pages/participant/Register";
@@ -16,7 +16,7 @@ import PrivateRoute from "./components/auth/PrivateRoute";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/participant/register" element={<ParticipantRegister />} />
