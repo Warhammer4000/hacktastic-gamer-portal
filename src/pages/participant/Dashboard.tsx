@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateTeamDialog } from "@/components/participant/teams/CreateTeamDialog";
 import { JoinTeamDialog } from "@/components/participant/teams/JoinTeamDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useState } from "react";
 
 interface Team {
   id: string;
@@ -13,6 +21,7 @@ interface Team {
   status: string;
   mentor_id: string | null;
   repository_url: string | null;
+  description: string | null;
   tech_stack: {
     name: string;
     icon_url: string;
@@ -20,6 +29,8 @@ interface Team {
 }
 
 export default function ParticipantDashboard() {
+  const [isViewTeamOpen, setIsViewTeamOpen] = useState(false);
+
   const { data: team, isLoading } = useQuery({
     queryKey: ['participant-team'],
     queryFn: async () => {
@@ -43,6 +54,7 @@ export default function ParticipantDashboard() {
           status,
           mentor_id,
           repository_url,
+          description,
           tech_stack:tech_stack_id (
             name,
             icon_url
@@ -120,6 +132,11 @@ export default function ParticipantDashboard() {
           <CardContent>
             <div className="space-y-2">
               <p className="font-medium">{team.name}</p>
+              {team.description && (
+                <p className="text-sm text-muted-foreground">
+                  {team.description}
+                </p>
+              )}
               <p className="text-sm text-muted-foreground">
                 Status: {team.status}
               </p>
@@ -129,7 +146,7 @@ export default function ParticipantDashboard() {
                 </p>
               )}
               <div className="flex items-center gap-2 mt-4">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setIsViewTeamOpen(true)}>
                   <Users className="mr-2 h-4 w-4" />
                   View Team
                 </Button>
@@ -172,6 +189,35 @@ export default function ParticipantDashboard() {
           </Card>
         )}
       </div>
+
+      <Dialog open={isViewTeamOpen} onOpenChange={setIsViewTeamOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{team.name}</DialogTitle>
+            {team.description && (
+              <DialogDescription>
+                {team.description}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <h4 className="font-medium">Team Details</h4>
+              <p className="text-sm text-muted-foreground">Status: {team.status}</p>
+              {team.tech_stack && (
+                <p className="text-sm text-muted-foreground">
+                  Tech Stack: {team.tech_stack.name}
+                </p>
+              )}
+              {team.repository_url && (
+                <p className="text-sm text-muted-foreground">
+                  Repository: <a href={team.repository_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View on GitHub</a>
+                </p>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
