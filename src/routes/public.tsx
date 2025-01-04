@@ -6,6 +6,7 @@ import NewsDetailPage from "@/pages/public/news/NewsDetailPage";
 import PublicGalleryPage from "@/pages/public/gallery/GalleryPage";
 import FAQPage from "@/pages/public/faq/FAQPage";
 import PrivacyPolicyPage from "@/pages/public/privacy-policy/PrivacyPolicyPage";
+import TermsAndConditionsPage from "@/pages/public/terms-and-conditions/TermsAndConditionsPage";
 
 export const publicRoutes = (
   <Route element={<PublicLayout />}>
@@ -15,5 +16,6 @@ export const publicRoutes = (
     <Route path="/public/gallery" element={<PublicGalleryPage />} />
     <Route path="/public/faq" element={<FAQPage />} />
     <Route path="/public/privacy-policy" element={<PrivacyPolicyPage />} />
+    <Route path="/public/terms-and-conditions" element={<TermsAndConditionsPage />} />
   </Route>
 );
