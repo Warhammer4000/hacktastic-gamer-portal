@@ -24,6 +24,8 @@ export function TeamCountPreference({ defaultValue }: TeamCountPreferenceProps) 
         .upsert({
           mentor_id: user.id,
           team_count: teamCount,
+        }, {
+          onConflict: 'mentor_id'
         });
 
       if (error) throw error;
