@@ -1,12 +1,12 @@
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Login from "@/pages/auth/Login";
-import { useState } from "react";
 
 export default function Navbar() {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200">
+    <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200 dark:bg-gray-900/80 dark:border-gray-800">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="text-2xl font-display font-bold text-primary">

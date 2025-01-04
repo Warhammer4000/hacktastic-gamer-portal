@@ -1,3 +1,4 @@
+import React from "react";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
@@ -9,7 +10,7 @@ import Footer from "@/components/landing/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dark:bg-gray-900">
       <Navbar />
       <main className="pt-24">
         <Hero />
