@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Github, Linkedin, ArrowUpDown } from "lucide-react";
+import { Search, Github, Linkedin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface Mentor {
   id: string;
@@ -20,8 +21,10 @@ interface Mentor {
   linkedin_profile_id: string | null;
   github_username: string | null;
   tech_stacks: {
-    name: string;
-    id: string;
+    technology_stacks: {
+      id: string;
+      name: string;
+    };
   }[];
 }
 
@@ -55,7 +58,7 @@ export default function MentorsPage() {
           bio,
           linkedin_profile_id,
           github_username,
-          mentor_tech_stacks!inner (
+          mentor_tech_stacks (
             technology_stacks (
               id,
               name
@@ -72,13 +75,7 @@ export default function MentorsPage() {
       const { data, error } = await query;
       
       if (error) throw error;
-
-      return data.map(mentor => ({
-        ...mentor,
-        tech_stacks: mentor.mentor_tech_stacks.map(
-          (ts: any) => ts.technology_stacks
-        ),
-      }));
+      return data as Mentor[];
     },
   });
 
@@ -134,13 +131,10 @@ export default function MentorsPage() {
             <Card key={mentor.id} className="flex flex-col">
               <CardHeader>
                 <div className="flex items-center gap-4">
-                  {mentor.avatar_url && (
-                    <img
-                      src={mentor.avatar_url}
-                      alt={mentor.full_name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  )}
+                  <Avatar>
+                    <AvatarImage src={mentor.avatar_url || undefined} alt={mentor.full_name} />
+                    <AvatarFallback>{mentor.full_name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
                   <div>
                     <h3 className="font-semibold text-lg">{mentor.full_name}</h3>
                     <div className="flex gap-2 mt-2">
@@ -172,9 +166,9 @@ export default function MentorsPage() {
                 {mentor.bio && <p className="text-sm text-muted-foreground">{mentor.bio}</p>}
               </CardContent>
               <CardFooter className="flex flex-wrap gap-2">
-                {mentor.tech_stacks.map((tech) => (
-                  <Badge key={tech.id} variant="secondary">
-                    {tech.name}
+                {mentor.mentor_tech_stacks.map((tech, index) => (
+                  <Badge key={index} variant="secondary">
+                    {tech.technology_stacks.name}
                   </Badge>
                 ))}
               </CardFooter>
