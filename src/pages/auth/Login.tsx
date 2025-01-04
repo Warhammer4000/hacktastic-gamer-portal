@@ -70,8 +70,10 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         navigate("/mentor/dashboard");
       } else if (userRole?.role === 'admin') {
         navigate("/admin/dashboard");
-      } else {
+      } else if (userRole?.role === 'participant') {
         navigate("/participant/dashboard");
+      } else {
+        navigate("/");
       }
 
       onClose();
