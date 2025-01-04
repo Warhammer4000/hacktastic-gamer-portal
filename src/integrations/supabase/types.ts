@@ -153,6 +153,33 @@ export type Database = {
         }
         Relationships: []
       }
+      technology_stacks: {
+        Row: {
+          created_at: string
+          icon_url: string
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["tech_stack_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon_url: string
+          id?: string
+          name: string
+          status?: Database["public"]["Enums"]["tech_stack_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon_url?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["tech_stack_status"] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -183,6 +210,7 @@ export type Database = {
     }
     Enums: {
       profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
+      tech_stack_status: "active" | "inactive"
       user_role: "participant" | "mentor" | "admin" | "organizer" | "moderator"
     }
     CompositeTypes: {

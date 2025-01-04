@@ -2,6 +2,7 @@ import { LevelsTable } from './tables/levels';
 import { ProfilesTable } from './tables/profiles';
 import { RegistrationSettingsTable } from './tables/registration-settings';
 import { UserRolesTable } from './tables/user-roles';
+import { TechnologyStacksTable } from './tables/technology-stacks';
 
 export type Json =
   | string
@@ -18,6 +19,7 @@ export interface Database {
       profiles: ProfilesTable;
       registration_settings: RegistrationSettingsTable;
       user_roles: UserRolesTable;
+      technology_stacks: TechnologyStacksTable;
     };
     Views: {
       [_ in never]: never;
@@ -27,6 +29,7 @@ export interface Database {
     };
     Enums: {
       user_role: "participant" | "mentor" | "admin" | "organizer" | "moderator";
+      tech_stack_status: "active" | "inactive";
     };
     CompositeTypes: {
       [_ in never]: never;
