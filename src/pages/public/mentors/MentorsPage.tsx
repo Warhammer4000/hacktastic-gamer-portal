@@ -16,7 +16,17 @@ export default function MentorsPage() {
   const { data: mentors, isLoading } = useQuery({
     queryKey: ["public-mentors"],
     queryFn: async () => {
-      // First, get approved mentor profiles
+      // Get mentor user IDs first
+      const { data: mentorRoles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "mentor");
+
+      if (rolesError) throw rolesError;
+
+      const mentorIds = mentorRoles.map(role => role.user_id);
+
+      // Then get approved mentor profiles
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select(`
@@ -29,11 +39,12 @@ export default function MentorsPage() {
           github_username,
           status
         `)
-        .eq("status", "approved");
+        .eq("status", "approved")
+        .in("id", mentorIds);
 
       if (profilesError) throw profilesError;
 
-      // Then, get tech stacks for these mentors
+      // Get tech stacks for these mentors
       const { data: techStacks, error: techStacksError } = await supabase
         .from("mentor_tech_stacks")
         .select(`
@@ -169,7 +180,11 @@ export default function MentorsPage() {
                       <div className="flex flex-wrap gap-2">
                         {mentor.tech_stacks.map((tech) => (
                           tech.technology_stack && (
-                            <Badge key={tech.id} variant="secondary">
+                            <Badge 
+                              key={tech.id} 
+                              variant="secondary"
+                              className="flex items-center gap-1"
+                            >
                               {tech.technology_stack.name}
                             </Badge>
                           )
