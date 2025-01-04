@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { UserPlus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import AddAdminDialog from "./AddAdminDialog";
 import BulkAdminUploadDialog from "./BulkAdminUploadDialog";
+import AdminSearchBar from "./AdminSearchBar";
+import AdminActionsBar from "./AdminActionsBar";
+import AdminTable from "./AdminTable";
 
 export default function AdminUsers() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const queryClient = useQueryClient();
 
   const { data: admins, isLoading } = useQuery({
@@ -59,6 +60,11 @@ export default function AdminUsers() {
     }
   };
 
+  const filteredAdmins = admins?.filter(admin => 
+    admin.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    admin.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -66,44 +72,20 @@ export default function AdminUsers() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <div className="space-x-2">
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add Administrator
-          </Button>
-          <Button variant="outline" onClick={() => setIsBulkUploadOpen(true)}>
-            <Upload className="mr-2 h-4 w-4" />
-            Bulk Upload
-          </Button>
-        </div>
+        <AdminActionsBar
+          onAddAdmin={() => setIsAddDialogOpen(true)}
+          onBulkUpload={() => setIsBulkUploadOpen(true)}
+        />
+        <AdminSearchBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {admins?.map((admin) => (
-            <TableRow key={admin.id}>
-              <TableCell>{admin.full_name}</TableCell>
-              <TableCell>{admin.email}</TableCell>
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(admin.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <AdminTable
+        admins={filteredAdmins || []}
+        onDelete={handleDelete}
+      />
 
       <AddAdminDialog
         open={isAddDialogOpen}
