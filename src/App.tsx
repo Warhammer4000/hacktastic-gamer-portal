@@ -28,6 +28,8 @@ import NewsPage from "./pages/public/news/NewsPage";
 import NewsDetailPage from "./pages/public/news/NewsDetailPage";
 import PublicGalleryPage from "./pages/public/gallery/GalleryPage";
 
+import FAQPage from "./pages/public/faq/FAQPage";
+
 function App() {
   return (
     <Routes>
@@ -41,6 +43,7 @@ function App() {
       <Route path="/public/news" element={<NewsPage />} />
       <Route path="/public/news/:id" element={<NewsDetailPage />} />
       <Route path="/public/gallery" element={<PublicGalleryPage />} />
+      <Route path="/public/faq" element={<FAQPage />} />
       <Route path="/mentors" element={<MentorsPage />} />
       <Route path="/mentor" element={<PrivateRoute><MentorLayout /></PrivateRoute>}>
         <Route index element={<MentorDashboard />} />

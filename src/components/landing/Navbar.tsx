@@ -17,6 +17,7 @@ export default function Navbar() {
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/public/news" className="nav-link">News</Link>
             <Link to="/public/gallery" className="nav-link">Gallery</Link>
+            <Link to="/public/faq" className="nav-link">FAQ</Link>
           </div>
           <div className="flex items-center space-x-4">
             <button 
