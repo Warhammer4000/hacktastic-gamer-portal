@@ -75,7 +75,7 @@ export default function ParticipantRegister() {
       }
 
       toast.success("Registration successful! Please check your email to verify your account.");
-      navigate("/login");
+      navigate("/participant/dashboard");
     } catch (error) {
       toast.error("An error occurred during registration");
     } finally {
