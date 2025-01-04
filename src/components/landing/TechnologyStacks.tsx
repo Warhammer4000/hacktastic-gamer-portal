@@ -6,16 +6,21 @@ export default function TechnologyStacks() {
   const { data: techStacks, isLoading, error } = useQuery({
     queryKey: ["techStacks"],
     queryFn: async () => {
+      console.log("Fetching tech stacks...");
       const { data, error } = await supabase
         .from("technology_stacks")
         .select("*")
         .eq("status", "active")
         .order("name");
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching tech stacks:", error);
+        throw error;
+      }
+      
+      console.log("Fetched tech stacks:", data);
       return data;
     },
-    // Add retry and staleTime options to improve data fetching reliability
     retry: 3,
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
@@ -45,6 +50,7 @@ export default function TechnologyStacks() {
 
   // Show error message if data fetching fails
   if (error) {
+    console.error("Error in component:", error);
     return (
       <section className="py-16 bg-white dark:bg-gray-900">
         <div className="container max-w-7xl mx-auto px-4">
@@ -60,6 +66,8 @@ export default function TechnologyStacks() {
       </section>
     );
   }
+
+  console.log("Component render - techStacks:", techStacks);
 
   // Show empty state if no tech stacks are found
   if (!techStacks || techStacks.length === 0) {
