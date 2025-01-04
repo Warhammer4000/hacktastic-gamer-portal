@@ -15,7 +15,7 @@ type NewsPost = {
   title: string;
   content: string;
   tags: string[] | null;
-  published_at: string;
+  published_at: string | null;
   created_at: string;
   profiles: {
     full_name: string | null;
