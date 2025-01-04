@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TeamForm, type TeamFormValues } from "./forms/TeamForm";
-import { useQuery } from "@tanstack/react-query";
 
 interface TeamDetailsDialogProps {
   isOpen: boolean;
@@ -33,8 +32,16 @@ interface TeamDetailsDialogProps {
 export function TeamDetailsDialog({ isOpen, onOpenChange, team }: TeamDetailsDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
-  const userId = (await supabase.auth.getUser()).data.user?.id;
-  const isTeamLeader = team.leader_id === userId;
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
+
+  const isTeamLeader = team.leader_id === currentUser?.id;
 
   const { data: techStacks, isLoading: isLoadingTechStacks } = useQuery({
     queryKey: ['technology-stacks'],
