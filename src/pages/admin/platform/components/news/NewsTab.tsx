@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { AddNewsPost } from "./AddNewsPost";
 import { NewsList } from "./NewsList";
 import { SearchBar } from "./SearchBar";
+import { BulkNewsUpload } from "./BulkNewsUpload";
 
 type NewsPost = {
   id: string;
@@ -19,6 +20,7 @@ type NewsPost = {
 
 export function NewsTab() {
   const [showAddPost, setShowAddPost] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [editingPost, setEditingPost] = useState<NewsPost | null>(null);
@@ -52,13 +54,19 @@ export function NewsTab() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">News Posts</h2>
-        <Button size="sm" onClick={() => {
-          setEditingPost(null);
-          setShowAddPost(true);
-        }}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Post
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={() => setShowBulkUpload(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Bulk Upload
+          </Button>
+          <Button size="sm" onClick={() => {
+            setEditingPost(null);
+            setShowAddPost(true);
+          }}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Post
+          </Button>
+        </div>
       </div>
 
       <SearchBar 
@@ -79,6 +87,11 @@ export function NewsTab() {
         open={showAddPost} 
         onOpenChange={setShowAddPost}
         editingPost={editingPost}
+      />
+
+      <BulkNewsUpload
+        open={showBulkUpload}
+        onOpenChange={setShowBulkUpload}
       />
     </div>
   );
