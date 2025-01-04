@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import { Users, Settings, BarChart3, LogOut, User } from "lucide-react";
+import { Users, Settings, BarChart3, LogOut, User, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "next-themes";
@@ -17,25 +17,8 @@ import {
   SidebarProvider,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { useToast } from "@/components/ui/use-toast";
-
-const sidebarItems = [
-  {
-    title: "Users",
-    icon: Users,
-    path: "/admin/users",
-  },
-  {
-    title: "Analytics",
-    icon: BarChart3,
-    path: "/admin/analytics",
-  },
-  {
-    title: "Settings",
-    icon: Settings,
-    path: "/admin/settings",
-  },
-];
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -43,7 +26,7 @@ const AdminLayout = () => {
   const { toast } = useToast();
 
   // Check if user is admin
-  const { data: userRole, isLoading } = useQuery({
+  const { data: userRole, isLoading: isRoleLoading } = useQuery({
     queryKey: ["adminCheck"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -59,6 +42,45 @@ const AdminLayout = () => {
     },
   });
 
+  // Fetch pending mentors count
+  const { data: pendingMentorsCount } = useQuery({
+    queryKey: ["pendingMentorsCount"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("profiles")
+        .select("*", { count: 'exact', head: true })
+        .eq("status", "pending_approval");
+
+      if (error) throw error;
+      return count || 0;
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  const sidebarItems = [
+    {
+      title: "Users",
+      icon: Users,
+      path: "/admin/users",
+    },
+    {
+      title: "Mentor Approval",
+      icon: AlertCircle,
+      path: "/admin/mentors",
+      badge: pendingMentorsCount,
+    },
+    {
+      title: "Analytics",
+      icon: BarChart3,
+      path: "/admin/analytics",
+    },
+    {
+      title: "Settings",
+      icon: Settings,
+      path: "/admin/settings",
+    },
+  ];
+
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -73,12 +95,12 @@ const AdminLayout = () => {
   };
 
   useEffect(() => {
-    if (!isLoading && userRole !== "admin") {
+    if (!isRoleLoading && userRole !== "admin") {
       navigate("/");
     }
-  }, [userRole, isLoading, navigate]);
+  }, [userRole, isRoleLoading, navigate]);
 
-  if (isLoading) {
+  if (isRoleLoading) {
     return <div>Loading...</div>;
   }
 
@@ -107,10 +129,17 @@ const AdminLayout = () => {
                       <SidebarMenuButton asChild>
                         <button
                           onClick={() => navigate(item.path)}
-                          className="flex items-center gap-2 w-full"
+                          className="flex items-center justify-between w-full"
                         >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
+                          <div className="flex items-center gap-2">
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </div>
+                          {item.badge ? (
+                            <Badge variant="destructive" className="ml-2">
+                              {item.badge}
+                            </Badge>
+                          ) : null}
                         </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
