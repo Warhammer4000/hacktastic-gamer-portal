@@ -32,16 +32,20 @@ export default function ParticipantLayout() {
   }, [profile, navigate]);
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      <aside className="w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800">
-        <div className="flex h-16 items-center justify-center border-b border-gray-200 dark:border-gray-800">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      <aside className="fixed top-0 left-0 h-screen w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 z-10">
+        <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800">
           <h1 className="text-xl font-bold text-primary">Participant Portal</h1>
         </div>
-        <ParticipantNavigation />
+        <div className="overflow-y-auto h-[calc(100vh-4rem)]">
+          <ParticipantNavigation />
+        </div>
       </aside>
 
-      <main className="flex-1 overflow-auto">
-        <Outlet />
+      <main className="flex-1 ml-64">
+        <div className="container p-6">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

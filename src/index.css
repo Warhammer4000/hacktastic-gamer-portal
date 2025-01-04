@@ -34,7 +34,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground pt-16; /* Added pt-16 to ensure content starts below navbar */
+    @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
