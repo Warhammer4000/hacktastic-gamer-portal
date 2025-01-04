@@ -10,8 +10,8 @@ type Option = {
 };
 
 type MultiSelectProps = {
-  options: Option[];
-  selected: string[];
+  options?: Option[];
+  selected?: string[];
   onChange: (selected: string[]) => void;
   placeholder?: string;
   className?: string;
@@ -19,8 +19,8 @@ type MultiSelectProps = {
 };
 
 export function MultiSelect({
-  options,
-  selected,
+  options = [], // Provide default empty array
+  selected = [], // Provide default empty array
   onChange,
   placeholder = "Select options...",
   className,
@@ -30,21 +30,25 @@ export function MultiSelect({
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
 
+  // Ensure we're working with arrays even if undefined is passed
+  const safeOptions = Array.isArray(options) ? options : [];
+  const safeSelected = Array.isArray(selected) ? selected : [];
+
   const handleUnselect = (option: string) => {
-    onChange(selected.filter((s) => s !== option));
+    onChange(safeSelected.filter((s) => s !== option));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const input = inputRef.current;
     if (input) {
       if (e.key === "Delete" || e.key === "Backspace") {
-        if (input.value === "" && selected.length > 0) {
-          handleUnselect(selected[selected.length - 1]);
+        if (input.value === "" && safeSelected.length > 0) {
+          handleUnselect(safeSelected[safeSelected.length - 1]);
         }
       }
-      if (e.key === "Enter" && creatable && inputValue && !options.find(opt => opt.value === inputValue)) {
+      if (e.key === "Enter" && creatable && inputValue && !safeOptions.find(opt => opt.value === inputValue)) {
         e.preventDefault();
-        onChange([...selected, inputValue]);
+        onChange([...safeSelected, inputValue]);
         setInputValue("");
       }
       if (e.key === "Escape") {
@@ -53,7 +57,7 @@ export function MultiSelect({
     }
   };
 
-  const selectables = options.filter((option) => !selected.includes(option.value));
+  const selectables = safeOptions.filter((option) => !safeSelected.includes(option.value));
 
   return (
     <Command
@@ -62,8 +66,8 @@ export function MultiSelect({
     >
       <div className="group border border-input px-3 py-2 text-sm ring-offset-background rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
         <div className="flex gap-1 flex-wrap">
-          {selected.map((option) => {
-            const label = options.find((o) => o.value === option)?.label || option;
+          {safeSelected.map((option) => {
+            const label = safeOptions.find((o) => o.value === option)?.label || option;
             return (
               <Badge
                 key={option}
@@ -114,7 +118,7 @@ export function MultiSelect({
                     }}
                     onSelect={() => {
                       setInputValue("");
-                      onChange([...selected, option.value]);
+                      onChange([...safeSelected, option.value]);
                     }}
                     className={"cursor-pointer"}
                   >
@@ -122,7 +126,7 @@ export function MultiSelect({
                   </CommandItem>
                 );
               })}
-              {creatable && inputValue && !options.find(opt => opt.value === inputValue) && (
+              {creatable && inputValue && !safeOptions.find(opt => opt.value === inputValue) && (
                 <CommandItem
                   onMouseDown={(e) => {
                     e.preventDefault();
@@ -130,7 +134,7 @@ export function MultiSelect({
                   }}
                   onSelect={() => {
                     setInputValue("");
-                    onChange([...selected, inputValue]);
+                    onChange([...safeSelected, inputValue]);
                   }}
                   className={"cursor-pointer"}
                 >
