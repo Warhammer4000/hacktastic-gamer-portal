@@ -8,6 +8,8 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/Register";
 import ParticipantRegister from "./pages/participant/Register";
 import MentorRegister from "./pages/mentor/Register";
+import MentorLayout from "./pages/mentor/MentorLayout";
+import MentorProfile from "./pages/mentor/Profile";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -23,6 +25,11 @@ function App() {
       <Route path="/mentor/register" element={<MentorRegister />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      
+      <Route path="/mentor" element={<PrivateRoute><MentorLayout /></PrivateRoute>}>
+        <Route path="profile" element={<MentorProfile />} />
+      </Route>
+
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="dashboard" element={<AdminDashboard />} />

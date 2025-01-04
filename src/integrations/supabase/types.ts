@@ -76,7 +76,11 @@ export type Database = {
           created_at: string
           email: string
           full_name: string | null
+          github_username: string | null
           id: string
+          is_profile_approved: boolean | null
+          is_profile_completed: boolean | null
+          linkedin_profile_id: string | null
           updated_at: string
         }
         Insert: {
@@ -85,7 +89,11 @@ export type Database = {
           created_at?: string
           email: string
           full_name?: string | null
+          github_username?: string | null
           id: string
+          is_profile_approved?: boolean | null
+          is_profile_completed?: boolean | null
+          linkedin_profile_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -94,7 +102,11 @@ export type Database = {
           created_at?: string
           email?: string
           full_name?: string | null
+          github_username?: string | null
           id?: string
+          is_profile_approved?: boolean | null
+          is_profile_completed?: boolean | null
+          linkedin_profile_id?: string | null
           updated_at?: string
         }
         Relationships: []
