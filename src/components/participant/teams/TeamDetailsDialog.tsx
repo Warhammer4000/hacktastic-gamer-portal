@@ -15,7 +15,7 @@ import { TeamForm, type TeamFormValues } from "./forms/TeamForm";
 interface TeamDetailsDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  team: {
+  team?: {
     id: string;
     name: string;
     description: string | null;
@@ -40,6 +40,22 @@ export function TeamDetailsDialog({ isOpen, onOpenChange, team }: TeamDetailsDia
       return user;
     },
   });
+
+  // If team is undefined, don't render the dialog content
+  if (!team) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Error</DialogTitle>
+            <DialogDescription>
+              Team details are not available.
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const isTeamLeader = team.leader_id === currentUser?.id;
 
