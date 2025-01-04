@@ -16,10 +16,10 @@ export function MentorPreferences() {
         .from('mentor_preferences')
         .select('*')
         .eq('mentor_id', user.id)
-        .single();
+        .maybeSingle();
       
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      if (error) throw error;
+      return data || { team_count: 1 }; // Default preferences if none exist
     },
   });
 
