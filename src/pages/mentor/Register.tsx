@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -46,7 +46,7 @@ export default function MentorRegister() {
       const { data, error } = await supabase
         .from("registration_settings")
         .select("*")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
