@@ -98,6 +98,25 @@ export default function TeamPage() {
     }
   };
 
+  const handleLockTeam = async () => {
+    if (!team) return;
+    
+    try {
+      const { error } = await supabase
+        .from('teams')
+        .update({ status: 'locked' })
+        .eq('id', team.id);
+
+      if (error) throw error;
+      
+      toast.success("Team has been locked successfully");
+      navigate(0);
+    } catch (error) {
+      console.error('Error locking team:', error);
+      toast.error("Failed to lock team");
+    }
+  };
+
   return (
     <div className="container p-6">
       <h1 className="text-3xl font-bold mb-8">Team</h1>
@@ -143,6 +162,7 @@ export default function TeamPage() {
             maxMembers={MAX_TEAM_MEMBERS}
             isLeader={team.leader_id === currentUser?.id}
             isLocked={team.status === 'locked'}
+            onLockTeam={handleLockTeam}
           />
         </div>
       )}
