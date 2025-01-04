@@ -1,8 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TechnologyStacksTab } from "./components/technology/TechnologyStacksTab";
 import { PartnersTab } from "./components/partners/PartnersTab";
-import { GalleryTab } from "./components/gallery/GalleryTab";
-import { NewsTab } from "./components/news/NewsTab";
 
 const Platform = () => {
   return (
@@ -13,8 +11,6 @@ const Platform = () => {
         <TabsList>
           <TabsTrigger value="technology">Technology Stacks</TabsTrigger>
           <TabsTrigger value="partners">Partners</TabsTrigger>
-          <TabsTrigger value="gallery">Gallery</TabsTrigger>
-          <TabsTrigger value="news">News</TabsTrigger>
           <TabsTrigger value="terms">Terms & Conditions</TabsTrigger>
           <TabsTrigger value="privacy">Privacy Policy</TabsTrigger>
         </TabsList>
@@ -25,14 +21,6 @@ const Platform = () => {
         
         <TabsContent value="partners">
           <PartnersTab />
-        </TabsContent>
-
-        <TabsContent value="gallery">
-          <GalleryTab />
-        </TabsContent>
-
-        <TabsContent value="news">
-          <NewsTab />
         </TabsContent>
 
         <TabsContent value="terms">
