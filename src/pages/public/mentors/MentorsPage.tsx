@@ -58,7 +58,7 @@ export default function MentorsPage() {
           bio,
           linkedin_profile_id,
           github_username,
-          mentor_tech_stacks (
+          mentor_tech_stacks!inner (
             technology_stacks (
               id,
               name
@@ -69,7 +69,7 @@ export default function MentorsPage() {
         .eq('is_profile_approved', true);
 
       if (selectedTechStack) {
-        query = query.eq('mentor_tech_stacks.tech_stack_id', selectedTechStack);
+        query = query.eq('mentor_tech_stacks.technology_stacks.id', selectedTechStack);
       }
 
       const { data, error } = await query;
