@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TechnologyStacksTab } from "./components/technology/TechnologyStacksTab";
+import { PartnersTab } from "./components/partners/PartnersTab";
 
 const Platform = () => {
   return (
@@ -19,9 +20,7 @@ const Platform = () => {
         </TabsContent>
         
         <TabsContent value="partners">
-          <div className="text-muted-foreground">
-            Partners management coming soon...
-          </div>
+          <PartnersTab />
         </TabsContent>
 
         <TabsContent value="terms">
