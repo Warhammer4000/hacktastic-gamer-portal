@@ -30,6 +30,11 @@ export default function Footer() {
                   News
                 </Link>
               </li>
+              <li>
+                <Link to="/public/privacy-policy" className="hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
             </ul>
           </div>
           <div>

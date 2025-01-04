@@ -5,6 +5,7 @@ import NewsPage from "@/pages/public/news/NewsPage";
 import NewsDetailPage from "@/pages/public/news/NewsDetailPage";
 import PublicGalleryPage from "@/pages/public/gallery/GalleryPage";
 import FAQPage from "@/pages/public/faq/FAQPage";
+import PrivacyPolicyPage from "@/pages/public/privacy-policy/PrivacyPolicyPage";
 
 export const publicRoutes = (
   <Route element={<PublicLayout />}>
@@ -13,5 +14,6 @@ export const publicRoutes = (
     <Route path="/public/news/:id" element={<NewsDetailPage />} />
     <Route path="/public/gallery" element={<PublicGalleryPage />} />
     <Route path="/public/faq" element={<FAQPage />} />
+    <Route path="/public/privacy-policy" element={<PrivacyPolicyPage />} />
   </Route>
 );
