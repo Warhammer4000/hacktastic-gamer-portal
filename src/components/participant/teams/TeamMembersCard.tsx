@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { User, UserCheck, Lock, Users } from "lucide-react";
+import { User, UserCheck, Lock, Users, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +52,20 @@ export function TeamMembersCard({
     },
   });
 
+  const { data: team } = useQuery({
+    queryKey: ['team-details', teamId],
+    queryFn: async () => {
+      const { data: team, error } = await supabase
+        .from('teams')
+        .select('leader_id')
+        .eq('id', teamId)
+        .single();
+
+      if (error) throw error;
+      return team;
+    },
+  });
+
   const handleReadyToggle = async () => {
     if (!currentUser) return;
 
@@ -74,9 +88,11 @@ export function TeamMembersCard({
   };
 
   const emptySlots = maxMembers - (members?.length || 0);
-  const allMembersReady = members?.every(member => member.is_ready) || false;
+  const nonLeaderMembers = members?.filter(member => member.user_id !== team?.leader_id) || [];
+  const nonLeaderReadyCount = nonLeaderMembers.filter(member => member.is_ready).length;
+  const allNonLeaderMembersReady = nonLeaderReadyCount === nonLeaderMembers.length && nonLeaderMembers.length >= 2;
   const currentUserMember = members?.find(member => member.user_id === currentUser?.id);
-  const showLockButton = isLeader && !isLocked && allMembersReady && members && members.length >= 2;
+  const showLockButton = isLeader && !isLocked && allNonLeaderMembersReady && members && members.length >= 2;
 
   if (isLoading) {
     return (
@@ -110,7 +126,11 @@ export function TeamMembersCard({
               className="flex items-center justify-between p-3 rounded-lg border"
             >
               <div className="flex items-center gap-3">
-                <User className="h-5 w-5 text-muted-foreground" />
+                {member.user_id === team?.leader_id ? (
+                  <Crown className="h-5 w-5 text-yellow-500" />
+                ) : (
+                  <User className="h-5 w-5 text-muted-foreground" />
+                )}
                 <span>{member.profile?.full_name || 'Unknown User'}</span>
               </div>
               {member.is_ready && (

@@ -2,22 +2,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { TeamForm, type TeamFormValues } from "./forms/TeamForm";
 
-export function CreateTeamDialog() {
-  const [open, setOpen] = useState(false);
+interface CreateTeamDialogProps {
+  maxMembers: number;
+}
+
+export function CreateTeamDialog({ maxMembers }: CreateTeamDialogProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  
+
   const { data: techStacks, isLoading: isLoadingTechStacks } = useQuery({
     queryKey: ['technology-stacks'],
     queryFn: async () => {
@@ -32,62 +28,57 @@ export function CreateTeamDialog() {
     },
   });
 
-  async function onSubmit(data: TeamFormValues) {
+  const handleSubmit = async (data: TeamFormValues) => {
     try {
+      setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // Generate a random 6-character join code
       const joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      
-      const { data: team, error } = await supabase
+
+      const { data: team, error: teamError } = await supabase
         .from('teams')
         .insert({
           name: data.name,
           description: data.description,
           tech_stack_id: data.techStackId,
+          leader_id: user.id,
           join_code: joinCode,
-          leader_id: (await supabase.auth.getUser()).data.user?.id,
-          status: 'open',
+          max_members: maxMembers,
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (teamError) throw teamError;
 
+      // Add the creator as a team member
       const { error: memberError } = await supabase
         .from('team_members')
         .insert({
           team_id: team.id,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: user.id,
         });
 
       if (memberError) throw memberError;
 
       toast.success("Team created successfully!");
-      setOpen(false);
       navigate(0);
     } catch (error) {
       toast.error("Failed to create team. Please try again.");
       console.error("Error creating team:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Create Team</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create a New Team</DialogTitle>
-          <DialogDescription>
-            Create your team and invite others to join using a team code.
-          </DialogDescription>
-        </DialogHeader>
-
-        <TeamForm
-          onSubmit={onSubmit}
-          techStacks={techStacks}
-          isLoadingTechStacks={isLoadingTechStacks}
-        />
-      </DialogContent>
-    </Dialog>
+    <TeamForm
+      onSubmit={handleSubmit}
+      techStacks={techStacks}
+      isLoadingTechStacks={isLoadingTechStacks}
+      submitLabel="Create Team"
+      isLoading={isLoading}
+    />
   );
 }

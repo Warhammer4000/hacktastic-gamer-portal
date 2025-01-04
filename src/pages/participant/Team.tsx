@@ -13,6 +13,8 @@ import { TeamDetailsDialog } from "@/components/participant/teams/TeamDetailsDia
 import { DeleteTeamDialog } from "@/components/participant/teams/DeleteTeamDialog";
 import { TeamMembersCard } from "@/components/participant/teams/TeamMembersCard";
 
+const MAX_TEAM_MEMBERS = 3; // New constant for max team members
+
 export default function TeamPage() {
   const [isViewTeamOpen, setIsViewTeamOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -52,7 +54,6 @@ export default function TeamPage() {
           repository_url,
           description,
           tech_stack_id,
-          max_members,
           tech_stack:tech_stack_id (
             name,
             icon_url
@@ -133,7 +134,6 @@ export default function TeamPage() {
     return (
       <div className="container p-6">
         <h1 className="text-3xl font-bold mb-8">Team</h1>
-        
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <div className="p-6">
@@ -141,7 +141,7 @@ export default function TeamPage() {
               <p className="text-muted-foreground mb-4">
                 Start your own team and invite others to join
               </p>
-              <CreateTeamDialog />
+              <CreateTeamDialog maxMembers={MAX_TEAM_MEMBERS} />
             </div>
           </Card>
 
@@ -174,7 +174,7 @@ export default function TeamPage() {
         <TeamMentorCard mentorId={team.mentor_id} />
         <TeamMembersCard
           teamId={team.id}
-          maxMembers={team.max_members}
+          maxMembers={MAX_TEAM_MEMBERS}
           isLeader={team.leader_id === currentUser?.id}
           isLocked={team.status === 'locked'}
           onLockTeam={handleLockTeam}
