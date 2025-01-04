@@ -4,6 +4,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import Profile from "./pages/admin/Profile";
 import Settings from "./pages/admin/settings/Settings";
 import MentorApproval from "./pages/admin/mentors/MentorApproval";
+import Platform from "./pages/admin/platform/Platform";
 import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import Register from "./pages/Register";
@@ -38,6 +39,7 @@ function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="mentors" element={<MentorApproval />} />
+        <Route path="platform" element={<Platform />} />
         <Route path="settings" element={<Settings />} />
         <Route path="profile" element={<Profile />} />
       </Route>
