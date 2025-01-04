@@ -1,90 +1,74 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { Database } from "@/integrations/supabase/types";
-
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-
-interface MentorWithProfile {
-  user_id: string;
-  profile: Profile;
-}
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { UserPlus, Upload } from "lucide-react";
+import BulkMentorUploadDialog from "./BulkMentorUploadDialog";
 
 export default function MentorUsers() {
-  const { toast } = useToast();
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
 
-  const { data: mentors, isLoading, refetch } = useQuery<MentorWithProfile[]>({
-    queryKey: ["mentor-users"],
+  const { data: mentors, isLoading } = useQuery({
+    queryKey: ['mentor-users'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_roles")
+      const { data: profiles, error } = await supabase
+        .from('profiles')
         .select(`
-          user_id,
-          profile:profiles!user_roles_user_id_fkey_profiles (*)
+          id,
+          email,
+          full_name,
+          github_username,
+          linkedin_profile_id,
+          user_roles!inner (
+            role
+          )
         `)
-        .eq("role", "mentor");
+        .eq('user_roles.role', 'mentor');
 
       if (error) throw error;
-      
-      return data as MentorWithProfile[];
+      return profiles;
     },
   });
 
-  const handleDeleteMentor = async (userId: string) => {
-    const { error } = await supabase
-      .from("user_roles")
-      .delete()
-      .eq("user_id", userId)
-      .eq("role", "mentor");
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete mentor role",
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: "Mentor role has been deleted",
-      });
-      refetch();
-    }
-  };
-
   if (isLoading) {
-    return <div>Loading mentors...</div>;
+    return <div>Loading...</div>;
   }
 
   return (
     <div className="space-y-4">
-      {mentors?.map((mentor) => (
-        <Card key={mentor.user_id} className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              {mentor.profile?.avatar_url && (
-                <img
-                  src={mentor.profile.avatar_url}
-                  alt={mentor.profile?.full_name || "Mentor"}
-                  className="w-10 h-10 rounded-full"
-                />
-              )}
-              <div>
-                <h3 className="font-medium">{mentor.profile?.full_name}</h3>
-                <p className="text-sm text-gray-500">{mentor.profile?.email}</p>
-              </div>
-            </div>
-            <Button
-              variant="destructive"
-              onClick={() => handleDeleteMentor(mentor.user_id)}
-            >
-              Remove Mentor Role
-            </Button>
-          </div>
-        </Card>
-      ))}
+      <div className="flex justify-between items-center">
+        <Button onClick={() => setIsBulkUploadOpen(true)}>
+          <Upload className="mr-2 h-4 w-4" />
+          Bulk Upload Mentors
+        </Button>
+      </div>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>GitHub</TableHead>
+            <TableHead>LinkedIn</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {mentors?.map((mentor) => (
+            <TableRow key={mentor.id}>
+              <TableCell>{mentor.full_name}</TableCell>
+              <TableCell>{mentor.email}</TableCell>
+              <TableCell>{mentor.github_username}</TableCell>
+              <TableCell>{mentor.linkedin_profile_id}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <BulkMentorUploadDialog
+        open={isBulkUploadOpen}
+        onOpenChange={setIsBulkUploadOpen}
+      />
     </div>
   );
 }
