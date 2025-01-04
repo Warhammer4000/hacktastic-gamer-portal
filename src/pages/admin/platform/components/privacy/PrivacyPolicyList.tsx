@@ -23,7 +23,7 @@ type PrivacyPolicyListProps = {
 export function PrivacyPolicyList({ policy, isLoading, onEdit }: PrivacyPolicyListProps) {
   if (isLoading) {
     return (
-      <Card>
+      <Card className="h-[60vh]">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="animate-pulse h-6 bg-gray-200 rounded w-1/4"></div>
           <div className="animate-pulse h-6 bg-gray-200 rounded w-24"></div>
@@ -41,7 +41,7 @@ export function PrivacyPolicyList({ policy, isLoading, onEdit }: PrivacyPolicyLi
 
   if (!policy) {
     return (
-      <Card>
+      <Card className="h-[60vh]">
         <CardContent className="p-6">
           <p className="text-muted-foreground text-center">
             No privacy policy has been created yet.
@@ -52,7 +52,7 @@ export function PrivacyPolicyList({ policy, isLoading, onEdit }: PrivacyPolicyLi
   }
 
   return (
-    <Card>
+    <Card className="h-[60vh]">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-medium">
           Version {policy.version}
@@ -74,7 +74,7 @@ export function PrivacyPolicyList({ policy, isLoading, onEdit }: PrivacyPolicyLi
             <span>Created on {format(new Date(policy.created_at), "PPP")}</span>
           )}
         </div>
-        <ScrollArea className="h-[500px] w-full rounded-md border p-4">
+        <ScrollArea className="h-[calc(60vh-8rem)] w-full rounded-md border p-4">
           <div 
             className="prose dark:prose-invert max-w-none"
             dangerouslySetInnerHTML={{ __html: policy.content }} 

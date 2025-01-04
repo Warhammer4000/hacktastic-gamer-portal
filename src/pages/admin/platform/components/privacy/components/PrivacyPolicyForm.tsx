@@ -34,7 +34,7 @@ export function PrivacyPolicyForm({
 
   return (
     <Form {...form}>
-      <form className="space-y-4 h-full flex flex-col">
+      <form className="space-y-4 h-[60vh] flex flex-col">
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
           <FormField
             control={form.control}
@@ -58,9 +58,11 @@ export function PrivacyPolicyForm({
                 <FormLabel>Content</FormLabel>
                 <FormControl>
                   <div className="grid grid-cols-1 gap-4">
-                    <NewsEditor content={field.value} onChange={field.onChange} />
+                    <div className="h-[calc(60vh-16rem)]">
+                      <NewsEditor content={field.value} onChange={field.onChange} />
+                    </div>
                     {isPreview && (
-                      <div className="border rounded-lg p-4">
+                      <div className="border rounded-lg p-4 h-[calc(60vh-16rem)] overflow-y-auto">
                         <NewsPreview content={field.value} />
                       </div>
                     )}
