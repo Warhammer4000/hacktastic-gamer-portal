@@ -37,14 +37,32 @@ export default function Login() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
-      if (error) throw error;
+      if (signInError) throw signInError;
 
-      navigate("/admin/dashboard");
+      // Get the user's role
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No user found");
+
+      const { data: userRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      // Redirect based on role
+      if (userRole?.role === 'mentor') {
+        navigate("/mentor/dashboard");
+      } else if (userRole?.role === 'admin') {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/participant/dashboard");
+      }
+
     } catch (error) {
       toast({
         variant: "destructive",
