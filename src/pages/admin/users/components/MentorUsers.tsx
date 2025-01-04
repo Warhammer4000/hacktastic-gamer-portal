@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { UserPlus, Upload } from "lucide-react";
 import BulkMentorUploadDialog from "./BulkMentorUploadDialog";
+import AddMentorDialog from "./AddMentorDialog";
 
 export default function MentorUsers() {
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+  const [isAddMentorOpen, setIsAddMentorOpen] = useState(false);
 
   const { data: mentors, isLoading } = useQuery({
     queryKey: ['mentor-users'],
@@ -38,10 +40,16 @@ export default function MentorUsers() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <Button onClick={() => setIsBulkUploadOpen(true)}>
-          <Upload className="mr-2 h-4 w-4" />
-          Bulk Upload Mentors
-        </Button>
+        <div className="space-x-2">
+          <Button onClick={() => setIsAddMentorOpen(true)}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add Mentor
+          </Button>
+          <Button variant="outline" onClick={() => setIsBulkUploadOpen(true)}>
+            <Upload className="mr-2 h-4 w-4" />
+            Bulk Upload
+          </Button>
+        </div>
       </div>
 
       <Table>
@@ -64,6 +72,11 @@ export default function MentorUsers() {
           ))}
         </TableBody>
       </Table>
+
+      <AddMentorDialog
+        open={isAddMentorOpen}
+        onOpenChange={setIsAddMentorOpen}
+      />
 
       <BulkMentorUploadDialog
         open={isBulkUploadOpen}
