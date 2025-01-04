@@ -39,8 +39,10 @@ export default function TeamPage() {
           join_code,
           status,
           mentor_id,
+          leader_id,
           repository_url,
           description,
+          tech_stack_id,
           tech_stack:tech_stack_id (
             name,
             icon_url
@@ -146,7 +148,16 @@ export default function TeamPage() {
       <TeamDetailsDialog
         isOpen={isViewTeamOpen}
         onOpenChange={setIsViewTeamOpen}
-        team={team}
+        team={{
+          id: team.id,
+          name: team.name,
+          description: team.description,
+          status: team.status,
+          tech_stack: team.tech_stack,
+          tech_stack_id: team.tech_stack_id,
+          repository_url: team.repository_url,
+          leader_id: team.leader_id,
+        }}
       />
 
       <DeleteTeamDialog
