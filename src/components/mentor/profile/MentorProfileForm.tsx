@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { profileSchema, type ProfileFormValues } from "@/hooks/useMentorProfile";
 import { validateProfiles } from "@/utils/profileValidation";
 
@@ -22,7 +23,8 @@ interface MentorProfileFormProps {
 }
 
 export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: MentorProfileFormProps) {
-  const [isValidating, setIsValidating] = useState(false);
+  const [isValidatingGithub, setIsValidatingGithub] = useState(false);
+  const [isValidatingLinkedin, setIsValidatingLinkedin] = useState(false);
   
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -30,9 +32,24 @@ export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: Men
   });
 
   const handleSubmit = async (values: ProfileFormValues) => {
-    const isValid = await validateProfiles(values);
-    if (isValid) {
-      onSubmit(values);
+    onSubmit(values);
+  };
+
+  const validateGithub = async () => {
+    setIsValidatingGithub(true);
+    try {
+      await validateProfiles({ ...form.getValues(), github_username: form.getValues('github_username') });
+    } finally {
+      setIsValidatingGithub(false);
+    }
+  };
+
+  const validateLinkedin = async () => {
+    setIsValidatingLinkedin(true);
+    try {
+      await validateProfiles({ ...form.getValues(), linkedin_profile_id: form.getValues('linkedin_profile_id') });
+    } finally {
+      setIsValidatingLinkedin(false);
     }
   };
 
@@ -73,10 +90,22 @@ export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: Men
           render={({ field }) => (
             <FormItem>
               <FormLabel>Profile Photo URL</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
+              <div className="flex items-end gap-4">
+                <div className="flex-1">
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </div>
+                {field.value && (
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={field.value} alt="Profile preview" />
+                    <AvatarFallback>
+                      {form.getValues("full_name")?.charAt(0) || "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+              </div>
             </FormItem>
           )}
         />
@@ -87,10 +116,30 @@ export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: Men
           render={({ field }) => (
             <FormItem>
               <FormLabel>LinkedIn Profile ID</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="john-doe-123" />
-              </FormControl>
-              <FormMessage />
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <FormControl>
+                    <Input {...field} placeholder="john-doe-123" />
+                  </FormControl>
+                  <FormMessage />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={validateLinkedin}
+                  disabled={isValidatingLinkedin || !field.value}
+                  className="shrink-0"
+                >
+                  {isValidatingLinkedin ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Validating
+                    </>
+                  ) : (
+                    'Validate LinkedIn'
+                  )}
+                </Button>
+              </div>
             </FormItem>
           )}
         />
@@ -101,45 +150,48 @@ export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: Men
           render={({ field }) => (
             <FormItem>
               <FormLabel>GitHub Username</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={validateGithub}
+                  disabled={isValidatingGithub || !field.value}
+                  className="shrink-0"
+                >
+                  {isValidatingGithub ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Validating
+                    </>
+                  ) : (
+                    'Validate GitHub'
+                  )}
+                </Button>
+              </div>
             </FormItem>
           )}
         />
 
-        <div className="flex gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => validateProfiles(form.getValues())}
-            disabled={isValidating}
-          >
-            {isValidating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Validating
-              </>
-            ) : (
-              'Validate Profiles'
-            )}
-          </Button>
-
-          <Button 
-            type="submit"
-            disabled={isSubmitting || isValidating}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving
-              </>
-            ) : (
-              'Save Profile'
-            )}
-          </Button>
-        </div>
+        <Button 
+          type="submit"
+          disabled={isSubmitting || isValidatingGithub || isValidatingLinkedin}
+          className="w-full"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving
+            </>
+          ) : (
+            'Save Profile'
+          )}
+        </Button>
       </form>
     </Form>
   );
