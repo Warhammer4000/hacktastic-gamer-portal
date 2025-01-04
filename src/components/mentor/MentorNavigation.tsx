@@ -1,7 +1,8 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { 
   LayoutDashboard, 
   UserCircle, 
@@ -13,6 +14,7 @@ import {
 
 export default function MentorNavigation() {
   const location = useLocation();
+  const navigate = useNavigate();
   
   const { data: profile } = useQuery({
     queryKey: ['mentor-profile'],
@@ -33,7 +35,13 @@ export default function MentorNavigation() {
   const isApproved = profile?.status === 'approved';
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logged out successfully");
+      navigate("/");
+    } catch (error) {
+      toast.error("Error logging out");
+    }
   };
 
   const navItems = [
@@ -97,7 +105,7 @@ export default function MentorNavigation() {
       })}
       <Button
         variant="ghost"
-        className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+        className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
         onClick={handleLogout}
       >
         <LogOut className="w-4 h-4 mr-2" />
