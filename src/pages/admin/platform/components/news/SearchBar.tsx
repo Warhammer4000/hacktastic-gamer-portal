@@ -12,9 +12,9 @@ type SearchBarProps = {
 export function SearchBar({
   searchQuery,
   onSearchChange,
-  selectedTags,
+  selectedTags = [],
   onTagsChange,
-  availableTags,
+  availableTags = [],
 }: SearchBarProps) {
   return (
     <div className="flex gap-4">

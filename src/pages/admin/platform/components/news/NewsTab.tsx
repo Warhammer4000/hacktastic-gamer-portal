@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { AddNewsPost } from "./AddNewsPost";
 import { NewsList } from "./NewsList";
-import { SearchBar } from "./SearchBar";
+import { NewsHeader } from "./components/NewsHeader";
+import { NewsFilters } from "./components/NewsFilters";
 import { BulkNewsUpload } from "./BulkNewsUpload";
 
 type NewsPost = {
@@ -25,7 +24,7 @@ export function NewsTab() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [editingPost, setEditingPost] = useState<NewsPost | null>(null);
 
-  const { data: posts, isLoading } = useQuery({
+  const { data: posts = [], isLoading } = useQuery({
     queryKey: ["news-posts"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -34,16 +33,18 @@ export function NewsTab() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
-  const filteredPosts = posts?.filter((post) => {
+  const filteredPosts = posts.filter((post) => {
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTags = selectedTags.length === 0 || 
       selectedTags.every(tag => post.tags?.includes(tag));
     return matchesSearch && matchesTags;
   });
+
+  const availableTags = Array.from(new Set(posts.flatMap(post => post.tags || [])));
 
   const handleEdit = (post: NewsPost) => {
     setEditingPost(post);
@@ -52,33 +53,24 @@ export function NewsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">News Posts</h2>
-        <div className="flex gap-2">
-          <Button size="sm" onClick={() => setShowBulkUpload(true)}>
-            <Upload className="h-4 w-4 mr-2" />
-            Bulk Upload
-          </Button>
-          <Button size="sm" onClick={() => {
-            setEditingPost(null);
-            setShowAddPost(true);
-          }}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Post
-          </Button>
-        </div>
-      </div>
+      <NewsHeader
+        onAddPost={() => {
+          setEditingPost(null);
+          setShowAddPost(true);
+        }}
+        onBulkUpload={() => setShowBulkUpload(true)}
+      />
 
-      <SearchBar 
+      <NewsFilters
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         selectedTags={selectedTags}
         onTagsChange={setSelectedTags}
-        availableTags={Array.from(new Set(posts?.flatMap(post => post.tags || []) || []))}
+        availableTags={availableTags}
       />
 
       <NewsList 
-        posts={filteredPosts || []} 
+        posts={filteredPosts} 
         isLoading={isLoading} 
         onEdit={handleEdit}
       />
