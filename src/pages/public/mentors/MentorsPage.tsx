@@ -15,7 +15,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface Mentor {
   id: string;
-  full_name: string;
+  full_name: string | null;
   avatar_url: string | null;
   bio: string | null;
   linkedin_profile_id: string | null;
@@ -80,7 +80,7 @@ export default function MentorsPage() {
   });
 
   const filteredMentors = mentors?.filter(mentor => 
-    mentor.full_name.toLowerCase().includes(search.toLowerCase()) ||
+    mentor.full_name?.toLowerCase().includes(search.toLowerCase()) ||
     mentor.bio?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -132,8 +132,8 @@ export default function MentorsPage() {
               <CardHeader>
                 <div className="flex items-center gap-4">
                   <Avatar>
-                    <AvatarImage src={mentor.avatar_url || undefined} alt={mentor.full_name} />
-                    <AvatarFallback>{mentor.full_name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarImage src={mentor.avatar_url || undefined} alt={mentor.full_name || ''} />
+                    <AvatarFallback>{mentor.full_name?.slice(0, 2).toUpperCase() || 'ME'}</AvatarFallback>
                   </Avatar>
                   <div>
                     <h3 className="font-semibold text-lg">{mentor.full_name}</h3>
