@@ -9,7 +9,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 interface MentorWithProfile {
   user_id: string;
-  profiles: Profile;
+  profile: Profile;
 }
 
 export default function MentorUsers() {
@@ -22,19 +22,13 @@ export default function MentorUsers() {
         .from("user_roles")
         .select(`
           user_id,
-          profiles!user_roles_user_id_fkey (*)
+          profile:profiles!user_roles_user_id_fkey_profiles (*)
         `)
         .eq("role", "mentor");
 
       if (error) throw error;
       
-      // Transform the data to match our expected type
-      const transformedData = data?.map(item => ({
-        user_id: item.user_id,
-        profiles: item.profiles as Profile
-      })) || [];
-
-      return transformedData;
+      return data as MentorWithProfile[];
     },
   });
 
@@ -70,16 +64,16 @@ export default function MentorUsers() {
         <Card key={mentor.user_id} className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              {mentor.profiles?.avatar_url && (
+              {mentor.profile?.avatar_url && (
                 <img
-                  src={mentor.profiles.avatar_url}
-                  alt={mentor.profiles?.full_name || "Mentor"}
+                  src={mentor.profile.avatar_url}
+                  alt={mentor.profile?.full_name || "Mentor"}
                   className="w-10 h-10 rounded-full"
                 />
               )}
               <div>
-                <h3 className="font-medium">{mentor.profiles?.full_name}</h3>
-                <p className="text-sm text-gray-500">{mentor.profiles?.email}</p>
+                <h3 className="font-medium">{mentor.profile?.full_name}</h3>
+                <p className="text-sm text-gray-500">{mentor.profile?.email}</p>
               </div>
             </div>
             <Button
