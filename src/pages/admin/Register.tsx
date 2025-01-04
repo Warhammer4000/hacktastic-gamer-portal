@@ -30,7 +30,16 @@ const formSchema = z.object({
   adminCode: z
     .string()
     .min(6, "Admin code is required")
-    .refine((code) => code === import.meta.env.VITE_ADMIN_REGISTRATION_CODE, {
+    .refine(async (code) => {
+      try {
+        const { data: { secret }, error } = await supabase.functions.invoke('verify-admin-code', {
+          body: { code }
+        });
+        return !error && secret === code;
+      } catch {
+        return false;
+      }
+    }, {
       message: "Invalid admin registration code",
     }),
 });
@@ -82,7 +91,7 @@ export default function AdminRegister() {
       }
 
       toast.success("Admin registration successful! Please check your email to verify your account.");
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       toast.error("An error occurred during registration");
     } finally {
