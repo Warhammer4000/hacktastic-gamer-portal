@@ -13,6 +13,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
+interface TechnologyStack {
+  id: string;
+  name: string;
+}
+
+interface MentorTechStack {
+  technology_stacks: TechnologyStack;
+}
+
 interface Mentor {
   id: string;
   full_name: string | null;
@@ -20,12 +29,7 @@ interface Mentor {
   bio: string | null;
   linkedin_profile_id: string | null;
   github_username: string | null;
-  mentor_tech_stacks: {
-    technology_stacks: {
-      id: string;
-      name: string;
-    };
-  }[];
+  mentor_tech_stacks: MentorTechStack[];
 }
 
 export default function MentorsPage() {
