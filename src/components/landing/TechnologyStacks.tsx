@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function TechnologyStacks() {
   const { data: stacks, isLoading } = useQuery({
-    queryKey: ["technology-stacks"],
+    queryKey: ["techStacks"], // Updated to match the admin panel query key
     queryFn: async () => {
       const { data, error } = await supabase
         .from("technology_stacks")
@@ -13,7 +13,11 @@ export default function TechnologyStacks() {
         .eq("status", "active")
         .order("name");
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching tech stacks:", error);
+        throw error;
+      }
+      console.log("Fetched tech stacks:", data); // Added for debugging
       return data;
     },
   });
@@ -24,6 +28,21 @@ export default function TechnologyStacks() {
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="heading-lg mb-4">Loading Technology Stacks...</h2>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!stacks || stacks.length === 0) {
+    return (
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="heading-lg mb-4">Technology Stacks</h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              No technology stacks available at the moment.
+            </p>
           </div>
         </div>
       </section>
