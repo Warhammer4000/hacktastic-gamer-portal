@@ -11,7 +11,7 @@ interface TeamCountPreferenceProps {
 }
 
 export function TeamCountPreference({ defaultValue }: TeamCountPreferenceProps) {
-  const [value, setValue] = useState(defaultValue?.toString() || "1");
+  const [value, setValue] = useState(String(defaultValue));
   const queryClient = useQueryClient();
 
   const updateTeamCount = useMutation({
@@ -56,7 +56,7 @@ export function TeamCountPreference({ defaultValue }: TeamCountPreferenceProps) 
       >
         {[1, 2, 3, 4, 5].map((count) => (
           <div key={count} className="flex items-center space-x-2">
-            <RadioGroupItem value={count.toString()} id={`count-${count}`} />
+            <RadioGroupItem value={String(count)} id={`count-${count}`} />
             <Label htmlFor={`count-${count}`}>{count}</Label>
           </div>
         ))}
