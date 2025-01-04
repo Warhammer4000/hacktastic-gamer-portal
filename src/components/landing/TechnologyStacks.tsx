@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Circuit, ExternalLink } from "lucide-react";
+import { Code, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -44,7 +44,7 @@ export default function TechnologyStacks() {
             <Card key={stack.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center gap-4">
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Circuit className="h-6 w-6 text-primary" />
+                  <Code className="h-6 w-6 text-primary" />
                 </div>
                 <CardTitle>{stack.name}</CardTitle>
               </CardHeader>
