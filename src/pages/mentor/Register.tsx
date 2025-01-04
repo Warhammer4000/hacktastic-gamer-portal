@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -38,6 +39,25 @@ export default function MentorRegister() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Fetch registration settings
+  const { data: registrationSettings, isLoading: isLoadingSettings } = useQuery({
+    queryKey: ["registrationSettings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("registration_settings")
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Check if registration is currently allowed
+  const isRegistrationAllowed = registrationSettings?.mentor_registration_enabled && 
+    (!registrationSettings?.mentor_registration_start || new Date(registrationSettings.mentor_registration_start) <= new Date()) &&
+    (!registrationSettings?.mentor_registration_end || new Date(registrationSettings.mentor_registration_end) >= new Date());
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,10 +69,15 @@ export default function MentorRegister() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!isRegistrationAllowed) {
+      toast.error("Mentor registration is currently not available");
+      return;
+    }
+
     try {
       setIsLoading(true);
       
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -68,11 +93,16 @@ export default function MentorRegister() {
         return;
       }
 
+      if (!user?.id) {
+        toast.error("Error creating account");
+        return;
+      }
+
       // Add mentor role
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert([{ 
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: user.id,
           role: 'mentor'
         }]);
 
@@ -88,6 +118,22 @@ export default function MentorRegister() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (isLoadingSettings) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  }
+
+  if (!isRegistrationAllowed) {
+    return (
+      <div className="container max-w-md mx-auto mt-20 p-6 text-center">
+        <h1 className="text-3xl font-bold mb-4">Registration Closed</h1>
+        <p className="text-muted-foreground mb-6">
+          Mentor registration is currently not available. Please check back later.
+        </p>
+        <Button onClick={() => navigate("/")}>Back to Home</Button>
+      </div>
+    );
   }
 
   return (
