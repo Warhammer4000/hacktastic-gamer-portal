@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,9 +47,9 @@ export function JoinTeamDialog() {
         .from('teams')
         .select('id')
         .eq('join_code', data.joinCode.toUpperCase())
-        .single();
+        .maybeSingle();
 
-      if (teamError) {
+      if (teamError || !team) {
         toast.error("Invalid team code. Please try again.");
         return;
       }
