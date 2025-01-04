@@ -37,16 +37,6 @@ export default function ParticipantUsers() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <div className="relative w-64">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search participants..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
         <div className="space-x-2">
           <Button onClick={() => setShowAddDialog(true)}>
             <UserPlus className="mr-2 h-4 w-4" />
@@ -56,6 +46,16 @@ export default function ParticipantUsers() {
             <Upload className="mr-2 h-4 w-4" />
             Bulk Upload
           </Button>
+        </div>
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Search participants..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
         </div>
       </div>
 
