@@ -11,7 +11,7 @@ interface TeamCountPreferenceProps {
 }
 
 export function TeamCountPreference({ defaultValue }: TeamCountPreferenceProps) {
-  const [value, setValue] = useState(defaultValue.toString());
+  const [value, setValue] = useState(defaultValue?.toString() || "1");
   const queryClient = useQueryClient();
 
   const updateTeamCount = useMutation({

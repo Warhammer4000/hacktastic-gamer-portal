@@ -4,7 +4,8 @@ import {
   UserCircle, 
   Users, 
   Calendar,
-  MessageSquare
+  MessageSquare,
+  Settings
 } from "lucide-react";
 import { MentorNavigationItem } from "./navigation/MentorNavigationItem";
 import { LogoutButton } from "./navigation/LogoutButton";
@@ -25,6 +26,12 @@ export default function MentorNavigation() {
       to: "/mentor/profile",
       icon: UserCircle,
       label: "Profile",
+      requiresApproval: false
+    },
+    {
+      to: "/mentor/preferences",
+      icon: Settings,
+      label: "Preferences",
       requiresApproval: false
     },
     {

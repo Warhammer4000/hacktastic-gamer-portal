@@ -1,11 +1,9 @@
 import { Loader2 } from "lucide-react";
 import { MentorProfileForm } from "@/components/mentor/profile/MentorProfileForm";
-import { MentorPreferences } from "@/components/mentor/profile/preferences/MentorPreferences";
 import { useMentorProfile } from "@/hooks/useMentorProfile";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 
 export default function MentorProfile() {
   const { profile, isLoading, updateProfile } = useMentorProfile();
@@ -77,10 +75,6 @@ export default function MentorProfile() {
       />
 
       {renderStatusMessage()}
-
-      <Separator className="my-8" />
-
-      <MentorPreferences />
     </div>
   );
 }
