@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { NewsEditor } from "../editor/NewsEditor";
 import { NewsPreview } from "../preview/NewsPreview";
 import { Eye } from "lucide-react";
@@ -93,7 +94,9 @@ export function NewsForm({
                     <div className="grid grid-cols-1 gap-4">
                       <NewsEditor content={field.value} onChange={field.onChange} />
                       {isPreview && (
-                        <NewsPreview content={field.value} />
+                        <ScrollArea className="h-[500px] border rounded-lg">
+                          <NewsPreview content={field.value} />
+                        </ScrollArea>
                       )}
                     </div>
                   </FormControl>
