@@ -9,12 +9,15 @@ export default function TermsAndConditionsPage() {
       const { data, error } = await supabase
         .from('terms_and_conditions')
         .select('*')
-        .eq('status', 'published')
+        .eq('status', 'published'::terms_and_conditions_status)
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching terms:', error);
+        throw error;
+      }
       return data;
     },
   });
