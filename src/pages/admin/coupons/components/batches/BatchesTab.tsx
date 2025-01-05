@@ -33,9 +33,10 @@ export const BatchesTab = () => {
         .select(`
           *,
           vendor:coupon_vendors(name, icon_url),
-          coupons:coupons(
+          coupons(
             id,
             code,
+            batch_id,
             assigned_to,
             assigned_at
           )
@@ -109,7 +110,6 @@ export const BatchesTab = () => {
                   className="flex items-center gap-2"
                   disabled={batch.stats.remaining === 0}
                   onClick={() => {
-                    // This will trigger the AssignCouponsDialog
                     const assignButton = document.querySelector(`[data-batch-id="${batch.id}"]`);
                     if (assignButton instanceof HTMLElement) {
                       assignButton.click();
