@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Users } from "lucide-react";
@@ -33,11 +34,17 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Get array of already assigned user IDs
+  const assignedUserIds = batch.coupons
+    .filter(c => c.assigned_to)
+    .map(c => c.assigned_to);
+
   // Fetch eligible users based on roles
   const { data: eligibleUsers, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["eligible-users", batch.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get all users with eligible roles
+      const { data: usersWithRoles, error } = await supabase
         .from("user_roles")
         .select(`
           user_id,
@@ -48,15 +55,14 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
             email
           )
         `)
-        .in("role", batch.eligible_roles)
-        .not("user_id", "in", (
-          batch.coupons
-            .filter(c => c.assigned_to)
-            .map(c => c.assigned_to)
-        ));
+        .in("role", batch.eligible_roles);
 
       if (error) throw error;
-      return data;
+
+      // Filter out users who already have coupons from this batch
+      return usersWithRoles.filter(
+        user => !assignedUserIds.includes(user.user_id)
+      );
     },
     enabled: open,
   });
@@ -80,8 +86,6 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
       // Assign coupons to users
       const assignments = userIds.map((userId, index) => ({
         id: availableCoupons[index].id,
-        code: availableCoupons[index].code,
-        batch_id: availableCoupons[index].batch_id,
         assigned_to: userId,
         assigned_at: new Date().toISOString(),
       }));
@@ -126,13 +130,21 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button 
+          data-batch-id={batch.id}
+          variant="ghost" 
+          size="icon"
+          className="hidden"
+        >
           <Users className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Assign Coupons</DialogTitle>
+          <DialogDescription>
+            Select users to assign coupons from this batch.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
