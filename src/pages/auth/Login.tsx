@@ -54,12 +54,17 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       });
 
       if (error) {
-        console.error("Login error:", error);
-        throw error;
+        if (error.message === "Invalid login credentials") {
+          toast.error("Invalid credentials");
+        } else {
+          toast.error("An error occurred during login");
+        }
+        return;
       }
 
       if (!data.user) {
-        throw new Error("No user data returned");
+        toast.error("Invalid credentials");
+        return;
       }
 
       // Fetch user role
@@ -83,10 +88,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       toast.success("Logged in successfully");
       onClose();
     } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(error.message === "Invalid login credentials" 
-        ? "Invalid email or password" 
-        : "An error occurred during login");
+      toast.error("Invalid credentials");
     } finally {
       setIsLoading(false);
     }
