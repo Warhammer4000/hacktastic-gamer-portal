@@ -2,17 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { CreateTeamDialog } from "@/components/participant/teams/CreateTeamDialog";
-import { JoinTeamDialog } from "@/components/participant/teams/JoinTeamDialog";
-import { TeamCard } from "@/components/participant/teams/TeamCard";
-import { TeamCodeCard } from "@/components/participant/teams/TeamCodeCard";
-import { TeamMentorCard } from "@/components/participant/teams/TeamMentorCard";
+import { AvailableTeamsCard } from "@/components/participant/teams/AvailableTeamsCard";
 import { TeamDetailsDialog } from "@/components/participant/teams/TeamDetailsDialog";
 import { DeleteTeamDialog } from "@/components/participant/teams/DeleteTeamDialog";
-import { TeamMembersCard } from "@/components/participant/teams/TeamMembersCard";
-import { AvailableTeamsCard } from "@/components/participant/teams/AvailableTeamsCard";
+import { CreateTeamSection } from "@/components/participant/teams/page/CreateTeamSection";
+import { TeamSection } from "@/components/participant/teams/page/TeamSection";
 
 const MAX_TEAM_MEMBERS = 3;
 
@@ -122,50 +117,20 @@ export default function TeamPage() {
       <h1 className="text-3xl font-bold mb-8">Team</h1>
       
       {!team ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <div className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Create a Team</h2>
-              <p className="text-muted-foreground mb-4">
-                Start your own team and invite others to join
-              </p>
-              <CreateTeamDialog maxMembers={MAX_TEAM_MEMBERS} />
-            </div>
-          </Card>
-
-          <Card>
-            <div className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Join a Team</h2>
-              <p className="text-muted-foreground mb-4">
-                Join an existing team using their team code
-              </p>
-              <JoinTeamDialog />
-            </div>
-          </Card>
-
-          <div className="md:col-span-2">
+        <>
+          <CreateTeamSection maxMembers={MAX_TEAM_MEMBERS} />
+          <div className="mt-8">
             <AvailableTeamsCard />
           </div>
-        </div>
+        </>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <TeamCard
-            team={team}
-            onViewTeam={() => setIsViewTeamOpen(true)}
-            onDeleteTeam={() => setIsDeleteDialogOpen(true)}
-            isLocked={team.status === 'locked'}
-            currentUserId={currentUser?.id || ''}
-          />
-          <TeamCodeCard joinCode={team.join_code} />
-          <TeamMentorCard mentorId={team.mentor_id} />
-          <TeamMembersCard
-            teamId={team.id}
-            maxMembers={MAX_TEAM_MEMBERS}
-            isLeader={team.leader_id === currentUser?.id}
-            isLocked={team.status === 'locked'}
-            onLockTeam={handleLockTeam}
-          />
-        </div>
+        <TeamSection
+          team={team}
+          currentUserId={currentUser?.id || ''}
+          onViewTeam={() => setIsViewTeamOpen(true)}
+          onDeleteTeam={() => setIsDeleteDialogOpen(true)}
+          onLockTeam={handleLockTeam}
+        />
       )}
 
       <TeamDetailsDialog
