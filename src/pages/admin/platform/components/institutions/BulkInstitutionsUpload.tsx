@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -65,6 +66,7 @@ export function BulkInstitutionsUpload({
           location: row.location || null,
           email: row.email || null,
           phone: row.phone || null,
+          website_url: row.website_url || null, // Added website_url field
         }));
 
         uploadInstitutions.mutate(institutions);
@@ -84,6 +86,7 @@ export function BulkInstitutionsUpload({
         location: "City, Country",
         email: "contact@example.com",
         phone: "+1234567890",
+        website_url: "https://example.com", // Added website_url to template
       },
     ];
 
@@ -98,6 +101,9 @@ export function BulkInstitutionsUpload({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Bulk Upload Institutions</DialogTitle>
+          <DialogDescription>
+            Upload multiple institutions using an Excel file. Download the template below to ensure correct formatting.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex justify-between items-center">
