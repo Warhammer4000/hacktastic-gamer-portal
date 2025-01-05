@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AddVendorDialog } from "./AddVendorDialog";
 
 export const VendorsTab = () => {
   const { toast } = useToast();
@@ -36,10 +35,7 @@ export const VendorsTab = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Coupon Vendors</h2>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Vendor
-        </Button>
+        <AddVendorDialog />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

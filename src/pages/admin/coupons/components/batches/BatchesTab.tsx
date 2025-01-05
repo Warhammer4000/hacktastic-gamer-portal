@@ -1,11 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AddBatchDialog } from "./AddBatchDialog";
+import { AddCouponsDialog } from "../coupons/AddCouponsDialog";
 
 export const BatchesTab = () => {
   const { toast } = useToast();
+
+  const { data: vendors } = useQuery({
+    queryKey: ["couponVendors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coupon_vendors")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: batches, isLoading } = useQuery({
     queryKey: ["couponBatches"],
@@ -39,10 +52,13 @@ export const BatchesTab = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Coupon Batches</h2>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Batch
-        </Button>
+        {vendors && vendors.length > 0 ? (
+          <AddBatchDialog vendors={vendors} />
+        ) : (
+          <div className="text-sm text-gray-500">
+            Add vendors first to create batches
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4">
@@ -66,12 +82,7 @@ export const BatchesTab = () => {
                 </div>
               </div>
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm">
-                  Add Coupons
-                </Button>
-                <Button variant="outline" size="sm">
-                  Assign
-                </Button>
+                <AddCouponsDialog batchId={batch.id} />
               </div>
             </div>
             {batch.description && (
@@ -81,7 +92,7 @@ export const BatchesTab = () => {
             )}
             <div className="mt-2">
               <span className="text-sm font-medium">Eligible Roles: </span>
-              {batch.eligible_roles.map((role, index) => (
+              {batch.eligible_roles.map((role: string, index: number) => (
                 <span
                   key={role}
                   className="text-sm text-gray-600 dark:text-gray-300"
