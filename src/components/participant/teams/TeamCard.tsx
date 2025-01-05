@@ -21,6 +21,7 @@ interface TeamCardProps {
       name: string;
       icon_url: string;
     } | null;
+    repository_url: string | null;
   };
   onEditTeam: () => void;
   onDeleteTeam: () => void;
@@ -165,6 +166,7 @@ export function TeamCard({
             isLocked={isLocked}
             onAssignMentor={handleAssignMentor}
             teamId={team.id}
+            repositoryUrl={team.repository_url}
           />
 
           <TeamMembersSection

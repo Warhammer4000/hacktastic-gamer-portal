@@ -3,6 +3,7 @@ import { Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TeamRepositorySectionProps {
   teamId: string;
@@ -18,6 +19,7 @@ export function TeamRepositorySection({
   repositoryUrl,
 }: TeamRepositorySectionProps) {
   const [isCreatingRepo, setIsCreatingRepo] = useState(false);
+  const queryClient = useQueryClient();
 
   const createRepository = async () => {
     if (!isLeader || !mentorId) return;
@@ -29,6 +31,9 @@ export function TeamRepositorySection({
       });
 
       if (error) throw error;
+      
+      // Invalidate the team query to refresh the repository URL
+      queryClient.invalidateQueries({ queryKey: ['participant-team'] });
       toast.success("Repository created successfully!");
     } catch (error) {
       console.error('Error creating repository:', error);
@@ -56,15 +61,18 @@ export function TeamRepositorySection({
       )}
 
       {repositoryUrl && (
-        <a
-          href={repositoryUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary hover:underline flex items-center gap-2"
-        >
-          <Github className="h-4 w-4" />
-          View Repository
-        </a>
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">Repository:</p>
+          <a
+            href={repositoryUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline flex items-center gap-2 text-sm"
+          >
+            <Github className="h-4 w-4" />
+            View on GitHub
+          </a>
+        </div>
       )}
     </div>
   );

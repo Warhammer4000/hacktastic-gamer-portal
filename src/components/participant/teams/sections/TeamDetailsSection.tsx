@@ -18,6 +18,7 @@ interface TeamDetailsSectionProps {
   isLocked: boolean;
   onAssignMentor: () => Promise<void>;
   teamId: string;
+  repositoryUrl: string | null;
 }
 
 export function TeamDetailsSection({
@@ -31,6 +32,7 @@ export function TeamDetailsSection({
   isLocked,
   onAssignMentor,
   teamId,
+  repositoryUrl,
 }: TeamDetailsSectionProps) {
   const copyTeamCode = () => {
     navigator.clipboard.writeText(joinCode);
@@ -77,7 +79,7 @@ export function TeamDetailsSection({
           teamId={teamId}
           isLeader={isLeader}
           mentorId={mentorId}
-          repositoryUrl={null}
+          repositoryUrl={repositoryUrl}
         />
       </div>
       
