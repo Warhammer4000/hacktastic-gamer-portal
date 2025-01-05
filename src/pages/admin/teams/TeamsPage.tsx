@@ -29,12 +29,12 @@ export default function TeamsPage() {
               avatar_url
             )
           ),
-          leader:profiles(
+          leader:profiles!teams_leader_id_fkey(
             id,
             full_name,
             avatar_url
           ),
-          mentor:profiles(
+          mentor:profiles!teams_mentor_id_fkey(
             id,
             full_name,
             avatar_url,
