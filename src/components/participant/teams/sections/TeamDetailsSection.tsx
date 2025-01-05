@@ -1,7 +1,9 @@
-import { Copy } from "lucide-react";
+import { Copy, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { TeamMentorDetails } from "./TeamMentorDetails";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TeamDetailsSectionProps {
   name: string;
@@ -29,6 +31,9 @@ export function TeamDetailsSection({
   isLocked,
   onAssignMentor,
 }: TeamDetailsSectionProps) {
+  const [isCreatingRepo, setIsCreatingRepo] = useState(false);
+  const [repositoryUrl, setRepositoryUrl] = useState<string | null>(null);
+
   const copyTeamCode = () => {
     navigator.clipboard.writeText(joinCode);
     toast.success("Team code copied to clipboard!");
@@ -41,6 +46,27 @@ export function TeamDetailsSection({
     } catch (error) {
       console.error('Error in handleAssignMentor:', error);
       toast.error("Failed to assign mentor. Please try again.");
+    }
+  };
+
+  const createRepository = async () => {
+    if (!isLeader || !mentorId) return;
+    
+    setIsCreatingRepo(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-team-repository', {
+        body: { teamId: team.id }
+      });
+
+      if (error) throw error;
+
+      setRepositoryUrl(data.repository_url);
+      toast.success("Repository created successfully!");
+    } catch (error) {
+      console.error('Error creating repository:', error);
+      toast.error("Failed to create repository. Please try again.");
+    } finally {
+      setIsCreatingRepo(false);
     }
   };
 
@@ -68,6 +94,7 @@ export function TeamDetailsSection({
             <Copy className="h-4 w-4" />
           </Button>
         </div>
+        
         {isLeader && isLocked && !mentorId && (
           <Button 
             variant="outline" 
@@ -77,6 +104,33 @@ export function TeamDetailsSection({
           >
             Assign Mentor
           </Button>
+        )}
+
+        {isLeader && mentorId && status === 'active' && !repositoryUrl && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={createRepository}
+            disabled={isCreatingRepo}
+            className="mt-2 gap-2"
+          >
+            <Github className="h-4 w-4" />
+            Create Team Repository
+          </Button>
+        )}
+
+        {repositoryUrl && (
+          <div className="mt-2">
+            <a
+              href={repositoryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline flex items-center gap-2"
+            >
+              <Github className="h-4 w-4" />
+              View Repository
+            </a>
+          </div>
         )}
       </div>
       
