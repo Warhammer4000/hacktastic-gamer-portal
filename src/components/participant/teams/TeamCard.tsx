@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Users, Trash2, Edit, Copy, ToggleLeft } from "lucide-react";
+import { Users, Trash2, Edit, Copy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TeamMembersSection } from "./sections/TeamMembersSection";
@@ -89,16 +90,15 @@ export function TeamCard({
           </CardTitle>
           {isLeader && !isLocked && (
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleToggleStatus}
+              <Toggle
+                pressed={team.status === 'open'}
+                onPressedChange={() => handleToggleStatus()}
                 disabled={isUpdating}
-                className="gap-2"
+                className="gap-2 data-[state=on]:bg-green-500"
+                aria-label="Toggle team status"
               >
-                <ToggleLeft className={`h-4 w-4 ${team.status === 'open' ? 'text-green-500' : 'text-muted-foreground'}`} />
                 {team.status === 'draft' ? 'Draft' : 'Open'}
-              </Button>
+              </Toggle>
               <Button
                 variant="ghost"
                 size="sm"
