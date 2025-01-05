@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -27,8 +27,10 @@ export function AssignCouponDialog({
   const [loadingUsers, setLoadingUsers] = useState(true);
 
   const loadEligibleUsers = async () => {
-    setLoadingUsers(true);
     try {
+      setLoadingUsers(true);
+      console.log('Loading eligible users for batch:', batchId);
+      
       // First, get the batch details to check eligible roles
       const { data: batchData, error: batchError } = await supabase
         .from('coupon_batches')
@@ -36,7 +38,12 @@ export function AssignCouponDialog({
         .eq('id', batchId)
         .single();
 
-      if (batchError) throw batchError;
+      if (batchError) {
+        console.error('Error fetching batch:', batchError);
+        throw batchError;
+      }
+
+      console.log('Batch data:', batchData);
 
       // Get users who have the eligible roles and haven't been assigned a coupon from this batch
       const { data: eligibleUsers, error: usersError } = await supabase
@@ -58,9 +65,15 @@ export function AssignCouponDialog({
             .not('assigned_to', 'is', null)
         );
 
-      if (usersError) throw usersError;
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        throw usersError;
+      }
+
+      console.log('Eligible users:', eligibleUsers);
       setUsers(eligibleUsers || []);
     } catch (error: any) {
+      console.error('Error in loadEligibleUsers:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -82,41 +95,43 @@ export function AssignCouponDialog({
     }
 
     setIsLoading(true);
-    const { error } = await supabase
-      .from('coupons')
-      .update({ 
-        assigned_to: selectedUsers[0],
-        assigned_at: new Date().toISOString()
-      })
-      .eq('id', couponId);
+    try {
+      const { error } = await supabase
+        .from('coupons')
+        .update({ 
+          assigned_to: selectedUsers[0],
+          assigned_at: new Date().toISOString()
+        })
+        .eq('id', couponId);
 
-    setIsLoading(false);
+      if (error) throw error;
 
-    if (error) {
+      toast({
+        title: "Success",
+        description: "Coupon assigned successfully",
+      });
+      
+      onAssigned();
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Error assigning coupon:', error);
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to assign coupon",
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    toast({
-      title: "Success",
-      description: "Coupon assigned successfully",
-    });
-    
-    onAssigned();
-    onOpenChange(false);
   };
 
   // Load users when dialog opens
-  useState(() => {
+  useEffect(() => {
     if (open) {
       loadEligibleUsers();
       setSelectedUsers([]);
     }
-  });
+  }, [open, batchId]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
