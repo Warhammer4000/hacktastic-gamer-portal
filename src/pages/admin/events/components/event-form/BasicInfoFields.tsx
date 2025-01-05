@@ -4,7 +4,24 @@ import { UseFormReturn } from "react-hook-form";
 import { EventFormValues } from "../../types/event-form";
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Bold, Italic, List, Heading } from 'lucide-react';
+import Link from '@tiptap/extension-link';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import { 
+  Bold, 
+  Italic, 
+  List, 
+  Heading,
+  Link as LinkIcon,
+  Table as TableIcon,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Strikethrough,
+  Quote
+} from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface BasicInfoFieldsProps {
@@ -13,17 +30,42 @@ interface BasicInfoFieldsProps {
 
 export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-primary underline',
+        },
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableCell,
+      TableHeader,
+    ],
     content: form.getValues("description"),
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none min-h-[200px] dark:prose-invert'
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none min-h-[200px] max-h-[400px] overflow-y-auto p-4 dark:prose-invert'
       }
     },
     onUpdate: ({ editor }) => {
       form.setValue("description", editor.getHTML());
     }
   });
+
+  const addLink = () => {
+    const url = window.prompt('URL');
+    if (url) {
+      editor?.chain().focus().setLink({ href: url }).run();
+    }
+  };
+
+  const addTable = () => {
+    editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  };
 
   return (
     <>
@@ -71,6 +113,15 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => editor?.chain().focus().toggleStrike().run()}
+                    className={editor?.isActive('strike') ? 'bg-muted-foreground/20' : ''}
+                    type="button"
+                  >
+                    <Strikethrough className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => editor?.chain().focus().toggleBulletList().run()}
                     className={editor?.isActive('bulletList') ? 'bg-muted-foreground/20' : ''}
                     type="button"
@@ -80,14 +131,58 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                    className={editor?.isActive('heading', { level: 2 }) ? 'bg-muted-foreground/20' : ''}
+                    onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+                    className={editor?.isActive('blockquote') ? 'bg-muted-foreground/20' : ''}
                     type="button"
                   >
-                    <Heading className="h-4 w-4" />
+                    <Quote className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={addLink}
+                    className={editor?.isActive('link') ? 'bg-muted-foreground/20' : ''}
+                    type="button"
+                  >
+                    <LinkIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={addTable}
+                    type="button"
+                  >
+                    <TableIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => editor?.chain().focus().setTextAlign('left').run()}
+                    className={editor?.isActive({ textAlign: 'left' }) ? 'bg-muted-foreground/20' : ''}
+                    type="button"
+                  >
+                    <AlignLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => editor?.chain().focus().setTextAlign('center').run()}
+                    className={editor?.isActive({ textAlign: 'center' }) ? 'bg-muted-foreground/20' : ''}
+                    type="button"
+                  >
+                    <AlignCenter className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => editor?.chain().focus().setTextAlign('right').run()}
+                    className={editor?.isActive({ textAlign: 'right' }) ? 'bg-muted-foreground/20' : ''}
+                    type="button"
+                  >
+                    <AlignRight className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="p-4">
+                <div className="prose-container overflow-y-auto max-h-[400px]">
                   <EditorContent editor={editor} />
                 </div>
               </div>
