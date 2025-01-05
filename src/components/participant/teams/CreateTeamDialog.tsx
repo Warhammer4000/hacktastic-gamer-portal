@@ -7,9 +7,10 @@ import { TeamForm, type TeamFormValues } from "./forms/TeamForm";
 
 interface CreateTeamDialogProps {
   maxMembers: number;
+  onTeamCreated?: () => Promise<void>;
 }
 
-export function CreateTeamDialog({ maxMembers }: CreateTeamDialogProps) {
+export function CreateTeamDialog({ maxMembers, onTeamCreated }: CreateTeamDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
@@ -62,7 +63,9 @@ export function CreateTeamDialog({ maxMembers }: CreateTeamDialogProps) {
       if (memberError) throw memberError;
 
       toast.success("Team created successfully!");
-      navigate(0);
+      if (onTeamCreated) {
+        await onTeamCreated();
+      }
     } catch (error) {
       toast.error("Failed to create team. Please try again.");
       console.error("Error creating team:", error);

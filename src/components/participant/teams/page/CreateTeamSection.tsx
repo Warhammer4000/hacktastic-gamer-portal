@@ -2,7 +2,12 @@ import { Card } from "@/components/ui/card";
 import { CreateTeamDialog } from "../CreateTeamDialog";
 import { JoinTeamSection } from "../JoinTeamSection";
 
-export function CreateTeamSection({ maxMembers }: { maxMembers: number }) {
+interface CreateTeamSectionProps {
+  maxMembers: number;
+  onTeamJoined: () => Promise<void>;
+}
+
+export function CreateTeamSection({ maxMembers, onTeamJoined }: CreateTeamSectionProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2 h-[calc(100vh-12rem)]">
       <Card className="h-full">
@@ -14,12 +19,12 @@ export function CreateTeamSection({ maxMembers }: { maxMembers: number }) {
             </p>
           </div>
           <div className="flex-1">
-            <CreateTeamDialog maxMembers={maxMembers} />
+            <CreateTeamDialog maxMembers={maxMembers} onTeamCreated={onTeamJoined} />
           </div>
         </div>
       </Card>
 
-      <JoinTeamSection />
+      <JoinTeamSection onTeamJoined={onTeamJoined} />
     </div>
   );
 }

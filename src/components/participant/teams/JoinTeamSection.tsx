@@ -8,7 +8,11 @@ import { TeamListItem } from "./components/TeamListItem";
 import { JoinTeamForm } from "./components/JoinTeamForm";
 import { TeamFilters } from "./components/TeamFilters";
 
-export function JoinTeamSection() {
+interface JoinTeamSectionProps {
+  onTeamJoined?: () => Promise<void>;
+}
+
+export function JoinTeamSection({ onTeamJoined }: JoinTeamSectionProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTechStack, setSelectedTechStack] = useState("all");
   
@@ -41,7 +45,7 @@ export function JoinTeamSection() {
             id
           )
         `)
-        .eq('status', 'open'); // Only fetch teams with 'open' status
+        .eq('status', 'open');
 
       if (searchQuery) {
         query = query.ilike('name', `%${searchQuery}%`);
@@ -63,7 +67,7 @@ export function JoinTeamSection() {
         .from('teams')
         .select('id')
         .eq('join_code', data.joinCode.toUpperCase())
-        .eq('status', 'open') // Only allow joining open teams
+        .eq('status', 'open')
         .maybeSingle();
 
       if (teamError || !team) {
@@ -88,7 +92,9 @@ export function JoinTeamSection() {
       }
 
       toast.success("Successfully joined team!");
-      refetch();
+      if (onTeamJoined) {
+        await onTeamJoined();
+      }
     } catch (error) {
       toast.error("Failed to join team. Please try again.");
       console.error("Error joining team:", error);
@@ -117,7 +123,9 @@ export function JoinTeamSection() {
       }
 
       toast.success("Successfully joined team!");
-      refetch();
+      if (onTeamJoined) {
+        await onTeamJoined();
+      }
     } catch (error) {
       toast.error("Failed to join team");
       console.error("Error joining team:", error);
