@@ -30,9 +30,6 @@ export function EventCard({ event }: EventCardProps) {
             {event.status}
           </Badge>
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {event.description}
-        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
