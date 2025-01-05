@@ -37,21 +37,21 @@ export const CouponsTab = () => {
         .from("coupons")
         .select(`
           *,
-          batch:coupon_batches(
+          batch:coupon_batches!inner(
             name,
-            vendor:coupon_vendors(name)
+            vendor:coupon_vendors!inner(name)
           ),
           assignee:profiles(full_name)
         `);
 
       // Apply search filter
       if (search) {
-        query = query.or(`code.ilike.%${search}%,assignee.full_name.ilike.%${search}%`);
+        query = query.or(`code.ilike.%${search}%,profiles.full_name.ilike.%${search}%`);
       }
 
       // Apply sorting
       if (sortField === "assignee") {
-        query = query.order("assignee(full_name)", { ascending: sortOrder === "asc" });
+        query = query.order("profiles.full_name", { ascending: sortOrder === "asc" });
       } else {
         query = query.order(sortField, { ascending: sortOrder === "asc" });
       }
@@ -60,7 +60,7 @@ export const CouponsTab = () => {
       const from = (currentPage - 1) * itemsPerPage;
       query = query.range(from, from + itemsPerPage - 1);
 
-      const { data, error, count } = await query.select("*", { count: "exact" });
+      const { data, error, count } = await query;
 
       if (error) {
         toast({
@@ -99,7 +99,7 @@ export const CouponsTab = () => {
         <div className="w-72">
           <SearchInput
             value={search}
-            onChange={setSearch}
+            onChange={(value) => setSearch(value)}
             placeholder="Search by code or assignee..."
           />
         </div>
@@ -128,13 +128,13 @@ export const CouponsTab = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {couponsData?.data.map((coupon) => (
+            {couponsData?.data?.map((coupon) => (
               <TableRow key={coupon.id}>
                 <TableCell>{coupon.code}</TableCell>
-                <TableCell>{coupon.batch.name}</TableCell>
-                <TableCell>{coupon.batch.vendor.name}</TableCell>
+                <TableCell>{coupon.batch?.name}</TableCell>
+                <TableCell>{coupon.batch?.vendor?.name}</TableCell>
                 <TableCell>
-                  {coupon.assignee?.full_name || "Unassigned"}
+                  {coupon.assignee?.[0]?.full_name || "Unassigned"}
                 </TableCell>
                 <TableCell>
                   {coupon.assigned_at
