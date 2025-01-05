@@ -124,14 +124,14 @@ export function JoinTeamSection() {
   };
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>Join Team</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 h-[calc(100%-5rem)] flex flex-col">
         <JoinTeamForm onSubmit={handleJoinWithCode} />
 
-        <div className="space-y-4">
+        <div className="space-y-4 flex-1 flex flex-col">
           <TeamFilters
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -140,7 +140,7 @@ export function JoinTeamSection() {
             techStacks={techStacks}
           />
 
-          <ScrollArea className="h-[400px] rounded-md border p-4">
+          <ScrollArea className="flex-1 rounded-md border p-4">
             <div className="space-y-4">
               {availableTeams?.map((team) => (
                 <TeamListItem
