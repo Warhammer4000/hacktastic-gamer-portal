@@ -33,6 +33,7 @@ export const BatchesTab = () => {
           vendor:coupon_vendors(name, icon_url),
           coupons:coupons(
             id,
+            code,
             assigned_to,
             assigned_at
           )
