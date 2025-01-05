@@ -20,7 +20,8 @@ import {
   AlignCenter,
   AlignRight,
   Strikethrough,
-  Quote
+  Quote,
+  Underline
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
@@ -51,7 +52,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
     content: form.getValues("description"),
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none min-h-[200px] max-h-[400px] overflow-y-auto p-4 dark:prose-invert'
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none min-h-[200px] overflow-y-auto p-4 dark:prose-invert w-full max-w-none'
       }
     },
     onUpdate: ({ editor }) => {
@@ -93,7 +94,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
           <FormItem>
             <FormLabel>Description</FormLabel>
             <FormControl>
-              <div className="border rounded-md">
+              <div className="border rounded-md overflow-hidden">
                 <div className="flex flex-wrap gap-2 p-2 border-b bg-muted">
                   <Button
                     variant="ghost"
@@ -185,8 +186,8 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                     <AlignRight className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="prose-container overflow-y-auto max-h-[400px]">
-                  <EditorContent editor={editor} />
+                <div className="overflow-y-auto max-h-[400px] w-full">
+                  <EditorContent editor={editor} className="w-full" />
                 </div>
               </div>
             </FormControl>
