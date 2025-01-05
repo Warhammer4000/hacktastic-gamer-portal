@@ -11,7 +11,6 @@ import { TeamSection } from "@/components/participant/teams/page/TeamSection";
 const MAX_TEAM_MEMBERS = 3;
 
 export default function TeamPage() {
-  const [isViewTeamOpen, setIsViewTeamOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -121,17 +120,10 @@ export default function TeamPage() {
         <TeamSection
           team={team}
           currentUserId={currentUser?.id || ''}
-          onViewTeam={() => setIsViewTeamOpen(true)}
           onDeleteTeam={() => setIsDeleteDialogOpen(true)}
           onLockTeam={handleLockTeam}
         />
       )}
-
-      <TeamDetailsDialog
-        isOpen={isViewTeamOpen}
-        onOpenChange={setIsViewTeamOpen}
-        team={team!}
-      />
 
       <DeleteTeamDialog
         isOpen={isDeleteDialogOpen}
