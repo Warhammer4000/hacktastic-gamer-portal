@@ -9,6 +9,7 @@ export interface InstitutionsTable {
     location: string | null;
     email: string | null;
     phone: string | null;
+    website_url: string | null;
     status: string;
     created_at: string;
     updated_at: string;
@@ -21,6 +22,7 @@ export interface InstitutionsTable {
     location?: string | null;
     email?: string | null;
     phone?: string | null;
+    website_url?: string | null;
     status?: string;
     created_at?: string;
     updated_at?: string;
@@ -33,6 +35,7 @@ export interface InstitutionsTable {
     location?: string | null;
     email?: string | null;
     phone?: string | null;
+    website_url?: string | null;
     status?: string;
     created_at?: string;
     updated_at?: string;

@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Globe } from "lucide-react";
 import { useState } from "react";
 import { EditInstitution } from "./EditInstitution";
 import { DeleteInstitution } from "./DeleteInstitution";
@@ -64,6 +64,7 @@ export function InstitutionsTable({ search, typeFilter }: InstitutionsTableProps
             <TableHead>Location</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
+            <TableHead>Website</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -75,6 +76,21 @@ export function InstitutionsTable({ search, typeFilter }: InstitutionsTableProps
               <TableCell>{institution.location || "-"}</TableCell>
               <TableCell>{institution.email || "-"}</TableCell>
               <TableCell>{institution.phone || "-"}</TableCell>
+              <TableCell>
+                {institution.website_url ? (
+                  <a
+                    href={institution.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-blue-500 hover:text-blue-700"
+                  >
+                    <Globe className="h-4 w-4" />
+                    Visit
+                  </a>
+                ) : (
+                  "-"
+                )}
+              </TableCell>
               <TableCell className="text-right">
                 <Button
                   variant="ghost"

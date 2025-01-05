@@ -324,6 +324,7 @@ export type Database = {
           status: string | null
           type: Database["public"]["Enums"]["institution_type"]
           updated_at: string
+          website_url: string | null
         }
         Insert: {
           created_at?: string
@@ -336,6 +337,7 @@ export type Database = {
           status?: string | null
           type: Database["public"]["Enums"]["institution_type"]
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
           created_at?: string
@@ -348,6 +350,7 @@ export type Database = {
           status?: string | null
           type?: Database["public"]["Enums"]["institution_type"]
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }

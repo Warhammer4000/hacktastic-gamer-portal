@@ -37,6 +37,7 @@ const formSchema = z.object({
   location: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
   phone: z.string().optional(),
+  website_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -57,6 +58,7 @@ export function AddInstitution({ open, onOpenChange }: AddInstitutionProps) {
       location: "",
       email: "",
       phone: "",
+      website_url: "",
     },
   });
 
@@ -69,6 +71,7 @@ export function AddInstitution({ open, onOpenChange }: AddInstitutionProps) {
         location: values.location || null,
         email: values.email || null,
         phone: values.phone || null,
+        website_url: values.website_url || null,
       };
 
       const { error } = await supabase.from("institutions").insert([institution]);
@@ -144,6 +147,20 @@ export function AddInstitution({ open, onOpenChange }: AddInstitutionProps) {
                   <FormLabel>Logo URL</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter logo URL" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="website_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Website URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter website URL" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +48,17 @@ export function InstitutionCard({ institution }: InstitutionCardProps) {
             alt={institution.name}
             className="w-full h-24 object-contain"
           />
+          {institution.website_url && (
+            <a
+              href={institution.website_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-blue-500 hover:text-blue-700"
+            >
+              <Globe className="h-4 w-4" />
+              Visit Website
+            </a>
+          )}
           {institution.location && (
             <p className="text-sm text-muted-foreground">
               Location: {institution.location}
