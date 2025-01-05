@@ -24,7 +24,8 @@ export const CouponsTab = () => {
             name,
             vendor:coupon_vendors!inner(name)
           ),
-          assignee:profiles(full_name)
+          assignee:profiles(full_name),
+          count: count() over()
         `);
 
       if (search) {
@@ -37,8 +38,10 @@ export const CouponsTab = () => {
         query = query.order(sortField, { ascending: sortOrder === "asc" });
       }
 
+      // Calculate the range for pagination
       const from = (currentPage - 1) * itemsPerPage;
-      query = query.range(from, from + itemsPerPage - 1);
+      const to = from + itemsPerPage - 1;
+      query = query.range(from, to);
 
       const { data, error, count } = await query;
 
