@@ -1,9 +1,24 @@
 import { createEvents } from 'ics';
 
 export function generateICSString(event: any) {
+  const start = new Date(event.start_time);
+  const end = new Date(event.end_time);
+
   const { error, value } = createEvents([{
-    start: new Date(event.start_time).toISOString().split('T')[0].split('-').map(Number),
-    end: new Date(event.end_time).toISOString().split('T')[0].split('-').map(Number),
+    start: [
+      start.getFullYear(),
+      start.getMonth() + 1,
+      start.getDate(),
+      start.getHours(),
+      start.getMinutes()
+    ],
+    end: [
+      end.getFullYear(),
+      end.getMonth() + 1,
+      end.getDate(),
+      end.getHours(),
+      end.getMinutes()
+    ],
     title: event.title,
     description: event.description,
     location: '',

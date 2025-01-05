@@ -21,9 +21,10 @@ export function EventQRDialog({ open, onOpenChange, event }: EventQRDialogProps)
   useEffect(() => {
     if (open && event) {
       const icsData = generateICSString(event);
-      const dataUrl = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsData)}`;
+      // Use the webcal:// protocol to trigger calendar app
+      const calendarUrl = `webcal://${window.location.host}/calendar?data=${encodeURIComponent(icsData)}`;
       
-      QRCode.toDataURL(dataUrl)
+      QRCode.toDataURL(calendarUrl)
         .then(url => setQrCode(url))
         .catch(err => console.error(err));
     }

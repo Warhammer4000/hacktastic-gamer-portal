@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export type EventRole = "mentor" | "participant";
+export type EventRole = "mentor" | "participant" | "public";
 
 export const eventFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
