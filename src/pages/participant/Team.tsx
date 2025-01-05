@@ -6,11 +6,12 @@ import { toast } from "sonner";
 import { TeamDetailsDialog } from "@/components/participant/teams/TeamDetailsDialog";
 import { DeleteTeamDialog } from "@/components/participant/teams/DeleteTeamDialog";
 import { CreateTeamSection } from "@/components/participant/teams/page/CreateTeamSection";
-import { TeamSection } from "@/components/participant/teams/page/TeamSection";
+import { TeamCard } from "@/components/participant/teams/TeamCard";
 
 const MAX_TEAM_MEMBERS = 3;
 
 export default function TeamPage() {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -117,13 +118,20 @@ export default function TeamPage() {
       {!team ? (
         <CreateTeamSection maxMembers={MAX_TEAM_MEMBERS} />
       ) : (
-        <TeamSection
+        <TeamCard
           team={team}
-          currentUserId={currentUser?.id || ''}
+          onEditTeam={() => setIsEditDialogOpen(true)}
           onDeleteTeam={() => setIsDeleteDialogOpen(true)}
-          onLockTeam={handleLockTeam}
+          isLocked={team.status === 'locked'}
+          currentUserId={currentUser?.id || ''}
         />
       )}
+
+      <TeamDetailsDialog
+        isOpen={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        team={team}
+      />
 
       <DeleteTeamDialog
         isOpen={isDeleteDialogOpen}

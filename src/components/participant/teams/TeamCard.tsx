@@ -3,8 +3,8 @@ import { Users, Trash2, Edit, Copy, ToggleLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { TeamMembersSection } from "./sections/TeamMembersSection";
 import { supabase } from "@/integrations/supabase/client";
+import { TeamMembersSection } from "./sections/TeamMembersSection";
 
 interface TeamCardProps {
   team: {
@@ -66,7 +66,10 @@ export function TeamCard({
     <Card className="animate-fade-in">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>My Team</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Team Details
+          </CardTitle>
           {isLeader && !isLocked && (
             <div className="flex items-center gap-2">
               <Button
