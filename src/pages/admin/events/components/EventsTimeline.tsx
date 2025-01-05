@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { CalendarDays, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EventActions } from "./EventActions";
 
 export function EventsTimeline() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -87,6 +88,9 @@ export function EventsTimeline() {
                     {role}
                   </Badge>
                 ))}
+              </div>
+              <div className="mt-4 border-t pt-4">
+                <EventActions event={event} />
               </div>
             </div>
           </div>
