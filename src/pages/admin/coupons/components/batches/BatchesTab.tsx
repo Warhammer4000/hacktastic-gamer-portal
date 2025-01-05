@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { AddBatchDialog } from "./AddBatchDialog";
 import { AddCouponsDialog } from "../coupons/AddCouponsDialog";
+import { EditBatchDialog } from "./EditBatchDialog";
 
 export const BatchesTab = () => {
   const { toast } = useToast();
@@ -82,6 +83,7 @@ export const BatchesTab = () => {
                 </div>
               </div>
               <div className="flex space-x-2">
+                <EditBatchDialog batch={batch} vendors={vendors || []} />
                 <AddCouponsDialog batchId={batch.id} />
               </div>
             </div>
