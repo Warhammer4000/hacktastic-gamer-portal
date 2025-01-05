@@ -4,6 +4,8 @@ import { useToast } from "@/hooks/use-toast";
 import { AddBatchDialog } from "./AddBatchDialog";
 import { AddCouponsDialog } from "../coupons/AddCouponsDialog";
 import { EditBatchDialog } from "./EditBatchDialog";
+import { AssignCouponsDialog } from "./AssignCouponsDialog";
+import { Progress } from "@/components/ui/progress";
 
 export const BatchesTab = () => {
   const { toast } = useToast();
@@ -28,7 +30,12 @@ export const BatchesTab = () => {
         .from("coupon_batches")
         .select(`
           *,
-          vendor:coupon_vendors(name, icon_url)
+          vendor:coupon_vendors(name, icon_url),
+          coupons:coupons(
+            id,
+            assigned_to,
+            assigned_at
+          )
         `)
         .order("created_at", { ascending: false });
 
@@ -41,7 +48,14 @@ export const BatchesTab = () => {
         throw error;
       }
 
-      return data;
+      return data?.map(batch => ({
+        ...batch,
+        stats: {
+          total: batch.coupons.length,
+          assigned: batch.coupons.filter(c => c.assigned_to).length,
+          remaining: batch.coupons.filter(c => !c.assigned_to).length,
+        }
+      }));
     },
   });
 
@@ -85,13 +99,43 @@ export const BatchesTab = () => {
               <div className="flex space-x-2">
                 <EditBatchDialog batch={batch} vendors={vendors || []} />
                 <AddCouponsDialog batchId={batch.id} />
+                {batch.stats.remaining > 0 && (
+                  <AssignCouponsDialog batch={batch} />
+                )}
               </div>
             </div>
+            
             {batch.description && (
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                 {batch.description}
               </p>
             )}
+            
+            <div className="mt-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Coupon Usage</span>
+                <span>{batch.stats.assigned} / {batch.stats.total} assigned</span>
+              </div>
+              <Progress 
+                value={(batch.stats.assigned / batch.stats.total) * 100} 
+                className="h-2"
+              />
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="text-center">
+                  <div className="font-medium">{batch.stats.total}</div>
+                  <div className="text-gray-500 dark:text-gray-400">Total</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-medium">{batch.stats.assigned}</div>
+                  <div className="text-gray-500 dark:text-gray-400">Assigned</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-medium">{batch.stats.remaining}</div>
+                  <div className="text-gray-500 dark:text-gray-400">Remaining</div>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-2">
               <span className="text-sm font-medium">Eligible Roles: </span>
               {batch.eligible_roles.map((role: string, index: number) => (
