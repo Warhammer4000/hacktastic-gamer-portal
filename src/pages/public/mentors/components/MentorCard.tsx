@@ -50,46 +50,45 @@ export function MentorCard({ mentor }: MentorCardProps) {
           </div>
         )}
 
-        {/* Gradient Overlay and Name */}
+        {/* Gradient Overlay and Tech Stacks */}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
-          <h2 className="text-xl font-semibold text-white">
-            {mentor.full_name}
-          </h2>
-          {mentor.bio && (
-            <p className="text-sm text-gray-200 mt-1 line-clamp-2">
-              {mentor.bio}
-            </p>
+          {mentor.mentor_tech_stacks && mentor.mentor_tech_stacks.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {mentor.mentor_tech_stacks.map((tech) => (
+                tech.technology_stacks && (
+                  <Badge 
+                    key={tech.id} 
+                    className="bg-white text-black flex items-center gap-1.5 py-1 hover:bg-white/90"
+                  >
+                    {tech.technology_stacks.icon_url && (
+                      <img 
+                        src={tech.technology_stacks.icon_url} 
+                        alt={tech.technology_stacks.name}
+                        className="w-4 h-4"
+                      />
+                    )}
+                    <span className="text-xs">
+                      {tech.technology_stacks.name}
+                    </span>
+                  </Badge>
+                )
+              ))}
+            </div>
           )}
         </div>
       </div>
 
-      {/* Tech Stacks */}
-      {mentor.mentor_tech_stacks && mentor.mentor_tech_stacks.length > 0 && (
-        <div className="p-4 bg-white">
-          <div className="flex flex-wrap gap-2">
-            {mentor.mentor_tech_stacks.map((tech) => (
-              tech.technology_stacks && (
-                <Badge 
-                  key={tech.id} 
-                  variant="secondary"
-                  className="flex items-center gap-1.5 py-1"
-                >
-                  {tech.technology_stacks.icon_url && (
-                    <img 
-                      src={tech.technology_stacks.icon_url} 
-                      alt={tech.technology_stacks.name}
-                      className="w-4 h-4"
-                    />
-                  )}
-                  <span className="text-xs">
-                    {tech.technology_stacks.name}
-                  </span>
-                </Badge>
-              )
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Name in white background */}
+      <div className="p-4 bg-white">
+        <h2 className="text-xl font-semibold text-gray-900">
+          {mentor.full_name}
+        </h2>
+        {mentor.bio && (
+          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+            {mentor.bio}
+          </p>
+        )}
+      </div>
     </Card>
   );
 }
