@@ -6,18 +6,20 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useTeamMemberActions } from "../hooks/useTeamMemberActions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Users } from "lucide-react";
+import { Users, Lock } from "lucide-react";
 
 interface TeamMembersSectionProps {
   teamId: string;
   isLeader: boolean;
   isLocked: boolean;
+  onLockTeam: () => void;
 }
 
 export function TeamMembersSection({
   teamId,
   isLeader,
-  isLocked
+  isLocked,
+  onLockTeam
 }: TeamMembersSectionProps) {
   const { data: members, isLoading } = useTeamMembers(teamId);
   const { data: currentUser } = useCurrentUser();
@@ -86,7 +88,7 @@ export function TeamMembersSection({
         showLockButton={showLockButton}
         onReadyToggle={handleReadyToggle}
         onLeaveTeam={handleLeaveTeam}
-        onLockTeam={() => {}}
+        onLockTeam={onLockTeam}
         isUpdating={false}
       />
     </div>

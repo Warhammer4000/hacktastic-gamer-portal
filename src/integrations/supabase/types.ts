@@ -649,7 +649,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      assign_mentor_to_team: {
+        Args: {
+          team_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       faq_status: "draft" | "published"

@@ -46,6 +46,7 @@ export function TeamMemberActions({
           variant="default"
           onClick={onLockTeam}
           className="gap-2"
+          disabled={isUpdating}
         >
           <Lock className="h-4 w-4" />
           Lock Team

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Trash2, Edit, Copy } from "lucide-react";
+import { Users, Trash2, Edit, Copy, Lock, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
@@ -70,6 +70,34 @@ export function TeamCard({
       }));
       console.error('Error updating team status:', error);
       toast.error("Failed to update team status");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleLockTeam = async () => {
+    if (!isLeader || isLocked) return;
+    
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('teams')
+        .update({ status: 'locked' })
+        .eq('id', team.id);
+
+      if (error) throw error;
+      
+      // Call the assign_mentor_to_team function
+      const { data: mentorId, error: mentorError } = await supabase
+        .rpc('assign_mentor_to_team', { team_id: team.id });
+
+      if (mentorError) throw mentorError;
+
+      toast.success(mentorId ? "Team locked and mentor assigned!" : "Team locked, waiting for mentor assignment");
+      queryClient.invalidateQueries({ queryKey: ['participant-team'] });
+    } catch (error) {
+      console.error('Error locking team:', error);
+      toast.error("Failed to lock team");
     } finally {
       setIsUpdating(false);
     }
@@ -158,6 +186,7 @@ export function TeamCard({
             teamId={team.id}
             isLeader={isLeader}
             isLocked={isLocked}
+            onLockTeam={handleLockTeam}
           />
         </div>
       </CardContent>
