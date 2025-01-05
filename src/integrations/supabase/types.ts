@@ -85,6 +85,7 @@ export type Database = {
           code: string
           created_at: string
           id: string
+          reveal_date: string | null
           state: Database["public"]["Enums"]["coupon_state"]
           updated_at: string
         }
@@ -95,6 +96,7 @@ export type Database = {
           code: string
           created_at?: string
           id?: string
+          reveal_date?: string | null
           state?: Database["public"]["Enums"]["coupon_state"]
           updated_at?: string
         }
@@ -105,6 +107,7 @@ export type Database = {
           code?: string
           created_at?: string
           id?: string
+          reveal_date?: string | null
           state?: Database["public"]["Enums"]["coupon_state"]
           updated_at?: string
         }

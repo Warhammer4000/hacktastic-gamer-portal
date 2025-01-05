@@ -30,19 +30,25 @@ export function CouponBenefit({ coupon }: CouponBenefitProps) {
 
   const handleReveal = async () => {
     try {
-      // Mark the coupon as revealed by updating the assigned_at timestamp
-      const { error } = await supabase
-        .from('coupons')
-        .update({ assigned_at: new Date().toISOString() })
-        .eq('id', coupon.id);
+      // Only update if the coupon is not already revealed
+      if (coupon.state !== 'revealed') {
+        const { error } = await supabase
+          .from('coupons')
+          .update({ 
+            state: 'revealed',
+            assigned_at: new Date().toISOString(),
+            reveal_date: new Date().toISOString()
+          })
+          .eq('id', coupon.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setIsRevealed(true);
-      toast({
-        title: "Coupon revealed",
-        description: "Your coupon code is now visible",
-      });
+        setIsRevealed(true);
+        toast({
+          title: "Coupon revealed",
+          description: "Your coupon code is now visible",
+        });
+      }
     } catch (error) {
       console.error('Error revealing coupon:', error);
       toast({
