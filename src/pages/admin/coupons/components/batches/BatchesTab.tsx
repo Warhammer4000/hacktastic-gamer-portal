@@ -6,6 +6,8 @@ import { AddCouponsDialog } from "../coupons/AddCouponsDialog";
 import { EditBatchDialog } from "./EditBatchDialog";
 import { AssignCouponsDialog } from "./AssignCouponsDialog";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Users } from "lucide-react";
 
 export const BatchesTab = () => {
   const { toast } = useToast();
@@ -97,12 +99,30 @@ export const BatchesTab = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex items-center space-x-2">
                 <EditBatchDialog batch={batch} vendors={vendors || []} />
                 <AddCouponsDialog batchId={batch.id} />
-                {batch.stats.remaining > 0 && (
-                  <AssignCouponsDialog batch={batch} />
-                )}
+                <AssignCouponsDialog batch={batch} />
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="flex items-center gap-2"
+                  disabled={batch.stats.remaining === 0}
+                  onClick={() => {
+                    // This will trigger the AssignCouponsDialog
+                    const assignButton = document.querySelector(`[data-batch-id="${batch.id}"]`);
+                    if (assignButton instanceof HTMLElement) {
+                      assignButton.click();
+                    }
+                  }}
+                >
+                  <Users className="h-4 w-4" />
+                  <span>
+                    {batch.stats.remaining === 0 
+                      ? "No coupons left" 
+                      : `Assign ${batch.stats.remaining} coupons`}
+                  </span>
+                </Button>
               </div>
             </div>
             
