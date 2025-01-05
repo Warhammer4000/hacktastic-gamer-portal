@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,34 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { MultiSelect } from "@/components/ui/multi-select";
-
-// Define the event role type to match the database enum
-type EventRole = "public" | "mentor" | "participant";
-
-const eventFormSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  tech_stacks: z.array(z.string()).min(1, "Select at least one technology stack"),
-  roles: z.array(z.enum(["public", "mentor", "participant"])).min(1, "Select at least one role"),
-  start_time: z.string().min(1, "Start time is required"),
-  end_time: z.string().min(1, "End time is required"),
-});
-
-type EventFormValues = z.infer<typeof eventFormSchema>;
+import { EventFormFields } from "./event-form/EventFormFields";
+import { eventFormSchema, EventFormValues, EventRole } from "../types/event-form";
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -61,33 +37,10 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
     },
   });
 
-  const { data: techStacks } = useQuery({
-    queryKey: ["techStacks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("technology_stacks")
-        .select("id, name")
-        .eq("status", "active");
-
-      if (error) throw error;
-      return data.map(stack => ({
-        value: stack.id,
-        label: stack.name,
-      }));
-    },
-  });
-
-  const roleOptions: { value: EventRole; label: string }[] = [
-    { value: "mentor", label: "Mentors" },
-    { value: "participant", label: "Participants" },
-    { value: "public", label: "Public" },
-  ];
-
   async function onSubmit(data: EventFormValues) {
     try {
       setIsSubmitting(true);
       
-      // Get the current user's ID for created_by
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
@@ -95,7 +48,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
         title: data.title,
         description: data.description,
         tech_stacks: data.tech_stacks,
-        roles: data.roles as EventRole[], // Type assertion is safe here because of zod validation
+        roles: data.roles as EventRole[],
         start_time: new Date(data.start_time).toISOString(),
         end_time: new Date(data.end_time).toISOString(),
         status: "draft",
@@ -134,98 +87,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Event title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Event description"
-                      className="resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="tech_stacks"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Technology Stacks</FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      options={techStacks || []}
-                      placeholder="Select technology stacks"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="roles"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Roles</FormLabel>
-                  <FormControl>
-                    <MultiSelect
-                      options={roleOptions}
-                      placeholder="Select roles"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="start_time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Start Time</FormLabel>
-                    <FormControl>
-                      <Input type="datetime-local" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="end_time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>End Time</FormLabel>
-                    <FormControl>
-                      <Input type="datetime-local" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <EventFormFields form={form} />
             <DialogFooter>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Creating..." : "Create Event"}
