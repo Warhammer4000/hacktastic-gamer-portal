@@ -1,86 +1,64 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
 import { UseFormReturn } from "react-hook-form";
 import { EventFormValues } from "../../types/event-form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface RolesFieldProps {
   form: UseFormReturn<EventFormValues>;
 }
 
 export function RolesField({ form }: RolesFieldProps) {
-  const roles = form.watch("roles");
-
-  const toggleRole = (role: "mentor" | "participant") => {
-    const currentRoles = new Set(roles);
-    if (currentRoles.has(role)) {
-      currentRoles.delete(role);
-    } else {
-      currentRoles.add(role);
-    }
-    form.setValue("roles", Array.from(currentRoles));
-  };
+  const roles = [
+    { id: "mentor", label: "Mentor" },
+    { id: "participant", label: "Participant" },
+  ];
 
   return (
-    <>
-      <FormField
-        control={form.control}
-        name="roles"
-        render={() => (
-          <FormItem>
-            <FormLabel>Roles</FormLabel>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="mentor"
-                  checked={roles?.includes("mentor")}
-                  onCheckedChange={() => toggleRole("mentor")}
-                />
-                <label
-                  htmlFor="mentor"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Mentor
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="participant"
-                  checked={roles?.includes("participant")}
-                  onCheckedChange={() => toggleRole("participant")}
-                />
-                <label
-                  htmlFor="participant"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Participant
-                </label>
-              </div>
-            </div>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    <div className="space-y-4">
+      <div className="space-y-4">
+        <FormLabel>Roles</FormLabel>
+        <div className="flex flex-col space-y-2">
+          {roles.map((role) => (
+            <FormField
+              key={role.id}
+              control={form.control}
+              name="roles"
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value?.includes(role.id as any)}
+                      onCheckedChange={(checked) => {
+                        const newValue = checked
+                          ? [...(field.value || []), role.id]
+                          : field.value?.filter((r) => r !== role.id) || [];
+                        field.onChange(newValue);
+                      }}
+                    />
+                  </FormControl>
+                  <span>{role.label}</span>
+                </FormItem>
+              )}
+            />
+          ))}
+        </div>
+      </div>
 
       <FormField
         control={form.control}
         name="isPublic"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+          <FormItem className="flex items-center space-x-2">
             <FormControl>
               <Checkbox
                 checked={field.value}
                 onCheckedChange={field.onChange}
               />
             </FormControl>
-            <div className="space-y-1 leading-none">
-              <FormLabel>Public Event</FormLabel>
-              <p className="text-sm text-muted-foreground">
-                Make this event visible to everyone
-              </p>
-            </div>
+            <span>Public Event</span>
           </FormItem>
         )}
       />
-    </>
+    </div>
   );
 }
