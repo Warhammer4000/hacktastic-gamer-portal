@@ -45,7 +45,21 @@ export function AssignCouponDialog({
 
       console.log('Batch data:', batchData);
 
-      // Get users who have the eligible roles and haven't been assigned a coupon from this batch
+      // First get the list of users who already have coupons from this batch
+      const { data: assignedUsers, error: assignedError } = await supabase
+        .from('coupons')
+        .select('assigned_to')
+        .eq('batch_id', batchId)
+        .not('assigned_to', 'is', null);
+
+      if (assignedError) {
+        console.error('Error fetching assigned users:', assignedError);
+        throw assignedError;
+      }
+
+      const assignedUserIds = assignedUsers.map(u => u.assigned_to);
+
+      // Then get eligible users who haven't been assigned a coupon
       const { data: eligibleUsers, error: usersError } = await supabase
         .from('user_roles')
         .select(`
@@ -58,12 +72,7 @@ export function AssignCouponDialog({
           )
         `)
         .in('role', batchData.eligible_roles)
-        .not('user_id', 'in', (sb) =>
-          sb.from('coupons')
-            .select('assigned_to')
-            .eq('batch_id', batchId)
-            .not('assigned_to', 'is', null)
-        );
+        .not('user_id', 'in', assignedUserIds);
 
       if (usersError) {
         console.error('Error fetching users:', usersError);
