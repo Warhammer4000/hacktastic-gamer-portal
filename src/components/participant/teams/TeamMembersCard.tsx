@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { User, UserCheck, Lock, Users, Crown } from "lucide-react";
+import { Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { TeamMemberItem } from "./members/TeamMemberItem";
+import { EmptyMemberSlot } from "./members/EmptyMemberSlot";
+import { TeamMemberActions } from "./members/TeamMemberActions";
 
 interface TeamMembersCardProps {
   teamId: string;
@@ -155,63 +157,29 @@ export function TeamMembersCard({
       <CardContent>
         <div className="space-y-4">
           {members?.map((member) => (
-            <div
+            <TeamMemberItem
               key={member.id}
-              className="flex items-center justify-between p-3 rounded-lg border"
-            >
-              <div className="flex items-center gap-3">
-                {member.user_id === team?.leader_id ? (
-                  <Crown className="h-5 w-5 text-yellow-500" />
-                ) : (
-                  <User className="h-5 w-5 text-muted-foreground" />
-                )}
-                <span>{member.profile?.full_name || 'Unknown User'}</span>
-              </div>
-              {member.is_ready && (
-                <UserCheck className="h-5 w-5 text-green-500" />
-              )}
-            </div>
+              userId={member.user_id}
+              fullName={member.profile?.full_name}
+              isLeader={member.user_id === team?.leader_id}
+              isReady={member.is_ready}
+            />
           ))}
 
           {emptySlots > 0 && Array.from({ length: emptySlots }).map((_, index) => (
-            <div
-              key={`empty-${index}`}
-              className="flex items-center gap-3 p-3 rounded-lg border border-dashed"
-            >
-              <User className="h-5 w-5 text-muted-foreground" />
-              <span className="text-muted-foreground">Empty Slot</span>
-            </div>
+            <EmptyMemberSlot key={`empty-${index}`} />
           ))}
 
-          <div className="flex justify-end gap-2 pt-4">
-            {!isLocked && currentUserMember && !currentUserMember.is_ready && !isLeader && (
-              <Button
-                onClick={handleReadyToggle}
-                disabled={isUpdating}
-              >
-                Mark as Ready
-              </Button>
-            )}
-            {!isLocked && currentUserMember && !isLeader && (
-              <Button
-                variant="destructive"
-                onClick={handleLeaveTeam}
-                disabled={isUpdating}
-              >
-                Leave Team
-              </Button>
-            )}
-            {showLockButton && (
-              <Button
-                variant="default"
-                onClick={onLockTeam}
-                className="gap-2"
-              >
-                <Lock className="h-4 w-4" />
-                Lock Team
-              </Button>
-            )}
-          </div>
+          <TeamMemberActions
+            isLocked={isLocked}
+            isLeader={isLeader}
+            isReady={currentUserMember?.is_ready || false}
+            showLockButton={showLockButton}
+            onReadyToggle={handleReadyToggle}
+            onLeaveTeam={handleLeaveTeam}
+            onLockTeam={onLockTeam}
+            isUpdating={isUpdating}
+          />
         </div>
       </CardContent>
     </Card>
