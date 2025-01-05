@@ -312,6 +312,45 @@ export type Database = {
         }
         Relationships: []
       }
+      institutions: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          location: string | null
+          logo_url: string
+          name: string
+          phone: string | null
+          status: string | null
+          type: Database["public"]["Enums"]["institution_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          logo_url: string
+          name: string
+          phone?: string | null
+          status?: string | null
+          type: Database["public"]["Enums"]["institution_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          logo_url?: string
+          name?: string
+          phone?: string | null
+          status?: string | null
+          type?: Database["public"]["Enums"]["institution_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       levels: {
         Row: {
           created_at: string
@@ -857,6 +896,7 @@ export type Database = {
       event_role: "mentor" | "participant" | "public"
       event_status: "draft" | "published"
       faq_status: "draft" | "published"
+      institution_type: "university" | "organization"
       news_status: "draft" | "published"
       partner_status: "active" | "inactive"
       privacy_policy_status: "draft" | "published"
