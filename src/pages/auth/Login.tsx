@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface LoginProps {
@@ -35,7 +35,6 @@ const formSchema = z.object({
 
 export default function Login({ isOpen, onClose }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -49,20 +48,25 @@ export default function Login({ isOpen, onClose }: LoginProps) {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
-      if (signInError) throw signInError;
+      if (error) {
+        console.error("Login error:", error);
+        throw error;
+      }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
+      if (!data.user) {
+        throw new Error("No user data returned");
+      }
 
+      // Fetch user role
       const { data: userRole } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', user.id)
+        .eq('user_id', data.user.id)
         .maybeSingle();
 
       // Redirect based on role
@@ -76,13 +80,13 @@ export default function Login({ isOpen, onClose }: LoginProps) {
         navigate("/");
       }
 
+      toast.success("Logged in successfully");
       onClose();
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Invalid credentials. Please try again.",
-      });
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.message === "Invalid login credentials" 
+        ? "Invalid email or password" 
+        : "An error occurred during login");
     } finally {
       setIsLoading(false);
     }
@@ -107,7 +111,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="Enter your email" {...field} />
+                    <Input 
+                      type="email" 
+                      placeholder="Enter your email" 
+                      {...field} 
+                      autoComplete="email"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,7 +130,12 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Enter your password" {...field} />
+                    <Input 
+                      type="password" 
+                      placeholder="Enter your password" 
+                      {...field} 
+                      autoComplete="current-password"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
