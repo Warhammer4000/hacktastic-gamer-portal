@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { TeamMemberItem } from "./members/TeamMemberItem";
 import { EmptyMemberSlot } from "./members/EmptyMemberSlot";
 import { TeamMemberActions } from "./members/TeamMemberActions";
+import { useTeamMembers } from "./hooks/useTeamMembers";
+import { useCurrentUser } from "./hooks/useCurrentUser";
+import { useTeamMemberActions } from "./hooks/useTeamMemberActions";
 
 interface TeamMembersCardProps {
   teamId: string;
@@ -24,38 +24,9 @@ export function TeamMembersCard({
   isLocked,
   onLockTeam 
 }: TeamMembersCardProps) {
-  const [isUpdating, setIsUpdating] = useState(false);
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-
-  const { data: members, isLoading } = useQuery({
-    queryKey: ['team-members', teamId],
-    queryFn: async () => {
-      const { data: members, error } = await supabase
-        .from('team_members')
-        .select(`
-          id,
-          is_ready,
-          user_id,
-          profile:profiles (
-            full_name,
-            avatar_url
-          )
-        `)
-        .eq('team_id', teamId);
-
-      if (error) throw error;
-      return members;
-    },
-  });
-
-  const { data: currentUser } = useQuery({
-    queryKey: ['current-user'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user;
-    },
-  });
+  const { data: members, isLoading } = useTeamMembers(teamId);
+  const { data: currentUser } = useCurrentUser();
+  const { handleReadyToggle, handleLeaveTeam } = useTeamMemberActions(teamId, currentUser?.id);
 
   const { data: team } = useQuery({
     queryKey: ['team-details', teamId],
@@ -70,59 +41,6 @@ export function TeamMembersCard({
       return team;
     },
   });
-
-  const readyMutation = useMutation({
-    mutationFn: async () => {
-      if (!currentUser) throw new Error("Not authenticated");
-      const { error } = await supabase
-        .from('team_members')
-        .update({ is_ready: true })
-        .eq('team_id', teamId)
-        .eq('user_id', currentUser.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team-members', teamId] });
-      toast.success("Marked as ready!");
-    },
-    onError: (error) => {
-      console.error("Error updating ready status:", error);
-      toast.error("Failed to update ready status");
-    },
-  });
-
-  const leaveTeamMutation = useMutation({
-    mutationFn: async () => {
-      if (!currentUser) throw new Error("Not authenticated");
-      const { error } = await supabase
-        .from('team_members')
-        .delete()
-        .eq('team_id', teamId)
-        .eq('user_id', currentUser.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Left team successfully");
-      navigate('/participant/team');
-    },
-    onError: (error) => {
-      console.error('Error leaving team:', error);
-      toast.error("Failed to leave team");
-    },
-  });
-
-  const handleReadyToggle = () => {
-    readyMutation.mutate();
-  };
-
-  const handleLeaveTeam = async () => {
-    if (window.confirm("Are you sure you want to leave this team?")) {
-      return leaveTeamMutation.mutateAsync();
-    }
-    return Promise.resolve();
-  };
 
   const emptySlots = maxMembers - (members?.length || 0);
   const nonLeaderMembers = members?.filter(member => member.user_id !== team?.leader_id) || [];
@@ -179,7 +97,7 @@ export function TeamMembersCard({
             onReadyToggle={handleReadyToggle}
             onLeaveTeam={handleLeaveTeam}
             onLockTeam={onLockTeam}
-            isUpdating={isUpdating}
+            isUpdating={false}
           />
         </div>
       </CardContent>
