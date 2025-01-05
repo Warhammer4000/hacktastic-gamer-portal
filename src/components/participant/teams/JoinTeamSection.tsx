@@ -2,11 +2,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Search, Filter, UserPlus } from "lucide-react";
+import { Filter, UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Form,
@@ -25,6 +24,8 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { SearchInput } from "./components/SearchInput";
+import { Input } from "@/components/ui/input";
 
 const joinTeamSchema = z.object({
   joinCode: z.string().length(6, "Team code must be exactly 6 characters"),
@@ -188,12 +189,11 @@ export function JoinTeamSection() {
         <div className="space-y-4">
           <div className="flex gap-2">
             <div className="flex-1">
-              <Input
-                placeholder="Search teams..."
+              <SearchInput
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={setSearchQuery}
+                placeholder="Search teams..."
                 className="w-full"
-                icon={<Search className="h-4 w-4" />}
               />
             </div>
             <Select value={selectedTechStack} onValueChange={setSelectedTechStack}>

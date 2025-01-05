@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { AvailableTeamsCard } from "@/components/participant/teams/AvailableTeamsCard";
 import { TeamDetailsDialog } from "@/components/participant/teams/TeamDetailsDialog";
 import { DeleteTeamDialog } from "@/components/participant/teams/DeleteTeamDialog";
 import { CreateTeamSection } from "@/components/participant/teams/page/CreateTeamSection";
@@ -117,12 +116,7 @@ export default function TeamPage() {
       <h1 className="text-3xl font-bold mb-8">Team</h1>
       
       {!team ? (
-        <>
-          <CreateTeamSection maxMembers={MAX_TEAM_MEMBERS} />
-          <div className="mt-8">
-            <AvailableTeamsCard />
-          </div>
-        </>
+        <CreateTeamSection maxMembers={MAX_TEAM_MEMBERS} />
       ) : (
         <TeamSection
           team={team}

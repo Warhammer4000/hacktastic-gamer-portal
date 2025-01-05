@@ -1,40 +1,49 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
-const teamFormSchema = z.object({
-  name: z.string().min(1, "Team name is required"),
+const teamDetailsSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   techStackId: z.string().optional(),
 });
 
-type TeamFormData = z.infer<typeof teamFormSchema>;
+type TeamFormValues = z.infer<typeof teamDetailsSchema>;
 
 interface TeamDetailsFormProps {
+  onSubmit: (data: TeamFormValues) => Promise<void>;
+  techStacks: {
+    id: string;
+    name: string;
+    icon_url: string;
+    status: "active" | "inactive";
+    created_at: string;
+    updated_at: string;
+  }[];
+  isLoadingTechStacks: boolean;
   team: {
+    id: string;
     name: string;
     description: string | null;
+    status: string;
+    tech_stack: {
+      name: string;
+    } | null;
     tech_stack_id: string | null;
+    repository_url: string | null;
+    leader_id: string;
   };
-  onSubmit: (data: TeamFormData) => void;
-  techStacks: Array<{ id: string; name: string }>;
+  onCancel: () => void;
 }
 
-export function TeamDetailsForm({ team, onSubmit, techStacks }: TeamDetailsFormProps) {
-  const form = useForm<TeamFormData>({
-    resolver: zodResolver(teamFormSchema),
+export function TeamDetailsForm({ onSubmit, techStacks, isLoadingTechStacks, team, onCancel }: TeamDetailsFormProps) {
+  const form = useForm<TeamFormValues>({
+    resolver: zodResolver(teamDetailsSchema),
     defaultValues: {
       name: team.name,
       description: team.description || "",
@@ -42,65 +51,53 @@ export function TeamDetailsForm({ team, onSubmit, techStacks }: TeamDetailsFormP
     },
   });
 
+  const { handleSubmit, reset } = form;
+
+  useEffect(() => {
+    reset({
+      name: team.name,
+      description: team.description || "",
+      techStackId: team.tech_stack_id || "",
+    });
+  }, [team, reset]);
+
+  const handleFormSubmit = async (data: TeamFormValues) => {
+    await onSubmit(data);
+  };
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Team Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter team name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Enter team description" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="techStackId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tech Stack</FormLabel>
-              <FormControl>
-                <Select {...field}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select tech stack" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {techStacks.map((stack) => (
-                      <SelectItem key={stack.id} value={stack.id}>
-                        {stack.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex justify-end gap-2">
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            Save Changes
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium">Team Name</label>
+        <Input {...form.register("name")} placeholder="Enter team name" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium">Description</label>
+        <Input {...form.register("description")} placeholder="Enter team description" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium">Tech Stack</label>
+        <Select {...form.register("techStackId")}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select tech stack" />
+          </SelectTrigger>
+          <SelectContent>
+            {isLoadingTechStacks ? (
+              <SelectItem value="">Loading...</SelectItem>
+            ) : (
+              techStacks.map((stack) => (
+                <SelectItem key={stack.id} value={stack.id}>
+                  {stack.name}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex gap-2">
+        <Button type="submit">Save</Button>
+        <Button variant="outline" onClick={onCancel}>Cancel</Button>
+      </div>
+    </form>
   );
 }
