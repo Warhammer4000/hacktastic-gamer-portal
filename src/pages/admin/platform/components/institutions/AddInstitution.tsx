@@ -28,6 +28,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
+import type { InsertInstitution } from "@/integrations/supabase/types/tables/institutions";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -61,7 +62,16 @@ export function AddInstitution({ open, onOpenChange }: AddInstitutionProps) {
 
   const addInstitution = useMutation({
     mutationFn: async (values: FormValues) => {
-      const { error } = await supabase.from("institutions").insert([values]);
+      const institution: InsertInstitution = {
+        name: values.name,
+        type: values.type,
+        logo_url: values.logo_url,
+        location: values.location || null,
+        email: values.email || null,
+        phone: values.phone || null,
+      };
+
+      const { error } = await supabase.from("institutions").insert([institution]);
       if (error) throw error;
     },
     onSuccess: () => {

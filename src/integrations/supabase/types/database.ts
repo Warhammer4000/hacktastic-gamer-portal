@@ -6,6 +6,7 @@ import { TechnologyStacksTable } from './tables/technology-stacks';
 import { PartnersTable } from './tables/partners';
 import { GalleryPostsTable } from './tables/gallery-posts';
 import { TermsAndConditionsTable } from './tables/terms-and-conditions';
+import { InstitutionsTable } from './tables/institutions';
 
 export type Json =
   | string
@@ -26,6 +27,7 @@ export interface Database {
       partners: PartnersTable;
       gallery_posts: GalleryPostsTable;
       terms_and_conditions: TermsAndConditionsTable;
+      institutions: InstitutionsTable;
     };
     Views: {
       [_ in never]: never;
@@ -38,6 +40,7 @@ export interface Database {
       tech_stack_status: "active" | "inactive";
       partner_status: "active" | "inactive";
       terms_and_conditions_status: "draft" | "published";
+      institution_type: "university" | "organization";
     };
     CompositeTypes: {
       [_ in never]: never;
