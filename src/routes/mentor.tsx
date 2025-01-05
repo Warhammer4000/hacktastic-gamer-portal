@@ -1,15 +1,38 @@
-import { Route } from "react-router-dom";
-import PrivateRoute from "@/components/auth/PrivateRoute";
+import { RouteObject } from "react-router-dom";
 import MentorLayout from "@/pages/mentor/MentorLayout";
-import MentorProfile from "@/pages/mentor/Profile";
 import MentorDashboard from "@/pages/mentor/Dashboard";
-import MentorPreferences from "@/pages/mentor/Preferences";
+import Profile from "@/pages/mentor/Profile";
+import Preferences from "@/pages/mentor/Preferences";
+import Register from "@/pages/mentor/Register";
+import Benefits from "@/pages/mentor/Benefits";
 
-export const mentorRoutes = (
-  <Route path="/mentor" element={<PrivateRoute><MentorLayout /></PrivateRoute>}>
-    <Route index element={<MentorDashboard />} />
-    <Route path="dashboard" element={<MentorDashboard />} />
-    <Route path="profile" element={<MentorProfile />} />
-    <Route path="preferences" element={<MentorPreferences />} />
-  </Route>
-);
+export const mentorRoutes: RouteObject = {
+  path: "mentor",
+  children: [
+    {
+      path: "register",
+      element: <Register />,
+    },
+    {
+      element: <MentorLayout />,
+      children: [
+        {
+          path: "dashboard",
+          element: <MentorDashboard />,
+        },
+        {
+          path: "profile",
+          element: <Profile />,
+        },
+        {
+          path: "preferences",
+          element: <Preferences />,
+        },
+        {
+          path: "benefits",
+          element: <Benefits />,
+        },
+      ],
+    },
+  ],
+};
