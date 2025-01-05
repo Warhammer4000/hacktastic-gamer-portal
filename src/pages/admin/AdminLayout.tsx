@@ -1,17 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import { 
-  Users, 
-  Settings, 
-  BarChart3, 
-  LogOut, 
-  User, 
-  UserCheck, 
-  Cpu,
-  GalleryHorizontal,
-  Newspaper,
-  UsersRound
-} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "next-themes";
@@ -30,13 +18,13 @@ import {
 } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { adminSidebarItems, profileItems } from "./components/sidebar/AdminSidebarItems";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
-  // Check if user is admin
   const { data: userRole, isLoading: isRoleLoading } = useQuery({
     queryKey: ["adminCheck"],
     queryFn: async () => {
@@ -53,7 +41,6 @@ const AdminLayout = () => {
     },
   });
 
-  // Fetch pending mentors count
   const { data: pendingMentorsCount } = useQuery({
     queryKey: ["pendingMentorsCount"],
     queryFn: async () => {
@@ -65,52 +52,8 @@ const AdminLayout = () => {
       if (error) throw error;
       return count || 0;
     },
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 30000,
   });
-
-  const sidebarItems = [
-    {
-      title: "Dashboard",
-      icon: BarChart3,
-      path: "/admin/dashboard",
-    },
-    {
-      title: "Gallery",
-      icon: GalleryHorizontal,
-      path: "/admin/gallery",
-    },
-    {
-      title: "News",
-      icon: Newspaper,
-      path: "/admin/news",
-    },
-    {
-      title: "Teams",
-      icon: UsersRound,
-      path: "/admin/teams",
-    },
-    {
-      title: "Mentor Approval",
-      icon: UserCheck,
-      path: "/admin/mentors",
-      badge: pendingMentorsCount,
-    },
-    {
-      title: "Platform",
-      icon: Cpu,
-      path: "/admin/platform",
-    },
-    {
-      title: "Users",
-      icon: Users,
-      path: "/admin/users",
-    },
-    {
-      title: "Settings",
-      icon: Settings,
-      path: "/admin/settings",
-    },
-  ];
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -155,7 +98,7 @@ const AdminLayout = () => {
               </div>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {sidebarItems.map((item) => (
+                  {adminSidebarItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <button
@@ -166,9 +109,9 @@ const AdminLayout = () => {
                             <item.icon className="h-4 w-4" />
                             <span>{item.title}</span>
                           </div>
-                          {item.badge ? (
+                          {item.title === "Mentor Approval" && pendingMentorsCount ? (
                             <Badge variant="destructive" className="ml-2">
-                              {item.badge}
+                              {pendingMentorsCount}
                             </Badge>
                           ) : null}
                         </button>
@@ -176,28 +119,19 @@ const AdminLayout = () => {
                     </SidebarMenuItem>
                   ))}
                   <SidebarSeparator />
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <button
-                        onClick={() => navigate("/admin/profile")}
-                        className="flex items-center gap-2 w-full"
-                      >
-                        <User className="h-4 w-4" />
-                        <span>Profile</span>
-                      </button>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 w-full text-destructive hover:text-destructive"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span>Logout</span>
-                      </button>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  {profileItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <button
+                          onClick={item.title === "Logout" ? handleLogout : () => navigate(item.path)}
+                          className={`flex items-center gap-2 w-full ${item.className || ""}`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </button>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

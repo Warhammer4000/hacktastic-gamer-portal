@@ -10,6 +10,7 @@ import GalleryPage from "@/pages/admin/gallery/GalleryPage";
 import { NewsTab } from "@/pages/admin/platform/components/news/NewsTab";
 import EditMentorPage from "@/pages/admin/mentors/EditMentorPage";
 import TeamsPage from "@/pages/admin/teams/TeamsPage";
+import EventsPage from "@/pages/admin/events/EventsPage";
 
 export const adminRoutes = (
   <Route path="/admin" element={<AdminLayout />}>
@@ -17,6 +18,7 @@ export const adminRoutes = (
     <Route path="dashboard" element={<AdminDashboard />} />
     <Route path="gallery" element={<GalleryPage />} />
     <Route path="news" element={<NewsTab />} />
+    <Route path="events" element={<EventsPage />} />
     <Route path="mentors" element={<MentorApproval />} />
     <Route path="mentors/edit/:mentorId" element={<EditMentorPage />} />
     <Route path="platform" element={<Platform />} />

@@ -9,6 +9,56 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      events: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          end_time: string
+          id: string
+          roles: Database["public"]["Enums"]["event_role"][]
+          start_time: string
+          status: Database["public"]["Enums"]["event_status"]
+          tech_stacks: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description: string
+          end_time: string
+          id?: string
+          roles?: Database["public"]["Enums"]["event_role"][]
+          start_time: string
+          status?: Database["public"]["Enums"]["event_status"]
+          tech_stacks?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          end_time?: string
+          id?: string
+          roles?: Database["public"]["Enums"]["event_role"][]
+          start_time?: string
+          status?: Database["public"]["Enums"]["event_status"]
+          tech_stacks?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faq_categories: {
         Row: {
           created_at: string
@@ -657,6 +707,8 @@ export type Database = {
       }
     }
     Enums: {
+      event_role: "mentor" | "participant" | "public"
+      event_status: "draft" | "published"
       faq_status: "draft" | "published"
       news_status: "draft" | "published"
       partner_status: "active" | "inactive"
