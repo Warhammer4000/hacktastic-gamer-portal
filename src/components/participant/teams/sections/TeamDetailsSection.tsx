@@ -12,6 +12,9 @@ interface TeamDetailsSectionProps {
   } | null;
   joinCode: string;
   mentorId: string | null;
+  isLeader: boolean;
+  isLocked: boolean;
+  onAssignMentor: () => void;
 }
 
 export function TeamDetailsSection({
@@ -21,6 +24,9 @@ export function TeamDetailsSection({
   techStack,
   joinCode,
   mentorId,
+  isLeader,
+  isLocked,
+  onAssignMentor,
 }: TeamDetailsSectionProps) {
   const copyTeamCode = () => {
     navigator.clipboard.writeText(joinCode);
@@ -51,9 +57,18 @@ export function TeamDetailsSection({
             <Copy className="h-4 w-4" />
           </Button>
         </div>
-        <p>
-          Mentor: {mentorId ? "Assigned" : "Pending Assignment"}
-        </p>
+        <div className="flex items-center gap-2">
+          <p>Mentor: {mentorId ? "Assigned" : "Not Assigned"}</p>
+          {isLeader && isLocked && !mentorId && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onAssignMentor}
+            >
+              Assign Mentor
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

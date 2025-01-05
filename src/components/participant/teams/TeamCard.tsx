@@ -45,7 +45,6 @@ export function TeamCard({
     setIsUpdating(true);
     const newStatus = team.status === 'draft' ? 'open' : 'draft';
     
-    // Optimistically update the UI
     queryClient.setQueryData(['participant-team'], (oldData: any) => ({
       ...oldData,
       status: newStatus,
@@ -60,10 +59,8 @@ export function TeamCard({
       if (error) throw error;
       toast.success(`Team is now ${newStatus}`);
       
-      // Refresh the data to ensure consistency
       queryClient.invalidateQueries({ queryKey: ['participant-team'] });
     } catch (error) {
-      // Revert optimistic update on error
       queryClient.setQueryData(['participant-team'], (oldData: any) => ({
         ...oldData,
         status: team.status,
@@ -87,17 +84,31 @@ export function TeamCard({
 
       if (error) throw error;
       
-      // Call the assign_mentor_to_team function
+      toast.success("Team locked successfully!");
+      queryClient.invalidateQueries({ queryKey: ['participant-team'] });
+    } catch (error) {
+      console.error('Error locking team:', error);
+      toast.error("Failed to lock team");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleAssignMentor = async () => {
+    if (!isLeader || !isLocked) return;
+    
+    setIsUpdating(true);
+    try {
       const { data: mentorId, error: mentorError } = await supabase
         .rpc('assign_mentor_to_team', { team_id: team.id });
 
       if (mentorError) throw mentorError;
 
-      toast.success(mentorId ? "Team locked and mentor assigned!" : "Team locked, waiting for mentor assignment");
+      toast.success(mentorId ? "Mentor assigned successfully!" : "No eligible mentors available at the moment");
       queryClient.invalidateQueries({ queryKey: ['participant-team'] });
     } catch (error) {
-      console.error('Error locking team:', error);
-      toast.error("Failed to lock team");
+      console.error('Error assigning mentor:', error);
+      toast.error("Failed to assign mentor");
     } finally {
       setIsUpdating(false);
     }
@@ -131,6 +142,9 @@ export function TeamCard({
             techStack={team.tech_stack}
             joinCode={team.join_code}
             mentorId={team.mentor_id}
+            isLeader={isLeader}
+            isLocked={isLocked}
+            onAssignMentor={handleAssignMentor}
           />
 
           <TeamMembersSection
