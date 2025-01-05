@@ -7,6 +7,7 @@ import { Users, User, Github, Linkedin, Blocks } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { AdminTeamActions } from "./components/AdminTeamActions";
 
 export default function TeamsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -129,9 +130,16 @@ export default function TeamsPage() {
                     <Users className="h-5 w-5 text-muted-foreground" />
                     <CardTitle>{team.name}</CardTitle>
                   </div>
-                  <Badge className={getStatusColor(team.status)}>
-                    {team.status.replace('_', ' ').toUpperCase()}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge className={getStatusColor(team.status)}>
+                      {team.status.replace('_', ' ').toUpperCase()}
+                    </Badge>
+                    <AdminTeamActions
+                      teamId={team.id}
+                      teamName={team.name}
+                      currentMentorId={team.mentor_id}
+                    />
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-6">
