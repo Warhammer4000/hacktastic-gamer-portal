@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields } from "./event-form/EventFormFields";
 import { eventFormSchema, EventFormValues, EventRole } from "../types/event-form";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -24,6 +25,7 @@ interface CreateEventDialogProps {
 export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
@@ -63,6 +65,9 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
 
       if (error) throw error;
 
+      // Invalidate the events query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+
       toast({
         title: "Event created",
         description: "Your event has been created successfully.",
@@ -84,9 +89,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="sm:max-w-[600px]"
-      >
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Create Event</DialogTitle>
           <DialogDescription>
