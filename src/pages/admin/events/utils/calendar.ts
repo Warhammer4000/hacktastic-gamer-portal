@@ -1,4 +1,5 @@
 import { createEvents } from 'ics';
+import { v4 as uuidv4 } from 'uuid';
 
 export function generateICSString(event: any) {
   const start = new Date(event.start_time);
@@ -41,22 +42,32 @@ export function generateVEVENTUrl(event: any) {
     return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   };
 
+  const now = new Date();
   const eventData = {
-    title: encodeURIComponent(event.title),
-    description: encodeURIComponent(event.description),
+    uid: uuidv4().replace(/-/g, '').substring(0, 20), // Generate a shorter UID
+    title: event.title.replace(/[,\n]/g, '\\,'),
+    description: event.description.replace(/[,\n]/g, '\\,'),
     startTime: formatDate(start),
     endTime: formatDate(end),
+    timestamp: formatDate(now)
   };
 
   return `BEGIN:VCALENDAR
 VERSION:2.0
+CALSCALE:GREGORIAN
+PRODID:adamgibbons/ics
+METHOD:PUBLISH
+X-PUBLISHED-TTL:PT1H
 BEGIN:VEVENT
+UID:${eventData.uid}
 SUMMARY:${eventData.title}
-DESCRIPTION:${eventData.description}
+DTSTAMP:${eventData.timestamp}
 DTSTART:${eventData.startTime}
 DTEND:${eventData.endTime}
+DESCRIPTION:${eventData.description}
+STATUS:CONFIRMED
 END:VEVENT
-END:VCALENDAR`.replace(/\n/g, '%0A');
+END:VCALENDAR`.replace(/\n/g, '\r\n');
 }
 
 export function downloadICS(event: any) {
