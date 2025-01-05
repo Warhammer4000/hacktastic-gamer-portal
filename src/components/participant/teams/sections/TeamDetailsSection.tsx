@@ -14,7 +14,7 @@ interface TeamDetailsSectionProps {
   mentorId: string | null;
   isLeader: boolean;
   isLocked: boolean;
-  onAssignMentor: () => void;
+  onAssignMentor: () => Promise<void>;
 }
 
 export function TeamDetailsSection({
@@ -31,6 +31,16 @@ export function TeamDetailsSection({
   const copyTeamCode = () => {
     navigator.clipboard.writeText(joinCode);
     toast.success("Team code copied to clipboard!");
+  };
+
+  const handleAssignMentor = async () => {
+    try {
+      console.log('Attempting to assign mentor...');
+      await onAssignMentor();
+    } catch (error) {
+      console.error('Error in handleAssignMentor:', error);
+      toast.error("Failed to assign mentor. Please try again.");
+    }
   };
 
   return (
@@ -63,7 +73,7 @@ export function TeamDetailsSection({
             <Button 
               variant="outline" 
               size="sm"
-              onClick={onAssignMentor}
+              onClick={handleAssignMentor}
             >
               Assign Mentor
             </Button>

@@ -95,14 +95,24 @@ export function TeamCard({
   };
 
   const handleAssignMentor = async () => {
-    if (!isLeader || !isLocked) return;
+    console.log('handleAssignMentor called');
+    if (!isLeader || !isLocked) {
+      console.log('Conditions not met:', { isLeader, isLocked });
+      return;
+    }
     
     setIsUpdating(true);
     try {
+      console.log('Calling assign_mentor_to_team RPC with team_id:', team.id);
       const { data: mentorId, error: mentorError } = await supabase
         .rpc('assign_mentor_to_team', { team_id: team.id });
 
-      if (mentorError) throw mentorError;
+      if (mentorError) {
+        console.error('RPC error:', mentorError);
+        throw mentorError;
+      }
+
+      console.log('RPC response:', { mentorId });
 
       if (!mentorId) {
         toast.error(
