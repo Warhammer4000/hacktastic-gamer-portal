@@ -1,6 +1,7 @@
 import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { TeamMentorDetails } from "./TeamMentorDetails";
 
 interface TeamDetailsSectionProps {
   name: string;
@@ -67,19 +68,19 @@ export function TeamDetailsSection({
             <Copy className="h-4 w-4" />
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <p>Mentor: {mentorId ? "Assigned" : "Not Assigned"}</p>
-          {isLeader && isLocked && !mentorId && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleAssignMentor}
-            >
-              Assign Mentor
-            </Button>
-          )}
-        </div>
+        {isLeader && isLocked && !mentorId && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleAssignMentor}
+            className="mt-2"
+          >
+            Assign Mentor
+          </Button>
+        )}
       </div>
+      
+      <TeamMentorDetails mentorId={mentorId} />
     </div>
   );
 }

@@ -21,19 +21,24 @@ export function TeamHeaderActions({
   onEdit,
   onDelete,
 }: TeamHeaderActionsProps) {
-  if (!isLeader || isLocked) return null;
+  // Don't show any actions if not leader or if team is locked
+  if (!isLeader || isLocked || status === 'active' || status === 'pending_mentor') return null;
+
+  const showToggle = status === 'draft' || status === 'open';
 
   return (
     <div className="flex items-center gap-2">
-      <Toggle
-        pressed={status === 'open'}
-        onPressedChange={onStatusToggle}
-        disabled={isUpdating}
-        className="gap-2 data-[state=on]:bg-green-500"
-        aria-label="Toggle team status"
-      >
-        {status === 'draft' ? 'Draft' : 'Open'}
-      </Toggle>
+      {showToggle && (
+        <Toggle
+          pressed={status === 'open'}
+          onPressedChange={onStatusToggle}
+          disabled={isUpdating}
+          className="gap-2 data-[state=on]:bg-green-500"
+          aria-label="Toggle team status"
+        >
+          {status === 'draft' ? 'Draft' : 'Open'}
+        </Toggle>
+      )}
       <Button
         variant="ghost"
         size="sm"
