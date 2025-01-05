@@ -1,7 +1,6 @@
 import { TeamCard } from "../TeamCard";
-import { TeamCodeCard } from "../TeamCodeCard";
-import { TeamMentorCard } from "../TeamMentorCard";
-import { TeamMembersCard } from "../TeamMembersCard";
+import { TeamDetailsDialog } from "../TeamDetailsDialog";
+import { useState } from "react";
 
 interface TeamSectionProps {
   team: {
@@ -20,7 +19,6 @@ interface TeamSectionProps {
     } | null;
   };
   currentUserId: string;
-  onViewTeam: () => void;
   onDeleteTeam: () => void;
   onLockTeam: () => void;
 }
@@ -28,31 +26,28 @@ interface TeamSectionProps {
 export function TeamSection({ 
   team, 
   currentUserId, 
-  onViewTeam, 
   onDeleteTeam,
   onLockTeam 
 }: TeamSectionProps) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const isLeader = team.leader_id === currentUserId;
   const isLocked = team.status === 'locked';
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <>
       <TeamCard
         team={team}
-        onViewTeam={onViewTeam}
+        onEditTeam={() => setIsEditDialogOpen(true)}
         onDeleteTeam={onDeleteTeam}
         isLocked={isLocked}
         currentUserId={currentUserId}
       />
-      <TeamCodeCard joinCode={team.join_code} />
-      <TeamMentorCard mentorId={team.mentor_id} />
-      <TeamMembersCard
-        teamId={team.id}
-        maxMembers={3}
-        isLeader={isLeader}
-        isLocked={isLocked}
-        onLockTeam={onLockTeam}
+
+      <TeamDetailsDialog
+        isOpen={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        team={team}
       />
-    </div>
+    </>
   );
 }
