@@ -1,5 +1,6 @@
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface TeamMemberActionsProps {
   isLocked: boolean;
@@ -7,7 +8,7 @@ interface TeamMemberActionsProps {
   isReady: boolean;
   showLockButton: boolean;
   onReadyToggle: () => void;
-  onLeaveTeam: () => void;
+  onLeaveTeam: () => Promise<void>;
   onLockTeam: () => void;
   isUpdating: boolean;
 }
@@ -22,6 +23,18 @@ export function TeamMemberActions({
   onLockTeam,
   isUpdating
 }: TeamMemberActionsProps) {
+  const navigate = useNavigate();
+
+  const handleLeaveTeam = async () => {
+    try {
+      await onLeaveTeam();
+      // After successfully leaving, refresh the page to show team selection
+      navigate(0);
+    } catch (error) {
+      console.error("Error leaving team:", error);
+    }
+  };
+
   return (
     <div className="flex justify-end gap-2 pt-4">
       {!isLocked && !isReady && !isLeader && (
@@ -35,7 +48,7 @@ export function TeamMemberActions({
       {!isLocked && !isLeader && (
         <Button
           variant="destructive"
-          onClick={onLeaveTeam}
+          onClick={handleLeaveTeam}
           disabled={isUpdating}
         >
           Leave Team
