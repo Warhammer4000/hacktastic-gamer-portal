@@ -1,4 +1,4 @@
-import { Crown, User, UserCheck, UserX } from "lucide-react";
+import { Crown, User, UserCheck, Footprints } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,10 +29,10 @@ export function TeamMemberItem({
         .eq('user_id', userId);
 
       if (error) throw error;
-      toast.success("Team member removed successfully");
+      toast.success("Team member kicked successfully");
     } catch (error) {
-      console.error('Error removing team member:', error);
-      toast.error("Failed to remove team member");
+      console.error('Error kicking team member:', error);
+      toast.error("Failed to kick team member");
     }
   };
 
@@ -56,8 +56,9 @@ export function TeamMemberItem({
             size="icon"
             onClick={handleRemoveMember}
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            title="Kick member"
           >
-            <UserX className="h-4 w-4" />
+            <Footprints className="h-4 w-4" />
           </Button>
         )}
       </div>
