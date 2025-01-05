@@ -1,46 +1,17 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Filter, UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { SearchInput } from "./components/SearchInput";
-import { Input } from "@/components/ui/input";
-
-const joinTeamSchema = z.object({
-  joinCode: z.string().length(6, "Team code must be exactly 6 characters"),
-});
-
-type JoinTeamForm = z.infer<typeof joinTeamSchema>;
+import { TeamListItem } from "./components/TeamListItem";
+import { JoinTeamForm } from "./components/JoinTeamForm";
+import { TeamFilters } from "./components/TeamFilters";
 
 export function JoinTeamSection() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTechStack, setSelectedTechStack] = useState<string>("");
+  const [selectedTechStack, setSelectedTechStack] = useState("all");
   
-  const form = useForm<JoinTeamForm>({
-    resolver: zodResolver(joinTeamSchema),
-  });
-
   const { data: techStacks } = useQuery({
     queryKey: ['tech-stacks'],
     queryFn: async () => {
@@ -76,7 +47,7 @@ export function JoinTeamSection() {
         query = query.ilike('name', `%${searchQuery}%`);
       }
 
-      if (selectedTechStack) {
+      if (selectedTechStack && selectedTechStack !== 'all') {
         query = query.eq('tech_stack_id', selectedTechStack);
       }
 
@@ -86,7 +57,7 @@ export function JoinTeamSection() {
     },
   });
 
-  async function onSubmit(data: JoinTeamForm) {
+  const handleJoinWithCode = async (data: { joinCode: string }) => {
     try {
       const { data: team, error: teamError } = await supabase
         .from('teams')
@@ -116,13 +87,12 @@ export function JoinTeamSection() {
       }
 
       toast.success("Successfully joined team!");
-      form.reset();
       refetch();
     } catch (error) {
       toast.error("Failed to join team. Please try again.");
       console.error("Error joining team:", error);
     }
-  }
+  };
 
   const handleJoinTeam = async (teamId: string) => {
     try {
@@ -159,91 +129,25 @@ export function JoinTeamSection() {
         <CardTitle>Join Team</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="joinCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Team Code</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter 6-character code"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                      maxLength={6}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Join with Code
-            </Button>
-          </form>
-        </Form>
+        <JoinTeamForm onSubmit={handleJoinWithCode} />
 
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <SearchInput
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search teams..."
-                className="w-full"
-              />
-            </div>
-            <Select value={selectedTechStack} onValueChange={setSelectedTechStack}>
-              <SelectTrigger className="w-[180px]">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Tech Stack" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Tech Stacks</SelectItem>
-                {techStacks?.map((stack) => (
-                  <SelectItem key={stack.id} value={stack.id}>
-                    {stack.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <TeamFilters
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedTechStack={selectedTechStack}
+            onTechStackChange={setSelectedTechStack}
+            techStacks={techStacks}
+          />
 
           <ScrollArea className="h-[400px] rounded-md border p-4">
             <div className="space-y-4">
               {availableTeams?.map((team) => (
-                <div
+                <TeamListItem
                   key={team.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div>
-                    <h3 className="font-medium">{team.name}</h3>
-                    {team.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {team.description}
-                      </p>
-                    )}
-                    {team.tech_stack && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Tech Stack: {team.tech_stack.name}
-                      </p>
-                    )}
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Members: {team.team_members.length}/3
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleJoinTeam(team.id)}
-                  >
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Join
-                  </Button>
-                </div>
+                  team={team}
+                  onJoin={handleJoinTeam}
+                />
               ))}
             </div>
           </ScrollArea>
