@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UserSelectionList } from "../batches/UserSelectionList";
+import { useQuery } from "@tanstack/react-query";
 
 interface AssignCouponDialogProps {
   open: boolean;
@@ -23,13 +24,20 @@ export function AssignCouponDialog({
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [users, setUsers] = useState<any[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(true);
 
   // Get array of already assigned user IDs
   const { data: eligibleUsers, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["eligible-users", batchId],
     queryFn: async () => {
+      // First get the batch details to check eligible roles
+      const { data: batchData, error: batchError } = await supabase
+        .from('coupon_batches')
+        .select('eligible_roles')
+        .eq('id', batchId)
+        .single();
+
+      if (batchError) throw batchError;
+
       const { data: usersWithRoles, error } = await supabase
         .from("user_roles")
         .select(
@@ -43,7 +51,7 @@ export function AssignCouponDialog({
           )
         `
         )
-        .in("role", batch.eligible_roles);
+        .in("role", batchData.eligible_roles);
 
       if (error) throw error;
 
