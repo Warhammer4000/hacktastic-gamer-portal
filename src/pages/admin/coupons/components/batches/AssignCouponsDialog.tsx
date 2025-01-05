@@ -10,7 +10,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Users } from "lucide-react";
+import { Users, CheckSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -44,7 +44,6 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
   const { data: eligibleUsers, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["eligible-users", batch.id],
     queryFn: async () => {
-      // First get all users with eligible roles
       const { data: usersWithRoles, error } = await supabase
         .from("user_roles")
         .select(`
@@ -130,6 +129,18 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
     assignCouponsMutation.mutate(selectedUsers);
   };
 
+  const handleSelectAll = () => {
+    if (!eligibleUsers) return;
+    
+    if (selectedUsers.length === eligibleUsers.length) {
+      // If all users are selected, deselect all
+      setSelectedUsers([]);
+    } else {
+      // Otherwise, select all eligible users
+      setSelectedUsers(eligibleUsers.map(user => user.user_id));
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -151,7 +162,20 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label>Select Users</Label>
+            <div className="flex items-center justify-between">
+              <Label>Select Users</Label>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSelectAll}
+                className="flex items-center gap-2"
+              >
+                <CheckSquare className="h-4 w-4" />
+                {selectedUsers.length === (eligibleUsers?.length || 0)
+                  ? "Deselect All"
+                  : "Select All"}
+              </Button>
+            </div>
             {isLoadingUsers ? (
               <div>Loading users...</div>
             ) : (
