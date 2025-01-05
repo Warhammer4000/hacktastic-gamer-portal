@@ -17,17 +17,26 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAssignMentorDialogOpen, setIsAssignMentorDialogOpen] = useState(false);
   const [isReassignMentorDialogOpen, setIsReassignMentorDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
 
   const handleDeleteTeam = async () => {
     try {
+      setIsDeleting(true);
+      console.log('Starting team deletion process for team:', teamId);
+
       // First, delete all team members
       const { error: membersError } = await supabase
         .from('team_members')
         .delete()
         .eq('team_id', teamId);
 
-      if (membersError) throw membersError;
+      if (membersError) {
+        console.error('Error deleting team members:', membersError);
+        throw new Error(`Failed to delete team members: ${membersError.message}`);
+      }
+
+      console.log('Successfully deleted team members');
 
       // Then, delete the team itself
       const { error: teamError } = await supabase
@@ -35,14 +44,19 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
         .delete()
         .eq('id', teamId);
 
-      if (teamError) throw teamError;
+      if (teamError) {
+        console.error('Error deleting team:', teamError);
+        throw new Error(`Failed to delete team: ${teamError.message}`);
+      }
 
+      console.log('Successfully deleted team');
       toast.success("Team deleted successfully");
       queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
     } catch (error) {
-      console.error('Error deleting team:', error);
-      toast.error("Failed to delete team");
+      console.error('Error in delete operation:', error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete team");
     } finally {
+      setIsDeleting(false);
       setIsDeleteDialogOpen(false);
     }
   };
@@ -150,12 +164,13 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteTeam}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
             >
-              Delete Team
+              {isDeleting ? "Deleting..." : "Delete Team"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
