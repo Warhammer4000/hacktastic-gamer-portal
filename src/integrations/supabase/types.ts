@@ -601,6 +601,33 @@ export type Database = {
         }
         Relationships: []
       }
+      social_media_links: {
+        Row: {
+          created_at: string
+          id: string
+          platform: Database["public"]["Enums"]["social_media_platform"]
+          status: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: Database["public"]["Enums"]["social_media_platform"]
+          status?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: Database["public"]["Enums"]["social_media_platform"]
+          status?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           id: string
@@ -834,6 +861,14 @@ export type Database = {
       partner_status: "active" | "inactive"
       privacy_policy_status: "draft" | "published"
       profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
+      social_media_platform:
+        | "facebook"
+        | "twitter"
+        | "instagram"
+        | "youtube"
+        | "website"
+        | "medium"
+        | "linkedin"
       team_status: "draft" | "open" | "locked" | "pending_mentor" | "active"
       tech_stack_status: "active" | "inactive"
       terms_and_conditions_status: "draft" | "published"

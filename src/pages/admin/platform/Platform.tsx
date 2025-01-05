@@ -4,6 +4,7 @@ import { PartnersTab } from "./components/partners/PartnersTab";
 import { FAQTab } from "./components/faq/FAQTab";
 import { PrivacyPolicyTab } from "./components/privacy/PrivacyPolicyTab";
 import { TermsAndConditionsTab } from "./components/terms/TermsAndConditionsTab";
+import { SocialMediaTab } from "./components/social/SocialMediaTab";
 
 const Platform = () => {
   return (
@@ -14,6 +15,7 @@ const Platform = () => {
         <TabsList>
           <TabsTrigger value="technology">Technology Stacks</TabsTrigger>
           <TabsTrigger value="partners">Partners</TabsTrigger>
+          <TabsTrigger value="social">Social Media</TabsTrigger>
           <TabsTrigger value="faq">FAQ</TabsTrigger>
           <TabsTrigger value="terms">Terms & Conditions</TabsTrigger>
           <TabsTrigger value="privacy">Privacy Policy</TabsTrigger>
@@ -25,6 +27,10 @@ const Platform = () => {
         
         <TabsContent value="partners">
           <PartnersTab />
+        </TabsContent>
+
+        <TabsContent value="social">
+          <SocialMediaTab />
         </TabsContent>
 
         <TabsContent value="faq">
