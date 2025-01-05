@@ -6,7 +6,7 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useTeamMemberActions } from "../hooks/useTeamMemberActions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Lock } from "lucide-react";
+import { Users } from "lucide-react";
 
 interface TeamMembersSectionProps {
   teamId: string;
@@ -30,7 +30,7 @@ export function TeamMembersSection({
     queryFn: async () => {
       const { data: team, error } = await supabase
         .from('teams')
-        .select('leader_id, max_members')
+        .select('leader_id, max_members, status')
         .eq('id', teamId)
         .single();
 
@@ -90,6 +90,7 @@ export function TeamMembersSection({
         onLeaveTeam={handleLeaveTeam}
         onLockTeam={onLockTeam}
         isUpdating={false}
+        teamStatus={team?.status}
       />
     </div>
   );

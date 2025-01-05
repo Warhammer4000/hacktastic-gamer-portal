@@ -10,6 +10,7 @@ interface TeamMemberActionsProps {
   onLeaveTeam: () => Promise<void>;
   onLockTeam: () => void;
   isUpdating: boolean;
+  teamStatus?: string;
 }
 
 export function TeamMemberActions({
@@ -20,8 +21,11 @@ export function TeamMemberActions({
   onReadyToggle,
   onLeaveTeam,
   onLockTeam,
-  isUpdating
+  isUpdating,
+  teamStatus
 }: TeamMemberActionsProps) {
+  const canShowLockButton = showLockButton && teamStatus === 'open';
+
   return (
     <div className="flex justify-end gap-2 pt-4">
       {!isLocked && !isReady && !isLeader && (
@@ -41,7 +45,7 @@ export function TeamMemberActions({
           Leave Team
         </Button>
       )}
-      {showLockButton && (
+      {canShowLockButton && (
         <Button
           variant="default"
           onClick={onLockTeam}
