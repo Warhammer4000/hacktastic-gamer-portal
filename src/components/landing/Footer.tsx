@@ -1,6 +1,32 @@
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Facebook, Twitter, Instagram, Youtube, Linkedin, Globe, FileText } from "lucide-react";
+
+const socialIcons = {
+  facebook: Facebook,
+  twitter: Twitter,
+  instagram: Instagram,
+  youtube: Youtube,
+  linkedin: Linkedin,
+  website: Globe,
+  medium: FileText,
+};
 
 export default function Footer() {
+  const { data: socialLinks } = useQuery({
+    queryKey: ["social-media-links"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("social_media_links")
+        .select("*")
+        .eq("status", "active");
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <footer className="bg-gray-900 text-gray-300 py-12">
       <div className="container mx-auto px-4">
@@ -65,36 +91,22 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Connect</h4>
             <ul className="space-y-2">
-              <li>
-                <a
-                  href="#"
-                  className="hover:text-white transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Twitter
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="hover:text-white transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Discord
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="hover:text-white transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  GitHub
-                </a>
-              </li>
+              {socialLinks?.map((link) => {
+                const Icon = socialIcons[link.platform as keyof typeof socialIcons];
+                return (
+                  <li key={link.id}>
+                    <a
+                      href={link.url}
+                      className="hover:text-white transition-colors flex items-center gap-2"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="capitalize">{link.platform}</span>
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
