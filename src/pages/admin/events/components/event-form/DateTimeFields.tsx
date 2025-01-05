@@ -22,14 +22,14 @@ export function DateTimeFields({ form }: DateTimeFieldsProps) {
         render={({ field }) => (
           <FormItem className="flex flex-col">
             <FormLabel>Start Time</FormLabel>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
+                        "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
                     >
@@ -42,7 +42,7 @@ export function DateTimeFields({ form }: DateTimeFieldsProps) {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 z-50" align="start">
                   <Calendar
                     mode="single"
                     selected={field.value ? new Date(field.value) : undefined}
@@ -62,7 +62,7 @@ export function DateTimeFields({ form }: DateTimeFieldsProps) {
                 <Clock className="h-4 w-4 opacity-50" />
                 <Input
                   type="time"
-                  className="w-[120px]"
+                  className="w-full"
                   value={field.value ? format(new Date(field.value), "HH:mm") : ""}
                   onChange={(e) => {
                     const [hours, minutes] = e.target.value.split(":");
@@ -85,14 +85,14 @@ export function DateTimeFields({ form }: DateTimeFieldsProps) {
         render={({ field }) => (
           <FormItem className="flex flex-col">
             <FormLabel>End Time</FormLabel>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
+                        "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
                     >
@@ -105,7 +105,7 @@ export function DateTimeFields({ form }: DateTimeFieldsProps) {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 z-50" align="start">
                   <Calendar
                     mode="single"
                     selected={field.value ? new Date(field.value) : undefined}
@@ -125,7 +125,7 @@ export function DateTimeFields({ form }: DateTimeFieldsProps) {
                 <Clock className="h-4 w-4 opacity-50" />
                 <Input
                   type="time"
-                  className="w-[120px]"
+                  className="w-full"
                   value={field.value ? format(new Date(field.value), "HH:mm") : ""}
                   onChange={(e) => {
                     const [hours, minutes] = e.target.value.split(":");
