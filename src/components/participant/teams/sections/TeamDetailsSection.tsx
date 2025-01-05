@@ -1,9 +1,10 @@
-import { Copy, Github, Users, Blocks } from "lucide-react";
+import { Copy, Github, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { TeamMentorDetails } from "./TeamMentorDetails";
 import { TeamRepositorySection } from "./repository/TeamRepositorySection";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface TeamDetailsSectionProps {
   name: string;
@@ -78,13 +79,18 @@ export function TeamDetailsSection({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Tech Stack Info */}
         <div className="space-y-2 p-4 rounded-lg border">
-          <h4 className="font-medium text-sm text-muted-foreground flex items-center gap-2">
-            <Blocks className="h-4 w-4" />
-            Tech Stack
-          </h4>
-          <p className="font-medium">
-            {techStack?.name || 'Not specified'}
-          </p>
+          <h4 className="font-medium text-sm text-muted-foreground">Tech Stack</h4>
+          <div className="flex items-center gap-2">
+            {techStack?.icon_url && (
+              <Avatar className="h-6 w-6">
+                <AvatarImage src={techStack.icon_url} alt={techStack.name} />
+                <AvatarFallback>{techStack.name[0]}</AvatarFallback>
+              </Avatar>
+            )}
+            <p className="font-medium">
+              {techStack?.name || 'Not specified'}
+            </p>
+          </div>
         </div>
 
         {/* Team Code */}
