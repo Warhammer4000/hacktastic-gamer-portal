@@ -40,33 +40,37 @@ export default function ParticipantTable() {
 
   const deleteParticipant = useMutation({
     mutationFn: async (userId: string) => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.access_token) {
-        throw new Error('No session found');
+      // First delete related records
+      const deletions = [
+        // Delete user roles
+        supabase.from('user_roles').delete().eq('user_id', userId),
+        // Delete levels
+        supabase.from('levels').delete().eq('user_id', userId),
+        // Delete team memberships
+        supabase.from('team_members').delete().eq('user_id', userId),
+        // Delete profile
+        supabase.from('profiles').delete().eq('id', userId),
+      ];
+
+      // Execute all deletions
+      const results = await Promise.all(deletions);
+      
+      // Check for errors
+      const errors = results.filter(result => result.error);
+      if (errors.length > 0) {
+        throw new Error('Failed to delete user data');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete user');
-      }
-
-      return response.json();
+      // Finally delete the auth user
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      if (authError) throw authError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['participant-users'] });
       toast.success('Participant removed successfully');
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      toast.error('Failed to remove participant');
       console.error('Error:', error);
     },
   });
