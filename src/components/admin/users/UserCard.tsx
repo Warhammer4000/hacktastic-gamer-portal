@@ -34,9 +34,9 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
           )
         `)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
+      if (error) throw error;
       return teamMember?.team;
     },
   });
