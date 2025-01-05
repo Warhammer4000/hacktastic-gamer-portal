@@ -84,7 +84,7 @@ export function TeamMentorDetails({ mentorId }: TeamMentorDetailsProps) {
                 className="text-muted-foreground hover:text-primary flex items-center gap-1"
               >
                 <Linkedin className="h-4 w-4" />
-                <span className="text-sm">Profile</span>
+                <span className="text-sm">{mentorProfile.linkedin_profile_id}</span>
               </a>
             )}
           </div>
