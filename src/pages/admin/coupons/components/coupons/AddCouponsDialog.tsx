@@ -9,9 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
 
@@ -40,7 +39,18 @@ export const AddCouponsDialog = ({ batchId }: { batchId: string }) => {
         }))
       );
 
-      if (error) throw error;
+      if (error) {
+        // Check for unique constraint violation
+        if (error.code === '23505') {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Some coupon codes are duplicates. Please ensure all codes are unique within this batch.",
+          });
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Success",
