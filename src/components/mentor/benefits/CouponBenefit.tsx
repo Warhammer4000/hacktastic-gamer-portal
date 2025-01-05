@@ -62,13 +62,18 @@ export function CouponBenefit({ coupon }: CouponBenefitProps) {
   return (
     <Card className="relative overflow-hidden">
       <CardHeader className="flex flex-row items-center gap-4">
-        <div className="h-12 w-12 rounded-lg border p-2 flex items-center justify-center">
+        <a 
+          href={coupon.coupon_batches.coupon_vendors.website_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="h-12 w-12 rounded-lg border p-2 flex items-center justify-center hover:bg-muted transition-colors"
+        >
           <img
             src={coupon.coupon_batches.coupon_vendors.icon_url}
             alt={coupon.coupon_batches.coupon_vendors.name}
             className="h-full w-full object-contain"
           />
-        </div>
+        </a>
         <div className="flex-1">
           <h4 className="text-lg font-semibold">
             {coupon.coupon_batches.name}
@@ -77,6 +82,22 @@ export function CouponBenefit({ coupon }: CouponBenefitProps) {
             {coupon.coupon_batches.coupon_vendors.name}
           </p>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          asChild
+          className="shrink-0"
+        >
+          <a
+            href={coupon.coupon_batches.coupon_vendors.website_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Visit Website
+          </a>
+        </Button>
       </CardHeader>
       <CardContent className="space-y-2">
         {coupon.coupon_batches.description && (
@@ -114,7 +135,7 @@ export function CouponBenefit({ coupon }: CouponBenefitProps) {
             asChild
           >
             <a
-              href={coupon.coupon_batches.coupon_vendors.website_url}
+              href={`${coupon.coupon_batches.coupon_vendors.website_url}?coupon=${coupon.code}`}
               target="_blank"
               rel="noopener noreferrer"
             >
