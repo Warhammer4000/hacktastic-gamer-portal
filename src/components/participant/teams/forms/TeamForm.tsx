@@ -53,16 +53,20 @@ export function TeamForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="h-full flex flex-col space-y-4">
-        <div className="flex-1 space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="h-full flex flex-col">
+        <div className="flex-1 space-y-6">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Team Name</FormLabel>
+                <FormLabel className="text-base">Team Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter team name" {...field} />
+                  <Input 
+                    placeholder="Enter a memorable team name" 
+                    className="h-11"
+                    {...field} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -74,11 +78,11 @@ export function TeamForm({
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel className="text-base">Description</FormLabel>
                 <FormControl>
                   <Textarea 
-                    placeholder="Describe your team and project idea..."
-                    className="min-h-[120px] resize-none"
+                    placeholder="Share your project idea and what kind of teammates you're looking for..."
+                    className="min-h-[160px] resize-none text-base leading-relaxed"
                     {...field} 
                   />
                 </FormControl>
@@ -92,14 +96,14 @@ export function TeamForm({
             name="techStackId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Technology Stack</FormLabel>
+                <FormLabel className="text-base">Technology Stack</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a technology stack" />
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Choose your primary technology stack" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -125,10 +129,11 @@ export function TeamForm({
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full mt-auto"
+          size="lg"
+          className="w-full mt-8"
         >
           {isSubmitting && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           )}
           {submitLabel}
         </Button>
