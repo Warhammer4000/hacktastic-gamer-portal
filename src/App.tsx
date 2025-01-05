@@ -8,6 +8,11 @@ import Profile from "@/pages/mentor/Profile";
 import Preferences from "@/pages/mentor/Preferences";
 import Register from "@/pages/mentor/Register";
 import Benefits from "@/pages/mentor/Benefits";
+import PublicLayout from "@/pages/public/PublicLayout";
+import NewsPage from "@/pages/public/news/NewsPage";
+import NewsDetailPage from "@/pages/public/news/NewsDetailPage";
+import GalleryPage from "@/pages/public/gallery/GalleryPage";
+import FAQPage from "@/pages/public/faq/FAQPage";
 
 function App() {
   return (
@@ -26,7 +31,13 @@ function App() {
       </Route>
 
       {/* Public Routes */}
-      <Route path="/mentors" element={<MentorsPage />} />
+      <Route path="/public" element={<PublicLayout />}>
+        <Route path="mentors" element={<MentorsPage />} />
+        <Route path="news" element={<NewsPage />} />
+        <Route path="news/:id" element={<NewsDetailPage />} />
+        <Route path="gallery" element={<GalleryPage />} />
+        <Route path="faq" element={<FAQPage />} />
+      </Route>
       
       {/* 404 Route */}
       <Route path="*" element={<NotFound />} />

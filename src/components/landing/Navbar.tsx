@@ -13,7 +13,7 @@ export default function Navbar() {
             HackathonHub
           </Link>
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/mentors" className="nav-link">Mentors</Link>
+            <Link to="/public/mentors" className="nav-link">Mentors</Link>
             <Link to="/about" className="nav-link">About</Link>
             <Link to="/public/news" className="nav-link">News</Link>
             <Link to="/public/gallery" className="nav-link">Gallery</Link>
