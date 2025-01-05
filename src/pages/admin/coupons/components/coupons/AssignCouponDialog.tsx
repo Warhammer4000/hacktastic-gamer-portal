@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,43 +26,14 @@ export function AssignCouponDialog({
   const [users, setUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
 
-  const loadEligibleUsers = async () => {
-    try {
-      setLoadingUsers(true);
-      console.log('Loading eligible users for batch:', batchId);
-      
-      // First, get the batch details to check eligible roles
-      const { data: batchData, error: batchError } = await supabase
-        .from('coupon_batches')
-        .select('eligible_roles')
-        .eq('id', batchId)
-        .single();
-
-      if (batchError) {
-        console.error('Error fetching batch:', batchError);
-        throw batchError;
-      }
-
-      console.log('Batch data:', batchData);
-
-      // First get the list of users who already have coupons from this batch
-      const { data: assignedUsers, error: assignedError } = await supabase
-        .from('coupons')
-        .select('assigned_to')
-        .eq('batch_id', batchId)
-        .not('assigned_to', 'is', null);
-
-      if (assignedError) {
-        console.error('Error fetching assigned users:', assignedError);
-        throw assignedError;
-      }
-
-      const assignedUserIds = assignedUsers.map(u => u.assigned_to);
-
-      // Then get eligible users who haven't been assigned a coupon
-      const { data: eligibleUsers, error: usersError } = await supabase
-        .from('user_roles')
-        .select(`
+  // Get array of already assigned user IDs
+  const { data: eligibleUsers, isLoading: isLoadingUsers } = useQuery({
+    queryKey: ["eligible-users", batchId],
+    queryFn: async () => {
+      const { data: usersWithRoles, error } = await supabase
+        .from("user_roles")
+        .select(
+          `
           user_id,
           role,
           user:profiles!inner(
@@ -70,28 +41,27 @@ export function AssignCouponDialog({
             full_name,
             email
           )
-        `)
-        .in('role', batchData.eligible_roles)
-        .not('user_id', 'in', assignedUserIds);
+        `
+        )
+        .in("role", batch.eligible_roles);
 
-      if (usersError) {
-        console.error('Error fetching users:', usersError);
-        throw usersError;
-      }
+      if (error) throw error;
 
-      console.log('Eligible users:', eligibleUsers);
-      setUsers(eligibleUsers || []);
-    } catch (error: any) {
-      console.error('Error in loadEligibleUsers:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load eligible users",
-      });
-    } finally {
-      setLoadingUsers(false);
-    }
-  };
+      // Filter out users who already have coupons from this batch
+      const { data: assignedUsers } = await supabase
+        .from("coupons")
+        .select("assigned_to")
+        .eq("batch_id", batchId)
+        .not("assigned_to", "is", null);
+
+      const assignedUserIds = assignedUsers?.map((u) => u.assigned_to) || [];
+
+      return usersWithRoles.filter(
+        (user) => !assignedUserIds.includes(user.user_id)
+      );
+    },
+    enabled: open,
+  });
 
   const handleAssign = async () => {
     if (!couponId || selectedUsers.length === 0) {
@@ -134,26 +104,28 @@ export function AssignCouponDialog({
     }
   };
 
-  // Load users when dialog opens
+  // Reset selection when dialog opens
   useEffect(() => {
     if (open) {
-      loadEligibleUsers();
       setSelectedUsers([]);
     }
-  }, [open, batchId]);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Assign Coupon</DialogTitle>
+          <DialogDescription>
+            Select a user to assign this coupon to.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <UserSelectionList
-            users={users}
+            users={eligibleUsers || []}
             selectedUsers={selectedUsers}
             onSelectionChange={(selected) => setSelectedUsers(selected)}
-            isLoading={loadingUsers}
+            isLoading={isLoadingUsers}
           />
           <Button 
             onClick={handleAssign} 
