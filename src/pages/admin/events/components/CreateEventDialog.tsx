@@ -32,6 +32,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
       description: "",
       tech_stacks: [],
       roles: [],
+      isPublic: false,
       start_time: "",
       end_time: "",
     },
@@ -44,11 +45,16 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      const roles: EventRole[] = [...data.roles];
+      if (data.isPublic) {
+        roles.push("public" as EventRole);
+      }
+
       const { error } = await supabase.from("events").insert({
         title: data.title,
         description: data.description,
         tech_stacks: data.tech_stacks,
-        roles: data.roles as EventRole[],
+        roles: roles,
         start_time: new Date(data.start_time).toISOString(),
         end_time: new Date(data.end_time).toISOString(),
         status: "draft",
