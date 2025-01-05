@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { generateICSString } from "../utils/calendar";
+import { generateVEVENTUrl } from "../utils/calendar";
 
 interface EventQRDialogProps {
   open: boolean;
@@ -20,9 +20,8 @@ export function EventQRDialog({ open, onOpenChange, event }: EventQRDialogProps)
 
   useEffect(() => {
     if (open && event) {
-      const icsData = generateICSString(event);
-      // Use the webcal:// protocol to trigger calendar app
-      const calendarUrl = `webcal://${window.location.host}/calendar?data=${encodeURIComponent(icsData)}`;
+      const calendarData = generateVEVENTUrl(event);
+      const calendarUrl = `data:text/calendar;charset=utf-8,${calendarData}`;
       
       QRCode.toDataURL(calendarUrl)
         .then(url => setQrCode(url))

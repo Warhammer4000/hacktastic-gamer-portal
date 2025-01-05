@@ -32,6 +32,33 @@ export function generateICSString(event: any) {
   return value;
 }
 
+export function generateVEVENTUrl(event: any) {
+  const start = new Date(event.start_time);
+  const end = new Date(event.end_time);
+  
+  // Format dates to YYYYMMDDTHHMMSSZ format
+  const formatDate = (date: Date) => {
+    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  };
+
+  const eventData = {
+    title: encodeURIComponent(event.title),
+    description: encodeURIComponent(event.description),
+    startTime: formatDate(start),
+    endTime: formatDate(end),
+  };
+
+  return `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:${eventData.title}
+DESCRIPTION:${eventData.description}
+DTSTART:${eventData.startTime}
+DTEND:${eventData.endTime}
+END:VEVENT
+END:VCALENDAR`.replace(/\n/g, '%0A');
+}
+
 export function downloadICS(event: any) {
   const icsString = generateICSString(event);
   const blob = new Blob([icsString], { type: 'text/calendar;charset=utf-8' });
