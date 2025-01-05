@@ -1,19 +1,15 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { TeamDetailsDialog } from "@/components/participant/teams/TeamDetailsDialog";
 import { DeleteTeamDialog } from "@/components/participant/teams/DeleteTeamDialog";
-import { CreateTeamSection } from "@/components/participant/teams/page/CreateTeamSection";
-import { TeamCard } from "@/components/participant/teams/TeamCard";
-import { AnimatePresence, motion } from "framer-motion";
-
-const MAX_TEAM_MEMBERS = 3;
+import { TeamTransition } from "@/components/participant/teams/components/TeamTransition";
+import { useTeamTransitionAnimation } from "@/components/participant/teams/hooks/useTeamTransitionAnimation";
 
 export default function TeamPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isJoining, setIsJoining] = useState(false);
+  const { isTransitioning: isJoining, handleTransition } = useTeamTransitionAnimation();
 
   const { data: currentUser } = useQuery({
     queryKey: ['current-user'],
@@ -23,7 +19,7 @@ export default function TeamPage() {
     },
   });
 
-  const { data: team, refetch } = useQuery({
+  const { data: team } = useQuery({
     queryKey: ['participant-team'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -61,45 +57,18 @@ export default function TeamPage() {
     },
   });
 
-  const handleTeamJoined = async () => {
-    setIsJoining(true);
-    await refetch();
-  };
-
   return (
     <div className="container p-6">
       <h1 className="text-3xl font-bold mb-8">Team</h1>
       
-      <AnimatePresence mode="wait">
-        {!team ? (
-          <motion.div
-            key="create-team"
-            initial={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ duration: 0.3 }}
-          >
-            <CreateTeamSection 
-              maxMembers={MAX_TEAM_MEMBERS} 
-              onTeamJoined={handleTeamJoined}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="team-card"
-            initial={isJoining ? { opacity: 0, x: 100 } : { opacity: 1, x: 0 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <TeamCard
-              team={team}
-              onEditTeam={() => setIsEditDialogOpen(true)}
-              onDeleteTeam={() => setIsDeleteDialogOpen(true)}
-              isLocked={team.status === 'locked'}
-              currentUserId={currentUser?.id || ''}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <TeamTransition
+        team={team}
+        isJoining={isJoining}
+        currentUserId={currentUser?.id || ''}
+        onEditTeam={() => setIsEditDialogOpen(true)}
+        onDeleteTeam={() => setIsDeleteDialogOpen(true)}
+        onTeamJoined={handleTransition}
+      />
 
       <TeamDetailsDialog
         isOpen={isEditDialogOpen}
@@ -110,7 +79,7 @@ export default function TeamPage() {
       <DeleteTeamDialog
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
-        onConfirmDelete={handleTeamJoined}
+        onConfirmDelete={handleTransition}
       />
     </div>
   );

@@ -32,7 +32,6 @@ export function CreateTeamDialog({ maxMembers, onTeamCreated }: CreateTeamDialog
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Generate a random 6-character join code
       const joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
       const { data: team, error: teamError } = await supabase
@@ -50,7 +49,6 @@ export function CreateTeamDialog({ maxMembers, onTeamCreated }: CreateTeamDialog
 
       if (teamError) throw teamError;
 
-      // Add the creator as a team member
       const { error: memberError } = await supabase
         .from('team_members')
         .insert({
