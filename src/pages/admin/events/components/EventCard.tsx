@@ -1,15 +1,13 @@
 import { format } from "date-fns";
-import { Calendar, Clock, Users, Edit, Eye, Trash, QrCode, ExternalLink } from "lucide-react";
+import { Calendar, Clock, Users } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { EventActions } from "./EventActions";
 
 type EventCardProps = {
   event: {
     id: string;
     title: string;
-    description: string;
     start_time: string;
     end_time: string;
     status: string;
@@ -56,34 +54,8 @@ export function EventCard({ event }: EventCardProps) {
           </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" className="flex items-center gap-1">
-            <Edit className="h-4 w-4" />
-            Edit
-          </Button>
-          <Button 
-            variant="secondary" 
-            size="sm"
-            className={cn(
-              "flex items-center gap-1",
-              event.status === "published" && "bg-primary text-primary-foreground hover:bg-primary/90"
-            )}
-          >
-            <Eye className="h-4 w-4" />
-            {event.status === "published" ? "Unpublish" : "Publish"}
-          </Button>
-          <Button variant="outline" size="sm" className="flex items-center gap-1">
-            <ExternalLink className="h-4 w-4" />
-            Export
-          </Button>
-          <Button variant="outline" size="sm" className="flex items-center gap-1">
-            <QrCode className="h-4 w-4" />
-            QR Code
-          </Button>
-          <Button variant="destructive" size="sm" className="flex items-center gap-1">
-            <Trash className="h-4 w-4" />
-            Delete
-          </Button>
+        <div className="border-t pt-4">
+          <EventActions event={event} />
         </div>
       </CardContent>
     </Card>
