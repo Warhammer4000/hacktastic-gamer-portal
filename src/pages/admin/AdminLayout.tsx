@@ -9,7 +9,8 @@ import {
   UserCheck, 
   Cpu,
   GalleryHorizontal,
-  Newspaper
+  Newspaper,
+  UsersRound
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -82,6 +83,11 @@ const AdminLayout = () => {
       title: "News",
       icon: Newspaper,
       path: "/admin/news",
+    },
+    {
+      title: "Teams",
+      icon: UsersRound,
+      path: "/admin/teams",
     },
     {
       title: "Mentor Approval",
