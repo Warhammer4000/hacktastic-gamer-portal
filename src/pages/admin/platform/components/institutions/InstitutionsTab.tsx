@@ -9,6 +9,8 @@ import { ExportInstitutions } from "./ExportInstitutions";
 export function InstitutionsTab() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -16,8 +18,14 @@ export function InstitutionsTab() {
         <h2 className="text-xl font-semibold">Institutions</h2>
         <div className="flex items-center gap-2">
           <ExportInstitutions />
-          <BulkInstitutionsUpload />
-          <AddInstitution />
+          <BulkInstitutionsUpload 
+            open={showBulkUploadDialog} 
+            onOpenChange={setShowBulkUploadDialog}
+          />
+          <AddInstitution 
+            open={showAddDialog} 
+            onOpenChange={setShowAddDialog}
+          />
         </div>
       </div>
 
