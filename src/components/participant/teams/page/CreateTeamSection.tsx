@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { CreateTeamDialog } from "../CreateTeamDialog";
-import { JoinTeamDialog } from "../JoinTeamDialog";
+import { JoinTeamSection } from "../JoinTeamSection";
 
 export function CreateTeamSection({ maxMembers }: { maxMembers: number }) {
   return (
@@ -15,15 +15,7 @@ export function CreateTeamSection({ maxMembers }: { maxMembers: number }) {
         </div>
       </Card>
 
-      <Card>
-        <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Join a Team</h2>
-          <p className="text-muted-foreground mb-4">
-            Join an existing team using their team code
-          </p>
-          <JoinTeamDialog />
-        </div>
-      </Card>
+      <JoinTeamSection />
     </div>
   );
 }
