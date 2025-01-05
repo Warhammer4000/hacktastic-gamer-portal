@@ -36,6 +36,7 @@ const formSchema = z.object({
   location: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
   phone: z.string().optional(),
+  website_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -57,6 +58,7 @@ export function EditInstitution({ open, onOpenChange, institution }: EditInstitu
       location: institution.location || "",
       email: institution.email || "",
       phone: institution.phone || "",
+      website_url: institution.website_url || "",
     },
   });
 
@@ -179,6 +181,20 @@ export function EditInstitution({ open, onOpenChange, institution }: EditInstitu
                   <FormLabel>Phone (Optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter phone number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="website_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Website URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter website URL" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
