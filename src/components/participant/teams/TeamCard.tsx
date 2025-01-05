@@ -104,11 +104,20 @@ export function TeamCard({
 
       if (mentorError) throw mentorError;
 
-      toast.success(mentorId ? "Mentor assigned successfully!" : "No eligible mentors available at the moment");
+      if (!mentorId) {
+        toast.error(
+          "No eligible mentors available. This could be because:" +
+          "\n- No mentors match your team's tech stack" +
+          "\n- Available mentors have reached their team limit"
+        );
+        return;
+      }
+
+      toast.success("Mentor assigned successfully!");
       queryClient.invalidateQueries({ queryKey: ['participant-team'] });
     } catch (error) {
       console.error('Error assigning mentor:', error);
-      toast.error("Failed to assign mentor");
+      toast.error("Failed to assign mentor. Please try again later.");
     } finally {
       setIsUpdating(false);
     }
