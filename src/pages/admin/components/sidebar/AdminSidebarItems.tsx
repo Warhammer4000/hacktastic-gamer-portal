@@ -3,6 +3,7 @@ import {
   Calendar,
   Cpu,
   GalleryHorizontal,
+  Gift,
   LogOut,
   Newspaper,
   Settings,
@@ -52,6 +53,11 @@ export const adminSidebarItems = [
     title: "Users",
     icon: Users,
     path: "/admin/users",
+  },
+  {
+    title: "Coupons",
+    icon: Gift,
+    path: "/admin/coupons",
   },
   {
     title: "Settings",

@@ -9,6 +9,119 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      coupon_batches: {
+        Row: {
+          created_at: string
+          description: string | null
+          eligible_roles: Database["public"]["Enums"]["user_role"][]
+          id: string
+          name: string
+          redemption_instructions: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          eligible_roles: Database["public"]["Enums"]["user_role"][]
+          id?: string
+          name: string
+          redemption_instructions: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          eligible_roles?: Database["public"]["Enums"]["user_role"][]
+          id?: string
+          name?: string
+          redemption_instructions?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_batches_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "coupon_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupon_vendors: {
+        Row: {
+          created_at: string
+          icon_url: string
+          id: string
+          name: string
+          updated_at: string
+          website_url: string
+        }
+        Insert: {
+          created_at?: string
+          icon_url: string
+          id?: string
+          name: string
+          updated_at?: string
+          website_url: string
+        }
+        Update: {
+          created_at?: string
+          icon_url?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          website_url?: string
+        }
+        Relationships: []
+      }
+      coupons: {
+        Row: {
+          assigned_at: string | null
+          assigned_to: string | null
+          batch_id: string
+          code: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_to?: string | null
+          batch_id: string
+          code: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_to?: string | null
+          batch_id?: string
+          code?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupons_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "coupon_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
