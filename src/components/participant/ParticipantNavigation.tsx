@@ -5,7 +5,8 @@ import {
   GraduationCap,
   Calendar,
   MessageSquare,
-  Users
+  Users,
+  Gift
 } from "lucide-react";
 import { ParticipantNavigationItem } from "./navigation/ParticipantNavigationItem";
 import { LogoutButton } from "@/components/mentor/navigation/LogoutButton";
@@ -68,6 +69,12 @@ export default function ParticipantNavigation() {
       to: "/participant/messages",
       icon: MessageSquare,
       label: "Messages",
+      requiresProfile: true
+    },
+    {
+      to: "/participant/benefits",
+      icon: Gift,
+      label: "Benefits",
       requiresProfile: true
     }
   ];
