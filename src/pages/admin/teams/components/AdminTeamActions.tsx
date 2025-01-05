@@ -1,10 +1,10 @@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
 import { MoreVertical, Trash2, UserPlus2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface AdminTeamActionsProps {
@@ -21,12 +21,21 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
 
   const handleDeleteTeam = async () => {
     try {
-      const { error } = await supabase
+      // First, delete all team members
+      const { error: membersError } = await supabase
+        .from('team_members')
+        .delete()
+        .eq('team_id', teamId);
+
+      if (membersError) throw membersError;
+
+      // Then, delete the team itself
+      const { error: teamError } = await supabase
         .from('teams')
         .delete()
         .eq('id', teamId);
 
-      if (error) throw error;
+      if (teamError) throw teamError;
 
       toast.success("Team deleted successfully");
       queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
