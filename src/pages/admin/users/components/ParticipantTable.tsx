@@ -13,20 +13,14 @@ import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Database } from "@/integrations/supabase/types/database";
+
+type Profile = Database["public"]["Tables"]["profiles"]["Row"] & {
+  user_roles: Database["public"]["Tables"]["user_roles"]["Row"][];
+};
 
 interface ParticipantTableProps {
-  participants: Array<{
-    id: string;
-    full_name: string | null;
-    email: string;
-    avatar_url: string | null;
-    github_username: string | null;
-    linkedin_profile_id: string | null;
-    status: string;
-    user_roles: {
-      role: string;
-    };
-  }>;
+  participants: Profile[];
   isLoading: boolean;
 }
 
