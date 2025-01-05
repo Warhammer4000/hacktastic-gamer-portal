@@ -25,13 +25,15 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { Checkbox } from "@/components/ui/checkbox";
+
+// Define the event role type to match the database enum
+type EventRole = "public" | "mentor" | "participant";
 
 const eventFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   tech_stacks: z.array(z.string()).min(1, "Select at least one technology stack"),
-  roles: z.array(z.string()).min(1, "Select at least one role"),
+  roles: z.array(z.enum(["public", "mentor", "participant"])).min(1, "Select at least one role"),
   start_time: z.string().min(1, "Start time is required"),
   end_time: z.string().min(1, "End time is required"),
 });
@@ -75,7 +77,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
     },
   });
 
-  const roleOptions = [
+  const roleOptions: { value: EventRole; label: string }[] = [
     { value: "mentor", label: "Mentors" },
     { value: "participant", label: "Participants" },
     { value: "public", label: "Public" },
@@ -84,14 +86,20 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
   async function onSubmit(data: EventFormValues) {
     try {
       setIsSubmitting(true);
+      
+      // Get the current user's ID for created_by
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       const { error } = await supabase.from("events").insert({
         title: data.title,
         description: data.description,
         tech_stacks: data.tech_stacks,
-        roles: data.roles,
+        roles: data.roles as EventRole[], // Type assertion is safe here because of zod validation
         start_time: new Date(data.start_time).toISOString(),
         end_time: new Date(data.end_time).toISOString(),
         status: "draft",
+        created_by: user.id,
       });
 
       if (error) throw error;
@@ -104,6 +112,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
       onOpenChange(false);
       form.reset();
     } catch (error) {
+      console.error("Error creating event:", error);
       toast({
         title: "Error",
         description: "Failed to create event. Please try again.",
