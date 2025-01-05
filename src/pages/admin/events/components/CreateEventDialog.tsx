@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { EventFormFields } from "./event-form/EventFormFields";
 import { eventFormSchema, EventFormValues, EventRole } from "../types/event-form";
 import { useQueryClient } from "@tanstack/react-query";
+import { Import } from "lucide-react";
+import { parseICSFile } from "../utils/ics-parser";
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -26,6 +28,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
@@ -65,7 +68,6 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
 
       if (error) throw error;
 
-      // Invalidate the events query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["events"] });
 
       toast({
@@ -87,11 +89,61 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
     }
   }
 
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const parsedEvent = parseICSFile(content);
+        
+        form.setValue("title", parsedEvent.title);
+        form.setValue("description", parsedEvent.description);
+        form.setValue("start_time", parsedEvent.start_time);
+        form.setValue("end_time", parsedEvent.end_time);
+
+        toast({
+          title: "ICS file imported",
+          description: "Event details have been filled from the imported file.",
+        });
+      } catch (error) {
+        console.error("Error parsing ICS file:", error);
+        toast({
+          title: "Error",
+          description: "Failed to parse ICS file. Please check the file format.",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create Event</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>Create Event</DialogTitle>
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                accept=".ics"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleFileImport}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Import className="h-4 w-4 mr-2" />
+                Import ICS
+              </Button>
+            </div>
+          </div>
           <DialogDescription>
             Create a new event for mentors and participants.
           </DialogDescription>
