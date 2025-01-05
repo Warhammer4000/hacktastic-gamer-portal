@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TeamMembersSection } from "./sections/TeamMembersSection";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TeamCardProps {
   team: {
@@ -35,13 +36,21 @@ export function TeamCard({
 }: TeamCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const isLeader = currentUserId === team.leader_id;
+  const queryClient = useQueryClient();
 
   const handleToggleStatus = async () => {
     if (!isLeader || isLocked) return;
     
     setIsUpdating(true);
+    const newStatus = team.status === 'draft' ? 'open' : 'draft';
+    
+    // Optimistically update the UI
+    queryClient.setQueryData(['participant-team'], (oldData: any) => ({
+      ...oldData,
+      status: newStatus,
+    }));
+
     try {
-      const newStatus = team.status === 'draft' ? 'open' : 'draft';
       const { error } = await supabase
         .from('teams')
         .update({ status: newStatus })
@@ -49,7 +58,15 @@ export function TeamCard({
 
       if (error) throw error;
       toast.success(`Team is now ${newStatus}`);
+      
+      // Refresh the data to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['participant-team'] });
     } catch (error) {
+      // Revert optimistic update on error
+      queryClient.setQueryData(['participant-team'], (oldData: any) => ({
+        ...oldData,
+        status: team.status,
+      }));
       console.error('Error updating team status:', error);
       toast.error("Failed to update team status");
     } finally {
