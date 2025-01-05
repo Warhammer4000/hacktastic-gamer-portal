@@ -21,6 +21,7 @@ interface AssignCouponsDialogProps {
     eligible_roles: string[];
     coupons: {
       id: string;
+      code: string;
       assigned_to: string | null;
     }[];
   };
@@ -66,7 +67,7 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
       // Get available coupons
       const { data: availableCoupons, error: fetchError } = await supabase
         .from("coupons")
-        .select("id")
+        .select("id, code, batch_id")
         .eq("batch_id", batch.id)
         .is("assigned_to", null)
         .limit(userIds.length);
@@ -79,6 +80,8 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
       // Assign coupons to users
       const assignments = userIds.map((userId, index) => ({
         id: availableCoupons[index].id,
+        code: availableCoupons[index].code,
+        batch_id: availableCoupons[index].batch_id,
         assigned_to: userId,
         assigned_at: new Date().toISOString(),
       }));
