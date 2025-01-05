@@ -1,6 +1,6 @@
 import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalendarDays, List, Timeline } from "lucide-react";
+import { CalendarDays, List, Clock } from "lucide-react";
 import { EventsList } from "./components/EventsList";
 import { EventsTimeline } from "./components/EventsTimeline";
 import { EventsCalendar } from "./components/EventsCalendar";
@@ -24,7 +24,7 @@ export default function EventsPage() {
             Calendar
           </TabsTrigger>
           <TabsTrigger value="timeline" className="flex items-center gap-2">
-            <Timeline className="h-4 w-4" />
+            <Clock className="h-4 w-4" />
             Timeline
           </TabsTrigger>
         </TabsList>
