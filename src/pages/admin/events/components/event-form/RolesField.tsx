@@ -1,29 +1,61 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { MultiSelect } from "@/components/ui/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UseFormReturn } from "react-hook-form";
-import { EventFormValues, roleOptions } from "../../types/event-form";
+import { EventFormValues } from "../../types/event-form";
 
 interface RolesFieldProps {
   form: UseFormReturn<EventFormValues>;
 }
 
 export function RolesField({ form }: RolesFieldProps) {
+  const roles = form.watch("roles");
+
+  const toggleRole = (role: "mentor" | "participant") => {
+    const currentRoles = new Set(roles);
+    if (currentRoles.has(role)) {
+      currentRoles.delete(role);
+    } else {
+      currentRoles.add(role);
+    }
+    form.setValue("roles", Array.from(currentRoles));
+  };
+
   return (
     <>
       <FormField
         control={form.control}
         name="roles"
-        render={({ field }) => (
+        render={() => (
           <FormItem>
             <FormLabel>Roles</FormLabel>
-            <FormControl>
-              <MultiSelect
-                options={roleOptions}
-                placeholder="Select roles"
-                {...field}
-              />
-            </FormControl>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="mentor"
+                  checked={roles?.includes("mentor")}
+                  onCheckedChange={() => toggleRole("mentor")}
+                />
+                <label
+                  htmlFor="mentor"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Mentor
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="participant"
+                  checked={roles?.includes("participant")}
+                  onCheckedChange={() => toggleRole("participant")}
+                />
+                <label
+                  htmlFor="participant"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Participant
+                </label>
+              </div>
+            </div>
             <FormMessage />
           </FormItem>
         )}

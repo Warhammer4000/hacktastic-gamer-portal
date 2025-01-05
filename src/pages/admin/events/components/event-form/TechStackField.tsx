@@ -4,6 +4,7 @@ import { UseFormReturn } from "react-hook-form";
 import { EventFormValues } from "../../types/event-form";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Code } from "lucide-react";
 
 interface TechStackFieldProps {
   form: UseFormReturn<EventFormValues>;
@@ -15,13 +16,14 @@ export function TechStackField({ form }: TechStackFieldProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("technology_stacks")
-        .select("id, name")
+        .select("id, name, icon_url")
         .eq("status", "active");
 
       if (error) throw error;
       return data.map(stack => ({
         value: stack.id,
         label: stack.name,
+        icon: stack.icon_url || <Code className="h-4 w-4" />,
       }));
     },
   });
@@ -38,6 +40,7 @@ export function TechStackField({ form }: TechStackFieldProps) {
               options={techStacks}
               placeholder="Select technology stacks"
               {...field}
+              className="w-full"
             />
           </FormControl>
           <FormMessage />
