@@ -12,8 +12,11 @@ import {
 } from "@/components/ui/dialog";
 import { Form, FormField } from "@/components/ui/form";
 import RoleSelection from "@/components/auth/registration/RoleSelection";
-import { formSchema } from "@/components/auth/registration/RegistrationForm";
 import { z } from "zod";
+
+const formSchema = z.object({
+  role: z.enum(["participant", "mentor"])
+});
 
 interface RegisterDialogProps {
   isOpen: boolean;
@@ -27,9 +30,6 @@ export default function RegisterDialog({ isOpen, onClose }: RegisterDialogProps)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
       role: "participant",
     },
   });
@@ -86,7 +86,7 @@ export default function RegisterDialog({ isOpen, onClose }: RegisterDialogProps)
               className="w-full" 
               disabled={isLoading}
             >
-              Continue
+              {isLoading ? "Please wait..." : "Continue"}
             </Button>
           </form>
         </Form>
