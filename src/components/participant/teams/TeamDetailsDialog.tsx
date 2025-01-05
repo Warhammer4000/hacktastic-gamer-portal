@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { TeamForm, type TeamFormValues } from "./forms/TeamForm";
+import { TeamDetailsForm } from "./dialogs/TeamDetailsForm";
+import { TeamDetailsView } from "./dialogs/TeamDetailsView";
+import type { TeamFormValues } from "./forms/TeamForm";
 
 interface TeamDetailsDialogProps {
   isOpen: boolean;
@@ -80,89 +81,42 @@ export function TeamDetailsDialog({ isOpen, onOpenChange, team }: TeamDetailsDia
   };
 
   const isTeamLeader = team && currentUser ? team.leader_id === currentUser.id : false;
+  const isLocked = team?.status === 'locked';
 
-  const renderContent = () => {
-    if (!team) {
-      return (
-        <DialogHeader>
-          <DialogTitle>Error</DialogTitle>
-          <DialogDescription>
-            Team details are not available.
-          </DialogDescription>
-        </DialogHeader>
-      );
-    }
-
-    if (isEditing) {
-      return (
-        <>
+  if (!team) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Team</DialogTitle>
+            <DialogTitle>Error</DialogTitle>
             <DialogDescription>
-              Update your team's information.
+              Team details are not available.
             </DialogDescription>
           </DialogHeader>
-          <TeamForm
-            onSubmit={handleEdit}
-            techStacks={techStacks}
-            isLoadingTechStacks={isLoadingTechStacks}
-            defaultValues={{
-              name: team.name,
-              description: team.description || undefined,
-              techStackId: team.tech_stack_id || undefined,
-            }}
-            submitLabel="Save Changes"
-          />
-          <Button
-            variant="outline"
-            onClick={() => setIsEditing(false)}
-            className="mt-2"
-          >
-            Cancel
-          </Button>
-        </>
-      );
-    }
-
-    return (
-      <>
-        <DialogHeader>
-          <DialogTitle>{team.name}</DialogTitle>
-          {team.description && (
-            <DialogDescription>
-              {team.description}
-            </DialogDescription>
-          )}
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <h4 className="font-medium">Team Details</h4>
-            <p className="text-sm text-muted-foreground">Status: {team.status}</p>
-            {team.tech_stack && (
-              <p className="text-sm text-muted-foreground">
-                Tech Stack: {team.tech_stack.name}
-              </p>
-            )}
-            {team.repository_url && (
-              <p className="text-sm text-muted-foreground">
-                Repository: <a href={team.repository_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View on GitHub</a>
-              </p>
-            )}
-          </div>
-          {isTeamLeader && team.status !== 'locked' && (
-            <Button onClick={() => setIsEditing(true)}>
-              Edit Team
-            </Button>
-          )}
-        </div>
-      </>
+        </DialogContent>
+      </Dialog>
     );
-  };
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
-        {renderContent()}
+        {isEditing ? (
+          <TeamDetailsForm
+            onSubmit={handleEdit}
+            techStacks={techStacks}
+            isLoadingTechStacks={isLoadingTechStacks}
+            team={team}
+            onCancel={() => setIsEditing(false)}
+          />
+        ) : (
+          <TeamDetailsView
+            team={team}
+            isTeamLeader={isTeamLeader}
+            isLocked={isLocked}
+            onEdit={() => setIsEditing(true)}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
