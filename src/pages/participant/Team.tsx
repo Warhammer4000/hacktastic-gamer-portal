@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,7 +14,6 @@ export default function TeamPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
-  const navigate = useNavigate();
 
   const { data: currentUser } = useQuery({
     queryKey: ['current-user'],
@@ -62,37 +60,6 @@ export default function TeamPage() {
       return team;
     },
   });
-
-  const handleDeleteTeam = async () => {
-    if (!team) return;
-
-    if (team.status === 'locked') {
-      toast.error("Cannot delete a locked team");
-      return;
-    }
-
-    try {
-      const { error: membersError } = await supabase
-        .from('team_members')
-        .delete()
-        .eq('team_id', team.id);
-
-      if (membersError) throw membersError;
-
-      const { error: teamError } = await supabase
-        .from('teams')
-        .delete()
-        .eq('id', team.id);
-
-      if (teamError) throw teamError;
-
-      toast.success("Team deleted successfully");
-      refetch();
-    } catch (error) {
-      console.error('Error deleting team:', error);
-      toast.error("Failed to delete team");
-    }
-  };
 
   const handleTeamJoined = async () => {
     setIsJoining(true);
@@ -143,7 +110,7 @@ export default function TeamPage() {
       <DeleteTeamDialog
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
-        onConfirmDelete={handleDeleteTeam}
+        onConfirmDelete={handleTeamJoined}
       />
     </div>
   );

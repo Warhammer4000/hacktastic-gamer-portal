@@ -1,11 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export function useTeamMemberActions(teamId: string, currentUserId: string | undefined) {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const readyMutation = useMutation({
     mutationFn: async () => {
@@ -41,7 +39,7 @@ export function useTeamMemberActions(teamId: string, currentUserId: string | und
     },
     onSuccess: () => {
       toast.success("Left team successfully");
-      navigate('/participant/team');
+      queryClient.invalidateQueries({ queryKey: ['participant-team'] });
     },
     onError: (error) => {
       console.error('Error leaving team:', error);
