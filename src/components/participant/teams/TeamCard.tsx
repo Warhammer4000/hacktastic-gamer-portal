@@ -7,6 +7,7 @@ interface TeamCardProps {
     name: string;
     description: string | null;
     status: string;
+    leader_id: string; // Add leader_id to the team type
     tech_stack: {
       name: string;
       icon_url: string;
@@ -15,9 +16,18 @@ interface TeamCardProps {
   onViewTeam: () => void;
   onDeleteTeam: () => void;
   isLocked: boolean;
+  currentUserId: string; // Add currentUserId prop
 }
 
-export function TeamCard({ team, onViewTeam, onDeleteTeam, isLocked }: TeamCardProps) {
+export function TeamCard({ 
+  team, 
+  onViewTeam, 
+  onDeleteTeam, 
+  isLocked,
+  currentUserId 
+}: TeamCardProps) {
+  const isLeader = currentUserId === team.leader_id;
+
   return (
     <Card>
       <CardHeader>
@@ -44,7 +54,7 @@ export function TeamCard({ team, onViewTeam, onDeleteTeam, isLocked }: TeamCardP
               <Users className="mr-2 h-4 w-4" />
               View Team
             </Button>
-            {!isLocked && (
+            {!isLocked && isLeader && (
               <Button 
                 variant="destructive" 
                 size="sm"
