@@ -13,6 +13,10 @@ import NewsPage from "@/pages/public/news/NewsPage";
 import NewsDetailPage from "@/pages/public/news/NewsDetailPage";
 import GalleryPage from "@/pages/public/gallery/GalleryPage";
 import FAQPage from "@/pages/public/faq/FAQPage";
+import ParticipantLayout from "@/pages/participant/ParticipantLayout";
+import ParticipantDashboard from "@/pages/participant/Dashboard";
+import ParticipantProfile from "@/pages/participant/Profile";
+import TeamPage from "@/pages/participant/Team";
 
 function App() {
   return (
@@ -28,6 +32,13 @@ function App() {
           <Route path="preferences" element={<Preferences />} />
           <Route path="benefits" element={<Benefits />} />
         </Route>
+      </Route>
+
+      {/* Participant Routes */}
+      <Route path="participant" element={<ParticipantLayout />}>
+        <Route path="dashboard" element={<ParticipantDashboard />} />
+        <Route path="profile" element={<ParticipantProfile />} />
+        <Route path="team" element={<TeamPage />} />
       </Route>
 
       {/* Public Routes */}
