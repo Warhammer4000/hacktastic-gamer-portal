@@ -45,12 +45,13 @@ export default function AdminUsers() {
 
       if (deleteRoleError) throw deleteRoleError;
 
-      // Then delete the profile if they have no other roles
+      // Then check for remaining roles
       const { data: remainingRoles } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId);
 
+      // If no other roles exist, delete the profile
       if (!remainingRoles?.length) {
         const { error: deleteProfileError } = await supabase
           .from('profiles')
