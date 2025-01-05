@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Github, Linkedin, Loader2, Search } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import type { Mentor } from "./types";
-import Navbar from "@/components/landing/Navbar";
+import { Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import Navbar from "@/components/landing/Navbar";
 import { MentorFilters } from "./components/MentorFilters";
+import { MentorCard } from "./components/MentorCard";
+import type { Mentor } from "./types";
 
 export default function MentorsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,7 +25,7 @@ export default function MentorsPage() {
 
       const mentorIds = mentorRoles.map(role => role.user_id);
 
-      // Then get approved mentor profiles
+      // Then get approved mentor profiles with tech stacks
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select(`
@@ -37,42 +36,26 @@ export default function MentorsPage() {
           bio,
           linkedin_profile_id,
           github_username,
-          status
+          status,
+          mentor_tech_stacks (
+            id,
+            tech_stack_id,
+            technology_stacks (
+              id,
+              name,
+              icon_url
+            )
+          )
         `)
         .eq("status", "approved")
         .in("id", mentorIds);
 
       if (profilesError) throw profilesError;
 
-      // Get tech stacks for these mentors
-      const { data: techStacks, error: techStacksError } = await supabase
-        .from("mentor_tech_stacks")
-        .select(`
-          id,
-          mentor_id,
-          tech_stack_id,
-          technology_stacks (
-            id,
-            name,
-            icon_url
-          )
-        `)
-        .in(
-          "mentor_id",
-          profiles?.map((profile) => profile.id) ?? []
-        );
-
-      if (techStacksError) throw techStacksError;
-
-      // Combine the data
-      const mentorsWithTechStacks = profiles?.map((profile) => ({
+      return profiles.map(profile => ({
         ...profile,
-        tech_stacks: techStacks.filter(
-          (stack) => stack.mentor_id === profile.id
-        ),
-      }));
-
-      return mentorsWithTechStacks as Mentor[];
+        tech_stacks: profile.mentor_tech_stacks
+      })) as Mentor[];
     },
   });
 
@@ -104,7 +87,9 @@ export default function MentorsPage() {
       <Navbar />
       <div className="container py-8 px-4 mx-auto mt-16">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-gray-900 dark:text-white">Our Mentors</h1>
+          <h1 className="text-4xl font-bold mb-8 text-gray-900 dark:text-white">
+            Our Mentors
+          </h1>
           
           {/* Search and Filters */}
           <div className="mb-8 space-y-4">
@@ -127,73 +112,7 @@ export default function MentorsPage() {
           {/* Mentors Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredMentors?.map((mentor) => (
-              <Card key={mentor.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    {mentor.avatar_url && (
-                      <img
-                        src={mentor.avatar_url}
-                        alt={mentor.full_name || "Mentor"}
-                        className="w-16 h-16 rounded-full object-cover"
-                      />
-                    )}
-                    <div className="flex-1">
-                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        {mentor.full_name}
-                      </h2>
-                      {mentor.bio && (
-                        <p className="text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
-                          {mentor.bio}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Social Links */}
-                  <div className="flex gap-2 mt-4">
-                    {mentor.github_username && (
-                      <a
-                        href={`https://github.com/${mentor.github_username}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                      >
-                        <Github className="h-5 w-5" />
-                      </a>
-                    )}
-                    {mentor.linkedin_profile_id && (
-                      <a
-                        href={`https://linkedin.com/in/${mentor.linkedin_profile_id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                      >
-                        <Linkedin className="h-5 w-5" />
-                      </a>
-                    )}
-                  </div>
-
-                  {/* Tech Stacks */}
-                  {mentor.tech_stacks && mentor.tech_stacks.length > 0 && (
-                    <div className="mt-4">
-                      <h3 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Tech Stack</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {mentor.tech_stacks.map((tech) => (
-                          tech.technology_stack && (
-                            <Badge 
-                              key={tech.id} 
-                              variant="secondary"
-                              className="flex items-center gap-1"
-                            >
-                              {tech.technology_stack.name}
-                            </Badge>
-                          )
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <MentorCard key={mentor.id} mentor={mentor} />
             ))}
           </div>
         </div>
