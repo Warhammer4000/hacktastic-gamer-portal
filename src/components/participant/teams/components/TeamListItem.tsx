@@ -1,5 +1,6 @@
 import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface TeamListItemProps {
   team: {
@@ -11,10 +12,22 @@ interface TeamListItemProps {
     } | null;
     team_members: { id: string; }[];
   };
-  onJoin: (teamId: string) => void;
+  onJoin: (teamId: string) => Promise<void>;
 }
 
 export function TeamListItem({ team, onJoin }: TeamListItemProps) {
+  const navigate = useNavigate();
+
+  const handleJoin = async () => {
+    try {
+      await onJoin(team.id);
+      // After successfully joining, refresh the page to show the current team view
+      navigate(0);
+    } catch (error) {
+      console.error("Error joining team:", error);
+    }
+  };
+
   return (
     <div className="flex items-center justify-between p-4 border rounded-lg">
       <div>
@@ -36,7 +49,7 @@ export function TeamListItem({ team, onJoin }: TeamListItemProps) {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => onJoin(team.id)}
+        onClick={handleJoin}
       >
         <UserPlus className="w-4 h-4 mr-2" />
         Join
