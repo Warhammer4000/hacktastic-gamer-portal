@@ -1,16 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { EventActions } from "./EventActions";
+import { EventCard } from "./EventCard";
 
 export function EventsList() {
   const { data: events, isLoading } = useQuery({
@@ -31,51 +21,27 @@ export function EventsList() {
       <div className="space-y-1">
         <h2 className="text-2xl font-semibold tracking-tight">All Events</h2>
         <p className="text-sm text-muted-foreground">
-          View and manage all events in a list format.
+          View and manage all events in a card format.
         </p>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Start Time</TableHead>
-              <TableHead>End Time</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {events?.map((event) => (
-              <TableRow key={event.id}>
-                <TableCell>{event.title}</TableCell>
-                <TableCell>
-                  {format(new Date(event.start_time), "PPp")}
-                </TableCell>
-                <TableCell>
-                  {format(new Date(event.end_time), "PPp")}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={event.status === "published" ? "default" : "secondary"}>
-                    {event.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <EventActions event={event} />
-                </TableCell>
-              </TableRow>
-            ))}
-            {!isLoading && !events?.length && (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                  No events found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-[300px] rounded-lg bg-muted animate-pulse" />
+          ))}
+        </div>
+      ) : events?.length ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {events.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 text-muted-foreground">
+          No events found
+        </div>
+      )}
     </div>
   );
 }
