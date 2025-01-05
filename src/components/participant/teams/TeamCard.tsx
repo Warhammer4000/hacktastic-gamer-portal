@@ -164,6 +164,7 @@ export function TeamCard({
             isLeader={isLeader}
             isLocked={isLocked}
             onAssignMentor={handleAssignMentor}
+            teamId={team.id}
           />
 
           <TeamMembersSection

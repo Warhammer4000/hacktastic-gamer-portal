@@ -18,6 +18,7 @@ interface TeamDetailsSectionProps {
   isLeader: boolean;
   isLocked: boolean;
   onAssignMentor: () => Promise<void>;
+  teamId: string; // Added teamId to props
 }
 
 export function TeamDetailsSection({
@@ -30,6 +31,7 @@ export function TeamDetailsSection({
   isLeader,
   isLocked,
   onAssignMentor,
+  teamId, // Added teamId to destructuring
 }: TeamDetailsSectionProps) {
   const [isCreatingRepo, setIsCreatingRepo] = useState(false);
   const [repositoryUrl, setRepositoryUrl] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export function TeamDetailsSection({
     setIsCreatingRepo(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-team-repository', {
-        body: { teamId: team.id }
+        body: { teamId: teamId } // Using teamId from props
       });
 
       if (error) throw error;
