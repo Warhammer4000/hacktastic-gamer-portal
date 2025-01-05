@@ -46,7 +46,7 @@ export const CouponsPagination = ({
   };
 
   return (
-    <Pagination className="mt-4">
+    <Pagination>
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious

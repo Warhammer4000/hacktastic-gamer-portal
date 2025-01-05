@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { CouponsPagination } from "./CouponsPagination";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CouponsTableProps {
   coupons: any[];
@@ -11,6 +12,8 @@ interface CouponsTableProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  itemsPerPage: number;
+  onItemsPerPageChange: (value: number) => void;
 }
 
 export const CouponsTable = ({ 
@@ -19,7 +22,9 @@ export const CouponsTable = ({
   sortField,
   currentPage,
   totalPages,
-  onPageChange 
+  onPageChange,
+  itemsPerPage,
+  onItemsPerPageChange
 }: CouponsTableProps) => {
   return (
     <div className="space-y-4">
@@ -71,11 +76,30 @@ export const CouponsTable = ({
           </TableBody>
         </Table>
       </div>
-      <CouponsPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-muted-foreground">Rows per page</span>
+          <Select
+            value={itemsPerPage.toString()}
+            onValueChange={(value) => onItemsPerPageChange(Number(value))}
+          >
+            <SelectTrigger className="w-[70px]">
+              <SelectValue placeholder="10" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <CouponsPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
+      </div>
     </div>
   );
 };

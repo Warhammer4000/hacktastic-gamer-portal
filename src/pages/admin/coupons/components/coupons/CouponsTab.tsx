@@ -11,10 +11,10 @@ export const CouponsTab = () => {
   const [sortField, setSortField] = useState<"assigned_at" | "assignee">("assigned_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const { data: couponsData, isLoading } = useQuery({
-    queryKey: ["coupons", search, sortField, sortOrder, currentPage],
+    queryKey: ["coupons", search, sortField, sortOrder, currentPage, itemsPerPage],
     queryFn: async () => {
       let query = supabase
         .from("coupons")
@@ -92,6 +92,8 @@ export const CouponsTab = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
+        itemsPerPage={itemsPerPage}
+        onItemsPerPageChange={setItemsPerPage}
       />
     </div>
   );
