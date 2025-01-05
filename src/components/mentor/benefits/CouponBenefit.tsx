@@ -10,6 +10,7 @@ interface CouponBenefitProps {
     id: string;
     code: string;
     assigned_at: string;
+    state: 'unassigned' | 'assigned' | 'revealed';
     coupon_batches: {
       name: string;
       description: string | null;
@@ -24,12 +25,12 @@ interface CouponBenefitProps {
 }
 
 export function CouponBenefit({ coupon }: CouponBenefitProps) {
-  const [isRevealed, setIsRevealed] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(coupon.state === 'revealed');
   const { toast } = useToast();
 
   const handleReveal = async () => {
     try {
-      // Mark the coupon as redeemed by updating the assigned_at timestamp
+      // Mark the coupon as revealed by updating the assigned_at timestamp
       const { error } = await supabase
         .from('coupons')
         .update({ assigned_at: new Date().toISOString() })

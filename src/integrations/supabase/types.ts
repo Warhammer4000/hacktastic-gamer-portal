@@ -85,6 +85,7 @@ export type Database = {
           code: string
           created_at: string
           id: string
+          state: Database["public"]["Enums"]["coupon_state"]
           updated_at: string
         }
         Insert: {
@@ -94,6 +95,7 @@ export type Database = {
           code: string
           created_at?: string
           id?: string
+          state?: Database["public"]["Enums"]["coupon_state"]
           updated_at?: string
         }
         Update: {
@@ -103,6 +105,7 @@ export type Database = {
           code?: string
           created_at?: string
           id?: string
+          state?: Database["public"]["Enums"]["coupon_state"]
           updated_at?: string
         }
         Relationships: [
@@ -820,6 +823,7 @@ export type Database = {
       }
     }
     Enums: {
+      coupon_state: "unassigned" | "assigned" | "revealed"
       event_role: "mentor" | "participant" | "public"
       event_status: "draft" | "published"
       faq_status: "draft" | "published"
