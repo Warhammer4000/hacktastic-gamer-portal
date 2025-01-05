@@ -1,8 +1,10 @@
-import { Github, Linkedin, Pencil, Trash2 } from "lucide-react";
+import { Github, Linkedin, Pencil, Trash2, Users } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserCardProps {
   user: {
@@ -19,6 +21,26 @@ interface UserCardProps {
 }
 
 export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
+  // Query to fetch team information for the user
+  const { data: teamInfo } = useQuery({
+    queryKey: ['user-team', user.id],
+    queryFn: async () => {
+      const { data: teamMember, error } = await supabase
+        .from('team_members')
+        .select(`
+          team:teams (
+            id,
+            name
+          )
+        `)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
+      return teamMember?.team;
+    },
+  });
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-4">
@@ -29,6 +51,14 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
         <div className="flex-1">
           <h3 className="font-semibold">{user.full_name || user.email}</h3>
           <p className="text-sm text-muted-foreground">{user.email}</p>
+          {teamInfo && (
+            <div className="flex items-center gap-2 mt-1">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Team: {teamInfo.name}
+              </span>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent>
