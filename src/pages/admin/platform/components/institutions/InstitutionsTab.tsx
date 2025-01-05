@@ -5,6 +5,8 @@ import { InstitutionsList } from "./InstitutionsList";
 import { AddInstitution } from "./AddInstitution";
 import { BulkInstitutionsUpload } from "./BulkInstitutionsUpload";
 import { ExportInstitutions } from "./ExportInstitutions";
+import { Button } from "@/components/ui/button";
+import { Upload, Plus } from "lucide-react";
 
 export function InstitutionsTab() {
   const [search, setSearch] = useState("");
@@ -18,6 +20,21 @@ export function InstitutionsTab() {
         <h2 className="text-xl font-semibold">Institutions</h2>
         <div className="flex items-center gap-2">
           <ExportInstitutions />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowBulkUploadDialog(true)}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Bulk Upload
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setShowAddDialog(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Institution
+          </Button>
           <BulkInstitutionsUpload 
             open={showBulkUploadDialog} 
             onOpenChange={setShowBulkUploadDialog}
