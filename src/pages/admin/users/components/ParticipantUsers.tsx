@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ export default function ParticipantUsers() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
   const [view, setView] = useState<"table" | "card">("table");
+  const queryClient = useQueryClient();
 
   const { data: participants, isLoading } = useQuery({
     queryKey: ["participants", searchQuery],
@@ -38,6 +39,43 @@ export default function ParticipantUsers() {
     },
   });
 
+  const deleteParticipant = useMutation({
+    mutationFn: async (userId: string) => {
+      // First remove the participant role
+      const { error: deleteRoleError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .eq('role', 'participant');
+
+      if (deleteRoleError) throw deleteRoleError;
+
+      // Then check for remaining roles
+      const { data: remainingRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+
+      // If no other roles exist, delete the profile
+      if (!remainingRoles?.length) {
+        const { error: deleteProfileError } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', userId);
+
+        if (deleteProfileError) throw deleteProfileError;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['participants'] });
+      toast.success('Participant removed successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to remove participant');
+      console.error('Error:', error);
+    },
+  });
+
   const handleEdit = (userId: string) => {
     // Implement edit functionality
     console.log('Edit participant:', userId);
@@ -45,8 +83,7 @@ export default function ParticipantUsers() {
 
   const handleDelete = (userId: string) => {
     if (window.confirm('Are you sure you want to delete this participant?')) {
-      // Implement delete functionality
-      console.log('Delete participant:', userId);
+      deleteParticipant.mutate(userId);
     }
   };
 
