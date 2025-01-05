@@ -23,6 +23,7 @@ interface AssignCouponsDialogProps {
     coupons: {
       id: string;
       code: string;
+      batch_id: string;
       assigned_to: string | null;
     }[];
   };
@@ -86,6 +87,8 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
       // Assign coupons to users
       const assignments = userIds.map((userId, index) => ({
         id: availableCoupons[index].id,
+        code: availableCoupons[index].code,
+        batch_id: availableCoupons[index].batch_id,
         assigned_to: userId,
         assigned_at: new Date().toISOString(),
       }));
