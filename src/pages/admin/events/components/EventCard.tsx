@@ -54,7 +54,7 @@ export function EventCard({ event }: EventCardProps) {
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="border-t pt-4">
           <EventActions event={event} />
         </div>
       </CardContent>
