@@ -85,9 +85,8 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-[600px] overflow-y-auto max-h-[90vh]"
+        className="sm:max-w-[600px]"
         onPointerDownOutside={(e) => {
-          // Prevent closing when clicking on popover content
           const target = e.target as HTMLElement;
           if (target.closest('[role="dialog"]')) {
             e.preventDefault();
