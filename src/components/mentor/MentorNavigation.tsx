@@ -5,7 +5,8 @@ import {
   Users, 
   Calendar,
   MessageSquare,
-  Settings
+  Settings,
+  Gift
 } from "lucide-react";
 import { MentorNavigationItem } from "./navigation/MentorNavigationItem";
 import { LogoutButton } from "./navigation/LogoutButton";
@@ -33,6 +34,12 @@ export default function MentorNavigation() {
       icon: Settings,
       label: "Preferences",
       requiresApproval: false
+    },
+    {
+      to: "/mentor/benefits",
+      icon: Gift,
+      label: "Benefits",
+      requiresApproval: true
     },
     {
       to: "/mentor/mentees",
