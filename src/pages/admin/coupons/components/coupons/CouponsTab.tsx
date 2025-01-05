@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SearchInput } from "@/components/participant/teams/components/SearchInput";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CouponsTable } from "./CouponsTable";
 
 export const CouponsTab = () => {
@@ -46,6 +46,38 @@ export const CouponsTab = () => {
       const { data, error, count } = await query;
 
       if (error) {
+        // Handle range not satisfiable error
+        if (error.code === 'PGRST103') {
+          // Reset to first page if current page is out of range
+          setCurrentPage(1);
+          // Retry the query with the first page
+          const retryQuery = await supabase
+            .from("coupons")
+            .select(`
+              *,
+              batch:coupon_batches!inner(
+                name,
+                vendor:coupon_vendors!inner(name)
+              ),
+              assignee:profiles(full_name)
+            `, { count: 'exact' })
+            .range(0, itemsPerPage - 1);
+
+          if (retryQuery.error) {
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Failed to load coupons",
+            });
+            throw retryQuery.error;
+          }
+
+          return {
+            data: retryQuery.data || [],
+            count: retryQuery.count || 0
+          };
+        }
+
         toast({
           variant: "destructive",
           title: "Error",
@@ -61,6 +93,11 @@ export const CouponsTab = () => {
     },
   });
 
+  // Reset to first page when itemsPerPage changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [itemsPerPage]);
+
   const handleSort = (field: "assigned_at" | "assignee") => {
     if (sortField === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -68,6 +105,8 @@ export const CouponsTab = () => {
       setSortField(field);
       setSortOrder("asc");
     }
+    // Reset to first page when sorting changes
+    setCurrentPage(1);
   };
 
   const totalPages = couponsData?.count 
@@ -85,7 +124,10 @@ export const CouponsTab = () => {
         <div className="w-72">
           <SearchInput
             value={search}
-            onChange={(value) => setSearch(value)}
+            onChange={(value) => {
+              setSearch(value);
+              setCurrentPage(1); // Reset to first page when search changes
+            }}
             placeholder="Search by code or assignee..."
           />
         </div>
