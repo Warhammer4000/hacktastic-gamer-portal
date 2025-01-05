@@ -74,7 +74,7 @@ export function CreateEventSidebar() {
   };
 
   return (
-    <div className="w-[400px] border-l p-6 space-y-6">
+    <div className="w-[40%] border-l p-6 space-y-6">
       <div>
         <h2 className="text-lg font-semibold">Create Event</h2>
         <p className="text-sm text-muted-foreground">Add a new event to the calendar.</p>

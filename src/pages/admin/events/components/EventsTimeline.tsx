@@ -23,16 +23,11 @@ export function EventsTimeline() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-semibold tracking-tight">Timeline</h2>
-          <p className="text-sm text-muted-foreground">
-            View events in a chronological timeline.
-          </p>
-        </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Create Event
-        </Button>
+      <div className="space-y-1">
+        <h2 className="text-2xl font-semibold tracking-tight">Timeline</h2>
+        <p className="text-sm text-muted-foreground">
+          View events in a chronological timeline.
+        </p>
       </div>
 
       <div className="min-h-[500px] bg-muted/50 rounded-lg p-4">

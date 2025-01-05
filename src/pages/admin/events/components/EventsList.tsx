@@ -1,9 +1,5 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { CreateEventDialog } from "./CreateEventDialog";
 import { format } from "date-fns";
 import {
   Table,
@@ -17,8 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { EventActions } from "./EventActions";
 
 export function EventsList() {
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-
   const { data: events, isLoading } = useQuery({
     queryKey: ["events"],
     queryFn: async () => {
@@ -34,16 +28,11 @@ export function EventsList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-semibold tracking-tight">All Events</h2>
-          <p className="text-sm text-muted-foreground">
-            View and manage all events in a list format.
-          </p>
-        </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Create Event
-        </Button>
+      <div className="space-y-1">
+        <h2 className="text-2xl font-semibold tracking-tight">All Events</h2>
+        <p className="text-sm text-muted-foreground">
+          View and manage all events in a list format.
+        </p>
       </div>
 
       <div className="rounded-md border">
@@ -87,11 +76,6 @@ export function EventsList() {
           </TableBody>
         </Table>
       </div>
-      
-      <CreateEventDialog 
-        open={showCreateDialog} 
-        onOpenChange={setShowCreateDialog} 
-      />
     </div>
   );
 }
