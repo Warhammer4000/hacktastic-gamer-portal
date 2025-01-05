@@ -1,7 +1,5 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { UseFormReturn } from "react-hook-form";
-import { EventFormValues } from "../../types/event-form";
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
@@ -26,7 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface BasicInfoFieldsProps {
-  form: UseFormReturn<EventFormValues>;
+  form: any;
 }
 
 export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
@@ -52,7 +50,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
     content: form.getValues("description"),
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none min-h-[200px] overflow-y-auto p-4 dark:prose-invert w-full max-w-none'
+        class: 'prose prose-sm focus:outline-none min-h-[200px] p-4 dark:prose-invert'
       }
     },
     onUpdate: ({ editor }) => {
@@ -95,12 +93,12 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
             <FormLabel>Description</FormLabel>
             <FormControl>
               <div className="border rounded-md overflow-hidden">
-                <div className="flex flex-wrap gap-2 p-2 border-b bg-muted">
+                <div className="flex items-center flex-wrap gap-1 p-2 border-b bg-muted">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => editor?.chain().focus().toggleBold().run()}
-                    className={editor?.isActive('bold') ? 'bg-muted-foreground/20' : ''}
+                    className={`h-8 px-2 ${editor?.isActive('bold') ? 'bg-muted-foreground/20' : ''}`}
                     type="button"
                   >
                     <Bold className="h-4 w-4" />
@@ -109,7 +107,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => editor?.chain().focus().toggleItalic().run()}
-                    className={editor?.isActive('italic') ? 'bg-muted-foreground/20' : ''}
+                    className={`h-8 px-2 ${editor?.isActive('italic') ? 'bg-muted-foreground/20' : ''}`}
                     type="button"
                   >
                     <Italic className="h-4 w-4" />
@@ -118,7 +116,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => editor?.chain().focus().toggleStrike().run()}
-                    className={editor?.isActive('strike') ? 'bg-muted-foreground/20' : ''}
+                    className={`h-8 px-2 ${editor?.isActive('strike') ? 'bg-muted-foreground/20' : ''}`}
                     type="button"
                   >
                     <Strikethrough className="h-4 w-4" />
@@ -127,7 +125,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                    className={editor?.isActive('bulletList') ? 'bg-muted-foreground/20' : ''}
+                    className={`h-8 px-2 ${editor?.isActive('bulletList') ? 'bg-muted-foreground/20' : ''}`}
                     type="button"
                   >
                     <List className="h-4 w-4" />
@@ -136,7 +134,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-                    className={editor?.isActive('blockquote') ? 'bg-muted-foreground/20' : ''}
+                    className={`h-8 px-2 ${editor?.isActive('blockquote') ? 'bg-muted-foreground/20' : ''}`}
                     type="button"
                   >
                     <Quote className="h-4 w-4" />
@@ -145,7 +143,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                     variant="ghost"
                     size="sm"
                     onClick={addLink}
-                    className={editor?.isActive('link') ? 'bg-muted-foreground/20' : ''}
+                    className={`h-8 px-2 ${editor?.isActive('link') ? 'bg-muted-foreground/20' : ''}`}
                     type="button"
                   >
                     <LinkIcon className="h-4 w-4" />
@@ -154,6 +152,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                     variant="ghost"
                     size="sm"
                     onClick={addTable}
+                    className="h-8 px-2"
                     type="button"
                   >
                     <TableIcon className="h-4 w-4" />
@@ -162,7 +161,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => editor?.chain().focus().setTextAlign('left').run()}
-                    className={editor?.isActive({ textAlign: 'left' }) ? 'bg-muted-foreground/20' : ''}
+                    className={`h-8 px-2 ${editor?.isActive({ textAlign: 'left' }) ? 'bg-muted-foreground/20' : ''}`}
                     type="button"
                   >
                     <AlignLeft className="h-4 w-4" />
@@ -171,7 +170,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => editor?.chain().focus().setTextAlign('center').run()}
-                    className={editor?.isActive({ textAlign: 'center' }) ? 'bg-muted-foreground/20' : ''}
+                    className={`h-8 px-2 ${editor?.isActive({ textAlign: 'center' }) ? 'bg-muted-foreground/20' : ''}`}
                     type="button"
                   >
                     <AlignCenter className="h-4 w-4" />
@@ -180,14 +179,17 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => editor?.chain().focus().setTextAlign('right').run()}
-                    className={editor?.isActive({ textAlign: 'right' }) ? 'bg-muted-foreground/20' : ''}
+                    className={`h-8 px-2 ${editor?.isActive({ textAlign: 'right' }) ? 'bg-muted-foreground/20' : ''}`}
                     type="button"
                   >
                     <AlignRight className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="overflow-y-auto max-h-[400px] w-full">
-                  <EditorContent editor={editor} className="w-full" />
+                <div className="relative w-full" style={{ height: '200px' }}>
+                  <EditorContent 
+                    editor={editor} 
+                    className="absolute inset-0 overflow-auto"
+                  />
                 </div>
               </div>
             </FormControl>
