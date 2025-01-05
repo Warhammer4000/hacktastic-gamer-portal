@@ -1,5 +1,5 @@
 import { Route } from "react-router-dom";
-import Register from "@/pages/Register";
+import Register from "@/pages/auth/Register";
 import ParticipantRegister from "@/pages/participant/Register";
 import MentorRegister from "@/pages/mentor/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
