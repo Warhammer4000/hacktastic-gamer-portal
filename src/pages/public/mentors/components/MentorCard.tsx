@@ -9,17 +9,17 @@ interface MentorCardProps {
 
 export function MentorCard({ mentor }: MentorCardProps) {
   return (
-    <Card className="group overflow-hidden relative">
+    <Card className="group overflow-hidden relative w-[240px]">
       {/* Social Links - Floating on top right */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+      <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-10">
         {mentor.linkedin_profile_id && (
           <a
             href={`https://linkedin.com/in/${mentor.linkedin_profile_id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-white/90 hover:bg-white p-2 rounded-full transition-colors duration-200 text-blue-600"
+            className="bg-white/90 hover:bg-white p-1.5 rounded-full transition-colors duration-200 text-blue-600"
           >
-            <Linkedin className="h-5 w-5" />
+            <Linkedin className="h-4 w-4" />
           </a>
         )}
         {mentor.github_username && (
@@ -27,9 +27,9 @@ export function MentorCard({ mentor }: MentorCardProps) {
             href={`https://github.com/${mentor.github_username}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-white/90 hover:bg-white p-2 rounded-full transition-colors duration-200 text-gray-800"
+            className="bg-white/90 hover:bg-white p-1.5 rounded-full transition-colors duration-200 text-gray-800"
           >
-            <Github className="h-5 w-5" />
+            <Github className="h-4 w-4" />
           </a>
         )}
       </div>
@@ -44,30 +44,30 @@ export function MentorCard({ mentor }: MentorCardProps) {
           />
         ) : (
           <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <span className="text-4xl text-gray-400">
+            <span className="text-3xl text-gray-400">
               {mentor.full_name?.charAt(0) || '?'}
             </span>
           </div>
         )}
 
         {/* Gradient Overlay and Tech Stacks */}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
           {mentor.mentor_tech_stacks && mentor.mentor_tech_stacks.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-2">
+            <div className="flex flex-wrap gap-1.5">
               {mentor.mentor_tech_stacks.map((tech) => (
                 tech.technology_stacks && (
                   <Badge 
                     key={tech.id} 
-                    className="bg-white text-black flex items-center gap-1.5 py-1 hover:bg-white/90"
+                    className="bg-white text-black flex items-center gap-1 py-0.5 hover:bg-white/90"
                   >
                     {tech.technology_stacks.icon_url && (
                       <img 
                         src={tech.technology_stacks.icon_url} 
                         alt={tech.technology_stacks.name}
-                        className="w-4 h-4"
+                        className="w-3 h-3"
                       />
                     )}
-                    <span className="text-xs">
+                    <span className="text-[10px]">
                       {tech.technology_stacks.name}
                     </span>
                   </Badge>
@@ -79,12 +79,12 @@ export function MentorCard({ mentor }: MentorCardProps) {
       </div>
 
       {/* Name in white background */}
-      <div className="p-4 bg-white">
-        <h2 className="text-xl font-semibold text-gray-900">
+      <div className="p-3 bg-white">
+        <h2 className="text-base font-semibold text-gray-900">
           {mentor.full_name}
         </h2>
         {mentor.bio && (
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+          <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
             {mentor.bio}
           </p>
         )}
