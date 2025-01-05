@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { User, UserCheck, Lock, Users, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface TeamMembersCardProps {
   teamId: string;
@@ -22,6 +23,8 @@ export function TeamMembersCard({
   onLockTeam 
 }: TeamMembersCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: members, isLoading } = useQuery({
     queryKey: ['team-members', teamId],
@@ -66,11 +69,9 @@ export function TeamMembersCard({
     },
   });
 
-  const handleReadyToggle = async () => {
-    if (!currentUser) return;
-
-    try {
-      setIsUpdating(true);
+  const readyMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentUser) throw new Error("Not authenticated");
       const { error } = await supabase
         .from('team_members')
         .update({ is_ready: true })
@@ -78,12 +79,45 @@ export function TeamMembersCard({
         .eq('user_id', currentUser.id);
 
       if (error) throw error;
-      toast.success("Ready status updated!");
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['team-members', teamId] });
+      toast.success("Marked as ready!");
+    },
+    onError: (error) => {
       console.error("Error updating ready status:", error);
       toast.error("Failed to update ready status");
-    } finally {
-      setIsUpdating(false);
+    },
+  });
+
+  const leaveTeamMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentUser) throw new Error("Not authenticated");
+      const { error } = await supabase
+        .from('team_members')
+        .delete()
+        .eq('team_id', teamId)
+        .eq('user_id', currentUser.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Left team successfully");
+      navigate('/participant/team');
+    },
+    onError: (error) => {
+      console.error("Error leaving team:", error);
+      toast.error("Failed to leave team");
+    },
+  });
+
+  const handleReadyToggle = () => {
+    readyMutation.mutate();
+  };
+
+  const handleLeaveTeam = () => {
+    if (window.confirm("Are you sure you want to leave this team?")) {
+      leaveTeamMutation.mutate();
     }
   };
 
@@ -150,12 +184,21 @@ export function TeamMembersCard({
           ))}
 
           <div className="flex justify-end gap-2 pt-4">
-            {!isLocked && currentUserMember && !currentUserMember.is_ready && (
+            {!isLocked && currentUserMember && !currentUserMember.is_ready && !isLeader && (
               <Button
                 onClick={handleReadyToggle}
                 disabled={isUpdating}
               >
                 Mark as Ready
+              </Button>
+            )}
+            {!isLocked && currentUserMember && !isLeader && (
+              <Button
+                variant="destructive"
+                onClick={handleLeaveTeam}
+                disabled={isUpdating}
+              >
+                Leave Team
               </Button>
             )}
             {showLockButton && (
