@@ -1,11 +1,25 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { supabase } from "@/integrations/supabase/client";
-import { MoreVertical, Trash2, UserPlus2, RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { MoreVertical, Trash2, UserPlus2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface AdminTeamActionsProps {
   teamId: string;
@@ -25,7 +39,22 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
       setIsDeleting(true);
       console.log('Starting team deletion process for team:', teamId);
 
-      // First, delete all team members
+      // First, delete the GitHub repository if it exists
+      try {
+        const { error: repoError } = await supabase.functions.invoke('delete-team-repository', {
+          body: { teamId }
+        });
+
+        if (repoError) {
+          console.error('Error deleting repository:', repoError);
+          // Don't throw here, continue with team deletion even if repo deletion fails
+        }
+      } catch (repoError) {
+        console.error('Repository deletion error:', repoError);
+        // Continue with team deletion even if repo deletion fails
+      }
+
+      // Delete all team members
       const { error: membersError } = await supabase
         .from('team_members')
         .delete()
@@ -38,7 +67,7 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
 
       console.log('Successfully deleted team members');
 
-      // Then, delete the team itself
+      // Delete the team itself
       const { error: teamError } = await supabase
         .from('teams')
         .delete()
@@ -160,7 +189,7 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
             <AlertDialogTitle>Delete Team</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete the team "{teamName}"? This action cannot be undone.
-              All team members will be removed and any associated data will be permanently deleted.
+              All team members will be removed, the GitHub repository will be deleted, and any associated data will be permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
