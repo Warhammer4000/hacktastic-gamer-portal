@@ -76,7 +76,7 @@ export const CouponsTable = ({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-6">
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted-foreground">Rows per page</span>
           <Select
