@@ -1,8 +1,12 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import RegisterDialog from "@/pages/auth/RegisterDialog";
 
 export default function Hero() {
+  const [showRegisterDialog, setShowRegisterDialog] = useState(false);
+
   return (
     <section className="container mx-auto px-4 py-20">
       <div className="max-w-4xl mx-auto text-center">
@@ -20,15 +24,22 @@ export default function Hero() {
             Participate in exciting hackathons, learn from mentors, and level up your skills.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/register" className="btn-primary flex items-center gap-2">
+            <button 
+              onClick={() => setShowRegisterDialog(true)}
+              className="btn-primary flex items-center gap-2"
+            >
               Get Started <ArrowRight className="w-4 h-4" />
-            </Link>
+            </button>
             <Link to="/about" className="btn-secondary">
               Learn More
             </Link>
           </div>
         </motion.div>
       </div>
+      <RegisterDialog 
+        isOpen={showRegisterDialog} 
+        onClose={() => setShowRegisterDialog(false)} 
+      />
     </section>
   );
 }
