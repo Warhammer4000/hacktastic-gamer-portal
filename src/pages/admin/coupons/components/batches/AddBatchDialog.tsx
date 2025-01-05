@@ -22,6 +22,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Database } from "@/integrations/supabase/types";
+
+type UserRole = Database["public"]["Enums"]["user_role"];
 
 export const AddBatchDialog = ({ vendors }: { vendors: any[] }) => {
   const [open, setOpen] = useState(false);
@@ -29,7 +32,7 @@ export const AddBatchDialog = ({ vendors }: { vendors: any[] }) => {
   const [description, setDescription] = useState("");
   const [vendorId, setVendorId] = useState("");
   const [redemptionInstructions, setRedemptionInstructions] = useState("");
-  const [eligibleRoles, setEligibleRoles] = useState<string[]>([]);
+  const [eligibleRoles, setEligibleRoles] = useState<UserRole[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const { toast } = useToast();
@@ -40,15 +43,13 @@ export const AddBatchDialog = ({ vendors }: { vendors: any[] }) => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from("coupon_batches").insert([
-        {
-          name,
-          description,
-          vendor_id: vendorId,
-          redemption_instructions: redemptionInstructions,
-          eligible_roles: eligibleRoles,
-        },
-      ]);
+      const { error } = await supabase.from("coupon_batches").insert({
+        name,
+        description,
+        vendor_id: vendorId,
+        redemption_instructions: redemptionInstructions,
+        eligible_roles: eligibleRoles,
+      });
 
       if (error) throw error;
 
@@ -75,9 +76,9 @@ export const AddBatchDialog = ({ vendors }: { vendors: any[] }) => {
     }
   };
 
-  const roles = ["participant", "mentor"];
+  const roles: UserRole[] = ["participant", "mentor"];
 
-  const handleRoleToggle = (role: string) => {
+  const handleRoleToggle = (role: UserRole) => {
     setEligibleRoles((current) =>
       current.includes(role)
         ? current.filter((r) => r !== role)
