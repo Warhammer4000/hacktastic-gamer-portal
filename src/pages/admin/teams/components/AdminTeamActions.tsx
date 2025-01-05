@@ -109,7 +109,7 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onClick={() => setDeleteDialogOpen(true)}
+            onClick={() => setIsDeleteDialogOpen(true)}
             className="text-destructive"
           >
             <Trash2 className="mr-2 h-4 w-4" />
