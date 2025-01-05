@@ -108,7 +108,7 @@ export function TeamMembersCard({
       navigate('/participant/team');
     },
     onError: (error) => {
-      console.error("Error leaving team:", error);
+      console.error('Error leaving team:', error);
       toast.error("Failed to leave team");
     },
   });
@@ -117,10 +117,11 @@ export function TeamMembersCard({
     readyMutation.mutate();
   };
 
-  const handleLeaveTeam = () => {
+  const handleLeaveTeam = async () => {
     if (window.confirm("Are you sure you want to leave this team?")) {
-      leaveTeamMutation.mutate();
+      return leaveTeamMutation.mutateAsync();
     }
+    return Promise.resolve();
   };
 
   const emptySlots = maxMembers - (members?.length || 0);
