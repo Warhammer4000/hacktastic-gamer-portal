@@ -25,11 +25,10 @@ export default function ParticipantUsers() {
         .from("profiles")
         .select(`
           *,
-          user_roles (
+          user_roles!inner (
             id,
             user_id,
-            role,
-            created_at
+            role
           )
         `)
         .eq("user_roles.role", "participant");
