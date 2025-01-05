@@ -41,7 +41,7 @@ export function JoinTeamSection() {
             id
           )
         `)
-        .neq('status', 'locked');
+        .eq('status', 'open'); // Only fetch teams with 'open' status
 
       if (searchQuery) {
         query = query.ilike('name', `%${searchQuery}%`);
@@ -63,6 +63,7 @@ export function JoinTeamSection() {
         .from('teams')
         .select('id')
         .eq('join_code', data.joinCode.toUpperCase())
+        .eq('status', 'open') // Only allow joining open teams
         .maybeSingle();
 
       if (teamError || !team) {
