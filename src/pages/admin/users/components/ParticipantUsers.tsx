@@ -28,7 +28,8 @@ export default function ParticipantUsers() {
           user_roles!inner (
             id,
             user_id,
-            role
+            role,
+            created_at
           )
         `)
         .eq("user_roles.role", "participant");
