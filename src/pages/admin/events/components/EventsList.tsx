@@ -13,6 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { EventActions } from "./EventActions";
 
 export function EventsList() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -52,6 +54,7 @@ export function EventsList() {
               <TableHead>Start Time</TableHead>
               <TableHead>End Time</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -64,12 +67,19 @@ export function EventsList() {
                 <TableCell>
                   {format(new Date(event.end_time), "PPp")}
                 </TableCell>
-                <TableCell className="capitalize">{event.status}</TableCell>
+                <TableCell>
+                  <Badge variant={event.status === "published" ? "default" : "secondary"}>
+                    {event.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <EventActions event={event} />
+                </TableCell>
               </TableRow>
             ))}
             {!isLoading && !events?.length && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
                   No events found
                 </TableCell>
               </TableRow>
