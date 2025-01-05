@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SearchInput } from "@/components/participant/teams/components/SearchInput";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 interface User {
   user_id: string;
@@ -37,17 +38,21 @@ export function UserSelectionList({
   });
 
   if (isLoading) {
-    return <div>Loading users...</div>;
+    return <div>Loading eligible users...</div>;
   }
 
   return (
     <div className="space-y-4">
-      <SearchInput
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder="Search users..."
-        className="mb-4"
-      />
+      <div className="relative">
+        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+        <Input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search users..."
+          className="pl-8"
+        />
+      </div>
       <ScrollArea className="h-[300px] rounded-md border p-4">
         {filteredUsers.map((user) => (
           <div key={user.user_id} className="flex items-center space-x-2 py-2">
@@ -72,8 +77,7 @@ export function UserSelectionList({
         ))}
         {filteredUsers.length === 0 && (
           <div className="text-sm text-gray-500">
-            No eligible users found or all users already have coupons from this
-            batch
+            No eligible users found or all users already have coupons from this batch
           </div>
         )}
       </ScrollArea>

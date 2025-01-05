@@ -4,10 +4,8 @@ import { ArrowUpDown } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { CouponsPagination } from "./CouponsPagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { AssignCouponDialog } from "./AssignCouponDialog";
 
 interface CouponsTableProps {
   coupons: any[];
@@ -31,67 +29,7 @@ export const CouponsTable = ({
   onItemsPerPageChange
 }: CouponsTableProps) => {
   const [selectedCouponId, setSelectedCouponId] = useState<string | null>(null);
-  const [selectedUserId, setSelectedUserId] = useState<string>("");
-  const [users, setUsers] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const loadUsers = async () => {
-    const { data: profiles, error } = await supabase
-      .from('profiles')
-      .select('id, full_name, email')
-      .order('full_name');
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load users",
-      });
-      return;
-    }
-
-    setUsers(profiles || []);
-  };
-
-  const handleAssign = async () => {
-    if (!selectedCouponId || !selectedUserId) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select a user to assign the coupon to",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    const { error } = await supabase
-      .from('coupons')
-      .update({ 
-        assigned_to: selectedUserId,
-        assigned_at: new Date().toISOString()
-      })
-      .eq('id', selectedCouponId);
-
-    setIsLoading(false);
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to assign coupon",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Coupon assigned successfully",
-    });
-    
-    setSelectedCouponId(null);
-    setSelectedUserId("");
-  };
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
 
   return (
     <div className="space-y-4">
@@ -133,55 +71,16 @@ export const CouponsTable = ({
                 </TableCell>
                 <TableCell>
                   {!coupon.assigned_to && (
-                    <Dialog onOpenChange={(open) => {
-                      if (open) {
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
                         setSelectedCouponId(coupon.id);
-                        loadUsers();
-                      } else {
-                        setSelectedCouponId(null);
-                        setSelectedUserId("");
-                      }
-                    }}>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          Assign
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Assign Coupon</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">
-                              Select User
-                            </label>
-                            <Select
-                              value={selectedUserId}
-                              onValueChange={setSelectedUserId}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a user" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {users.map((user) => (
-                                  <SelectItem key={user.id} value={user.id}>
-                                    {user.full_name || user.email}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <Button 
-                            onClick={handleAssign} 
-                            disabled={!selectedUserId || isLoading}
-                            className="w-full"
-                          >
-                            {isLoading ? "Assigning..." : "Assign Coupon"}
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                        setSelectedBatchId(coupon.batch_id);
+                      }}
+                    >
+                      Assign
+                    </Button>
                   )}
                 </TableCell>
               </TableRow>
@@ -213,6 +112,22 @@ export const CouponsTable = ({
           onPageChange={onPageChange}
         />
       </div>
+
+      <AssignCouponDialog
+        open={!!selectedCouponId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedCouponId(null);
+            setSelectedBatchId(null);
+          }
+        }}
+        couponId={selectedCouponId}
+        batchId={selectedBatchId!}
+        onAssigned={() => {
+          // Trigger a refetch of the coupons data
+          window.location.reload();
+        }}
+      />
     </div>
   );
 };
