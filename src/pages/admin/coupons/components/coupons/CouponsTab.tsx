@@ -1,26 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { SearchInput } from "@/components/participant/teams/components/SearchInput";
 import { useState } from "react";
-import { ArrowUpDown } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { CouponsTable } from "./CouponsTable";
+import { CouponsPagination } from "./CouponsPagination";
 
 export const CouponsTab = () => {
   const { toast } = useToast();
@@ -44,19 +28,16 @@ export const CouponsTab = () => {
           assignee:profiles(full_name)
         `);
 
-      // Apply search filter
       if (search) {
         query = query.or(`code.ilike.%${search}%,profiles.full_name.ilike.%${search}%`);
       }
 
-      // Apply sorting
       if (sortField === "assignee") {
         query = query.order("profiles.full_name", { ascending: sortOrder === "asc" });
       } else {
         query = query.order(sortField, { ascending: sortOrder === "asc" });
       }
 
-      // Apply pagination
       const from = (currentPage - 1) * itemsPerPage;
       query = query.range(from, from + itemsPerPage - 1);
 
@@ -105,114 +86,17 @@ export const CouponsTab = () => {
         </div>
       </div>
 
-      <div className="border rounded-lg overflow-hidden dark:border-gray-800">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Code</TableHead>
-              <TableHead>Batch</TableHead>
-              <TableHead>Vendor</TableHead>
-              <TableHead onClick={() => handleSort("assignee")} className="cursor-pointer">
-                <div className="flex items-center gap-2">
-                  Assigned To
-                  <ArrowUpDown className="h-4 w-4" />
-                </div>
-              </TableHead>
-              <TableHead onClick={() => handleSort("assigned_at")} className="cursor-pointer">
-                <div className="flex items-center gap-2">
-                  Assigned At
-                  <ArrowUpDown className="h-4 w-4" />
-                </div>
-              </TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {couponsData?.data?.map((coupon) => (
-              <TableRow key={coupon.id}>
-                <TableCell>{coupon.code}</TableCell>
-                <TableCell>{coupon.batch?.name}</TableCell>
-                <TableCell>{coupon.batch?.vendor?.name}</TableCell>
-                <TableCell>
-                  {coupon.assignee?.[0]?.full_name || "Unassigned"}
-                </TableCell>
-                <TableCell>
-                  {coupon.assigned_at
-                    ? new Date(coupon.assigned_at).toLocaleDateString()
-                    : "-"}
-                </TableCell>
-                <TableCell>
-                  {!coupon.assigned_to && (
-                    <Button variant="outline" size="sm">
-                      Assign
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <CouponsTable 
+        coupons={couponsData?.data || []} 
+        onSort={handleSort}
+        sortField={sortField}
+      />
 
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious 
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-            
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNumber;
-              if (totalPages <= 5) {
-                pageNumber = i + 1;
-              } else if (currentPage <= 3) {
-                pageNumber = i + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageNumber = totalPages - 4 + i;
-              } else {
-                pageNumber = currentPage - 2 + i;
-              }
-
-              return (
-                <PaginationItem key={pageNumber}>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(pageNumber)}
-                    isActive={currentPage === pageNumber}
-                  >
-                    {pageNumber}
-                  </PaginationLink>
-                </PaginationItem>
-              );
-            })}
-
-            {totalPages > 5 && currentPage < totalPages - 2 && (
-              <>
-                <PaginationItem>
-                  <span className="flex h-9 w-9 items-center justify-center">...</span>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(totalPages)}
-                    isActive={currentPage === totalPages}
-                  >
-                    {totalPages}
-                  </PaginationLink>
-                </PaginationItem>
-              </>
-            )}
-
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
+      <CouponsPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };
