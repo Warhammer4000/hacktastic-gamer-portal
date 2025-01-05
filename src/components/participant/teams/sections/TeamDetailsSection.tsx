@@ -1,4 +1,4 @@
-import { Copy, Github, Users } from "lucide-react";
+import { Copy, Github, Users, Blocks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { TeamMentorDetails } from "./TeamMentorDetails";
@@ -78,7 +78,10 @@ export function TeamDetailsSection({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Tech Stack Info */}
         <div className="space-y-2 p-4 rounded-lg border">
-          <h4 className="font-medium text-sm text-muted-foreground">Tech Stack</h4>
+          <h4 className="font-medium text-sm text-muted-foreground flex items-center gap-2">
+            <Blocks className="h-4 w-4" />
+            Tech Stack
+          </h4>
           <p className="font-medium">
             {techStack?.name || 'Not specified'}
           </p>
