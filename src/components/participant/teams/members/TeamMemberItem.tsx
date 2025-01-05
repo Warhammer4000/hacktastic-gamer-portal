@@ -2,6 +2,18 @@ import { Crown, User, UserCheck, Footprints } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TeamMemberItemProps {
   userId: string;
@@ -20,6 +32,8 @@ export function TeamMemberItem({
   teamId,
   showRemoveButton 
 }: TeamMemberItemProps) {
+  const queryClient = useQueryClient();
+
   const handleRemoveMember = async () => {
     try {
       const { error } = await supabase
@@ -29,6 +43,9 @@ export function TeamMemberItem({
         .eq('user_id', userId);
 
       if (error) throw error;
+      
+      // Immediately invalidate the query to trigger a refetch
+      queryClient.invalidateQueries({ queryKey: ['team-members', teamId] });
       toast.success("Team member kicked successfully");
     } catch (error) {
       console.error('Error kicking team member:', error);
@@ -51,15 +68,35 @@ export function TeamMemberItem({
           <UserCheck className="h-5 w-5 text-green-500" />
         )}
         {showRemoveButton && !isLeader && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleRemoveMember}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            title="Kick member"
-          >
-            <Footprints className="h-4 w-4" />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                title="Kick member"
+              >
+                <Footprints className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Kick Team Member</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to kick {fullName || 'this member'} from the team? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleRemoveMember}
+                  className="bg-destructive hover:bg-destructive/90"
+                >
+                  Kick Member
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
     </div>
