@@ -88,10 +88,10 @@ export default function ParticipantRegister() {
       <Button
         variant="ghost"
         className="mb-6"
-        onClick={() => navigate("/register")}
+        onClick={() => navigate("/")}
       >
         <ChevronLeft className="mr-2 h-4 w-4" />
-        Back to Registration Options
+        Back to Home
       </Button>
 
       <div className="text-center mb-8">
