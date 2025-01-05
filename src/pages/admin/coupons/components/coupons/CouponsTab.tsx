@@ -16,21 +16,7 @@ export const CouponsTab = () => {
   const { data: couponsData, isLoading } = useQuery({
     queryKey: ["coupons", search, sortField, sortOrder, currentPage, itemsPerPage],
     queryFn: async () => {
-      // First, get the total count
-      const countQuery = await supabase
-        .from('coupons')
-        .select('*', { count: 'exact', head: true });
-
-      if (countQuery.error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to get total count",
-        });
-        throw countQuery.error;
-      }
-
-      // Then get the paginated data
+      // Get the paginated data with count
       let query = supabase
         .from("coupons")
         .select(`
@@ -40,7 +26,7 @@ export const CouponsTab = () => {
             vendor:coupon_vendors!inner(name)
           ),
           assignee:profiles(full_name)
-        `);
+        `, { count: 'exact' });
 
       if (search) {
         query = query.or(`code.ilike.%${search}%,profiles.full_name.ilike.%${search}%`);
@@ -57,7 +43,7 @@ export const CouponsTab = () => {
       const to = from + itemsPerPage - 1;
       query = query.range(from, to);
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
 
       if (error) {
         toast({
@@ -69,8 +55,8 @@ export const CouponsTab = () => {
       }
 
       return { 
-        data, 
-        count: countQuery.count || 0 
+        data: data || [], 
+        count: count || 0 
       };
     },
   });
