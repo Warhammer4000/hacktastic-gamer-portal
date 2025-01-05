@@ -9,11 +9,11 @@ import Table from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
+import TextAlign from '@tiptap/extension-text-align';
 import { 
   Bold, 
   Italic, 
   List, 
-  Heading,
   Link as LinkIcon,
   Table as TableIcon,
   AlignLeft,
@@ -44,6 +44,9 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
       TableRow,
       TableCell,
       TableHeader,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
     content: form.getValues("description"),
     editorProps: {
