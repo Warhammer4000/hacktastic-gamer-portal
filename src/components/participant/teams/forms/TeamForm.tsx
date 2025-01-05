@@ -53,77 +53,79 @@ export function TeamForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Team Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter team name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Describe your team and project idea..."
-                  className="resize-none"
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="techStackId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Technology Stack</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="h-full flex flex-col space-y-4">
+        <div className="flex-1 space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Team Name</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a technology stack" />
-                  </SelectTrigger>
+                  <Input placeholder="Enter team name" {...field} />
                 </FormControl>
-                <SelectContent>
-                  {isLoadingTechStacks ? (
-                    <SelectItem value="loading" disabled>
-                      Loading...
-                    </SelectItem>
-                  ) : (
-                    techStacks?.map((stack) => (
-                      <SelectItem key={stack.id} value={stack.id}>
-                        {stack.name}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Describe your team and project idea..."
+                    className="min-h-[120px] resize-none"
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="techStackId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Technology Stack</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a technology stack" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {isLoadingTechStacks ? (
+                      <SelectItem value="loading" disabled>
+                        Loading...
                       </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                    ) : (
+                      techStacks?.map((stack) => (
+                        <SelectItem key={stack.id} value={stack.id}>
+                          {stack.name}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full"
+          className="w-full mt-auto"
         >
           {isSubmitting && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
