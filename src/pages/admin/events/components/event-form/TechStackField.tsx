@@ -39,7 +39,7 @@ export function TechStackField({ form }: TechStackFieldProps) {
                 <div className="text-sm text-gray-500 mb-2">
                   {selectedStacks.length} Selected
                 </div>
-                <div className="space-y-1">
+                <div className="flex flex-wrap gap-2">
                   {techStacks.map((stack) => (
                     <div
                       key={stack.id}

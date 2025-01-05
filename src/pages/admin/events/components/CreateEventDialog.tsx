@@ -84,7 +84,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]"> {/* Increased width here */}
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Create Event</DialogTitle>
           <DialogDescription>
@@ -92,7 +92,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <EventFormFields form={form} />
             <DialogFooter>
               <Button type="submit" disabled={isSubmitting}>
