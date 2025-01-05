@@ -27,6 +27,7 @@ serve(async (req) => {
       .single()
 
     if (settingsError || !settings) {
+      console.error('GitHub settings error:', settingsError)
       throw new Error('GitHub settings not found')
     }
 
@@ -38,6 +39,7 @@ serve(async (req) => {
       .single()
 
     if (teamError || !team?.repository_url) {
+      console.error('Team or repository URL not found:', teamError)
       throw new Error('Team or repository URL not found')
     }
 
