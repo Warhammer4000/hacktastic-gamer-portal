@@ -33,6 +33,10 @@ export function DateTimeFields({ form }: DateTimeFieldsProps) {
                         !field.value && "text-muted-foreground"
                       )}
                       type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
                     >
                       {field.value ? (
                         format(new Date(field.value), "PPP")
@@ -43,7 +47,12 @@ export function DateTimeFields({ form }: DateTimeFieldsProps) {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start" side="bottom">
+                <PopoverContent 
+                  className="w-auto p-0" 
+                  align="start"
+                  onOpenAutoFocus={(e) => e.preventDefault()}
+                  onPointerDownOutside={(e) => e.preventDefault()}
+                >
                   <Calendar
                     mode="single"
                     selected={field.value ? new Date(field.value) : undefined}
@@ -97,6 +106,10 @@ export function DateTimeFields({ form }: DateTimeFieldsProps) {
                         !field.value && "text-muted-foreground"
                       )}
                       type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
                     >
                       {field.value ? (
                         format(new Date(field.value), "PPP")
@@ -107,7 +120,12 @@ export function DateTimeFields({ form }: DateTimeFieldsProps) {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start" side="bottom">
+                <PopoverContent 
+                  className="w-auto p-0" 
+                  align="start"
+                  onOpenAutoFocus={(e) => e.preventDefault()}
+                  onPointerDownOutside={(e) => e.preventDefault()}
+                >
                   <Calendar
                     mode="single"
                     selected={field.value ? new Date(field.value) : undefined}

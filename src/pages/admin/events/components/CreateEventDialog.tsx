@@ -86,12 +86,6 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         className="sm:max-w-[600px]"
-        onPointerDownOutside={(e) => {
-          const target = e.target as HTMLElement;
-          if (target.closest('[role="dialog"]')) {
-            e.preventDefault();
-          }
-        }}
       >
         <DialogHeader>
           <DialogTitle>Create Event</DialogTitle>
