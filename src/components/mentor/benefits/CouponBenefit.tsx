@@ -135,7 +135,7 @@ export function CouponBenefit({ coupon }: CouponBenefitProps) {
             asChild
           >
             <a
-              href={coupon.coupon_batches.coupon_vendors.website_url}
+              href={coupon.coupon_batches.redemption_instructions}
               target="_blank"
               rel="noopener noreferrer"
             >
