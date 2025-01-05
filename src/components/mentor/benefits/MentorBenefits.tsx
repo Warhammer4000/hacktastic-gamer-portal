@@ -17,6 +17,7 @@ export function MentorBenefits() {
           id,
           code,
           assigned_at,
+          state,
           batch_id,
           coupon_batches (
             name,
