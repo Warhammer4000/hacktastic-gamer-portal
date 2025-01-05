@@ -54,11 +54,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
       });
 
       if (error) {
-        if (error.message === "Invalid login credentials") {
-          toast.error("Invalid credentials");
-        } else {
-          toast.error("An error occurred during login");
-        }
+        toast.error("Invalid credentials");
         return;
       }
 
@@ -87,7 +83,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
 
       toast.success("Logged in successfully");
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       toast.error("Invalid credentials");
     } finally {
       setIsLoading(false);
