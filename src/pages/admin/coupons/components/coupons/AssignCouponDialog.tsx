@@ -72,11 +72,11 @@ export function AssignCouponDialog({
   });
 
   const handleAssign = async () => {
-    if (!couponId || selectedUsers.length === 0) {
+    if (!couponId || selectedUsers.length !== 1) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please select a user to assign the coupon to",
+        description: "Please select exactly one user to assign the coupon to",
       });
       return;
     }
@@ -132,12 +132,19 @@ export function AssignCouponDialog({
           <UserSelectionList
             users={eligibleUsers || []}
             selectedUsers={selectedUsers}
-            onSelectionChange={(selected) => setSelectedUsers(selected)}
+            onSelectionChange={(selected) => {
+              // Only allow one user to be selected
+              if (selected.length > 1) {
+                setSelectedUsers([selected[selected.length - 1]]);
+              } else {
+                setSelectedUsers(selected);
+              }
+            }}
             isLoading={isLoadingUsers}
           />
           <Button 
             onClick={handleAssign} 
-            disabled={selectedUsers.length === 0 || isLoading}
+            disabled={selectedUsers.length !== 1 || isLoading}
             className="w-full"
           >
             {isLoading ? "Assigning..." : "Assign Coupon"}
