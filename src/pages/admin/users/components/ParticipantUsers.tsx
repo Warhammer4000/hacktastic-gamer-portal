@@ -25,7 +25,12 @@ export default function ParticipantUsers() {
         .from("profiles")
         .select(`
           *,
-          user_roles!inner (role)
+          user_roles (
+            id,
+            user_id,
+            role,
+            created_at
+          )
         `)
         .eq("user_roles.role", "participant");
 
@@ -41,36 +46,36 @@ export default function ParticipantUsers() {
 
   const deleteParticipant = useMutation({
     mutationFn: async (userId: string) => {
-      // First remove the participant role
-      const { error: deleteRoleError } = await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId)
-        .eq('role', 'participant');
+      // First delete related records
+      const deletions = [
+        // Delete user roles
+        supabase.from('user_roles').delete().eq('user_id', userId),
+        // Delete levels
+        supabase.from('levels').delete().eq('user_id', userId),
+        // Delete team memberships
+        supabase.from('team_members').delete().eq('user_id', userId),
+        // Delete profile
+        supabase.from('profiles').delete().eq('id', userId),
+      ];
 
-      if (deleteRoleError) throw deleteRoleError;
-
-      // Then check for remaining roles
-      const { data: remainingRoles } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
-
-      // If no other roles exist, delete the profile
-      if (!remainingRoles?.length) {
-        const { error: deleteProfileError } = await supabase
-          .from('profiles')
-          .delete()
-          .eq('id', userId);
-
-        if (deleteProfileError) throw deleteProfileError;
+      // Execute all deletions
+      const results = await Promise.all(deletions);
+      
+      // Check for errors
+      const errors = results.filter(result => result.error);
+      if (errors.length > 0) {
+        throw new Error('Failed to delete user data');
       }
+
+      // Finally delete the auth user
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      if (authError) throw authError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['participants'] });
       toast.success('Participant removed successfully');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error('Failed to remove participant');
       console.error('Error:', error);
     },
