@@ -19,21 +19,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react";
+import { Plus, Facebook, Twitter, Instagram, Youtube, Link2, FileText, Linkedin } from "lucide-react";
 
-const platforms = [
-  { value: "facebook", label: "Facebook" },
-  { value: "twitter", label: "X (Twitter)" },
-  { value: "instagram", label: "Instagram" },
-  { value: "youtube", label: "YouTube" },
-  { value: "website", label: "Website" },
-  { value: "medium", label: "Medium" },
-  { value: "linkedin", label: "LinkedIn" },
+type SocialMediaPlatform = 'facebook' | 'twitter' | 'instagram' | 'youtube' | 'website' | 'medium' | 'linkedin';
+
+const platforms: { value: SocialMediaPlatform; label: string; icon: JSX.Element }[] = [
+  { value: "facebook", label: "Facebook", icon: <Facebook className="h-4 w-4" /> },
+  { value: "twitter", label: "X (Twitter)", icon: <Twitter className="h-4 w-4" /> },
+  { value: "instagram", label: "Instagram", icon: <Instagram className="h-4 w-4" /> },
+  { value: "youtube", label: "YouTube", icon: <Youtube className="h-4 w-4" /> },
+  { value: "website", label: "Website", icon: <Link2 className="h-4 w-4" /> },
+  { value: "medium", label: "Medium", icon: <FileText className="h-4 w-4" /> },
+  { value: "linkedin", label: "LinkedIn", icon: <Linkedin className="h-4 w-4" /> },
 ];
 
 export const AddSocialMediaLink = () => {
   const [open, setOpen] = useState(false);
-  const [platform, setPlatform] = useState("");
+  const [platform, setPlatform] = useState<SocialMediaPlatform | ''>('');
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,12 +44,14 @@ export const AddSocialMediaLink = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!platform) return;
+    
     setIsLoading(true);
 
     try {
       const { error } = await supabase
         .from("social_media_links")
-        .insert([{ platform, url }]);
+        .insert({ platform, url });
 
       if (error) throw error;
 
@@ -58,7 +62,7 @@ export const AddSocialMediaLink = () => {
 
       queryClient.invalidateQueries({ queryKey: ["socialMediaLinks"] });
       setOpen(false);
-      setPlatform("");
+      setPlatform('');
       setUrl("");
     } catch (error) {
       toast({
@@ -86,14 +90,21 @@ export const AddSocialMediaLink = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="platform">Platform</Label>
-            <Select value={platform} onValueChange={setPlatform} required>
+            <Select value={platform} onValueChange={(value: SocialMediaPlatform) => setPlatform(value)} required>
               <SelectTrigger>
                 <SelectValue placeholder="Select platform" />
               </SelectTrigger>
               <SelectContent>
                 {platforms.map((platform) => (
-                  <SelectItem key={platform.value} value={platform.value}>
-                    {platform.label}
+                  <SelectItem 
+                    key={platform.value} 
+                    value={platform.value}
+                    className="flex items-center gap-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      {platform.icon}
+                      <span>{platform.label}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>

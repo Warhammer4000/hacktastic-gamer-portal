@@ -16,7 +16,7 @@ import { Pencil } from "lucide-react";
 
 interface SocialMediaLink {
   id: string;
-  platform: string;
+  platform: 'facebook' | 'twitter' | 'instagram' | 'youtube' | 'website' | 'medium' | 'linkedin';
   url: string;
 }
 

@@ -3,15 +3,34 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Facebook, Twitter, Instagram, Youtube, Link2, FileText, Linkedin } from "lucide-react";
 import { EditSocialMediaLink } from "./EditSocialMediaLink";
 
 interface SocialMediaLink {
   id: string;
-  platform: string;
+  platform: 'facebook' | 'twitter' | 'instagram' | 'youtube' | 'website' | 'medium' | 'linkedin';
   url: string;
   status: string;
 }
+
+const getPlatformIcon = (platform: SocialMediaLink['platform']) => {
+  switch (platform) {
+    case 'facebook':
+      return <Facebook className="h-5 w-5" />;
+    case 'twitter':
+      return <Twitter className="h-5 w-5" />;
+    case 'instagram':
+      return <Instagram className="h-5 w-5" />;
+    case 'youtube':
+      return <Youtube className="h-5 w-5" />;
+    case 'website':
+      return <Link2 className="h-5 w-5" />;
+    case 'medium':
+      return <FileText className="h-5 w-5" />;
+    case 'linkedin':
+      return <Linkedin className="h-5 w-5" />;
+  }
+};
 
 export const SocialMediaList = ({ links }: { links: SocialMediaLink[] }) => {
   const { toast } = useToast();
@@ -66,6 +85,7 @@ export const SocialMediaList = ({ links }: { links: SocialMediaLink[] }) => {
           className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-800"
         >
           <div className="flex items-center space-x-4">
+            {getPlatformIcon(link.platform)}
             <div>
               <h3 className="font-medium capitalize">{link.platform}</h3>
               <a
