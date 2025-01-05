@@ -1,42 +1,37 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pencil, Trash2 } from "lucide-react";
-import EditParticipantDialog from "./EditParticipantDialog";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-interface Participant {
-  id: string;
-  full_name: string | null;
-  email: string;
+interface ParticipantTableProps {
+  participants: Array<{
+    id: string;
+    full_name: string | null;
+    email: string;
+    avatar_url: string | null;
+    github_username: string | null;
+    linkedin_profile_id: string | null;
+    status: string;
+    user_roles: {
+      role: string;
+    };
+  }>;
+  isLoading: boolean;
 }
 
-export default function ParticipantTable() {
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
+export default function ParticipantTable({ participants, isLoading }: ParticipantTableProps) {
   const queryClient = useQueryClient();
-
-  const { data: participants, isLoading } = useQuery({
-    queryKey: ['participant-users'],
-    queryFn: async () => {
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          email,
-          full_name,
-          user_roles!inner (
-            role
-          )
-        `)
-        .eq('user_roles.role', 'participant');
-
-      if (error) throw error;
-      return profiles;
-    },
-  });
 
   const deleteParticipant = useMutation({
     mutationFn: async (userId: string) => {
@@ -75,13 +70,13 @@ export default function ParticipantTable() {
     },
   });
 
-  const handleEdit = (participant: Participant) => {
-    setSelectedParticipant(participant);
-    setIsEditDialogOpen(true);
+  const handleEdit = (userId: string) => {
+    // Implement edit functionality
+    console.log('Edit participant:', userId);
   };
 
-  const handleDelete = async (userId: string) => {
-    if (window.confirm('Are you sure you want to remove this participant?')) {
+  const handleDelete = (userId: string) => {
+    if (window.confirm('Are you sure you want to delete this participant?')) {
       deleteParticipant.mutate(userId);
     }
   };
@@ -91,48 +86,46 @@ export default function ParticipantTable() {
   }
 
   return (
-    <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>User</TableHead>
+          <TableHead>Email</TableHead>
+          <TableHead>GitHub</TableHead>
+          <TableHead>LinkedIn</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {participants.map((participant) => (
+          <TableRow key={participant.id}>
+            <TableCell className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={participant.avatar_url || ''} alt={participant.full_name || ''} />
+                <AvatarFallback>{participant.full_name?.charAt(0) || '?'}</AvatarFallback>
+              </Avatar>
+              <span>{participant.full_name || participant.email}</span>
+            </TableCell>
+            <TableCell>{participant.email}</TableCell>
+            <TableCell>{participant.github_username || '-'}</TableCell>
+            <TableCell>{participant.linkedin_profile_id || '-'}</TableCell>
+            <TableCell>
+              <Badge variant="outline">{participant.status}</Badge>
+            </TableCell>
+            <TableCell className="text-right">
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" size="icon" onClick={() => handleEdit(participant.id)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button variant="destructive" size="icon" onClick={() => handleDelete(participant.id)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {participants?.map((participant) => (
-            <TableRow key={participant.id}>
-              <TableCell>{participant.full_name}</TableCell>
-              <TableCell>{participant.email}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(participant)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(participant.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      <EditParticipantDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        participant={selectedParticipant}
-      />
-    </>
+        ))}
+      </TableBody>
+    </Table>
   );
 }
