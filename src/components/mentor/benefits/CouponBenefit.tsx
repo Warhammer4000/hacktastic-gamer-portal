@@ -132,12 +132,16 @@ export function CouponBenefit({ coupon }: CouponBenefitProps) {
           <Button
             variant="outline"
             className="w-full gap-2"
-            onClick={() => {
-              window.alert(coupon.coupon_batches.redemption_instructions);
-            }}
+            asChild
           >
-            <ExternalLink className="h-4 w-4" />
-            Redeem Now
+            <a
+              href={coupon.coupon_batches.coupon_vendors.website_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Redeem Now
+            </a>
           </Button>
         </CardFooter>
       )}
