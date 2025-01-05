@@ -82,6 +82,8 @@ export function TeamMembersCard({
               fullName={member.profile?.full_name}
               isLeader={member.user_id === team?.leader_id}
               isReady={member.is_ready}
+              teamId={teamId}
+              showRemoveButton={isLeader && !isLocked}
             />
           ))}
 

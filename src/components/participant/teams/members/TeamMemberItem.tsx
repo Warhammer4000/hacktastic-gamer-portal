@@ -1,13 +1,41 @@
-import { Crown, User, UserCheck } from "lucide-react";
+import { Crown, User, UserCheck, UserX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TeamMemberItemProps {
   userId: string;
   fullName: string | null;
   isLeader: boolean;
   isReady: boolean;
+  teamId: string;
+  showRemoveButton: boolean;
 }
 
-export function TeamMemberItem({ userId, fullName, isLeader, isReady }: TeamMemberItemProps) {
+export function TeamMemberItem({ 
+  userId, 
+  fullName, 
+  isLeader, 
+  isReady, 
+  teamId,
+  showRemoveButton 
+}: TeamMemberItemProps) {
+  const handleRemoveMember = async () => {
+    try {
+      const { error } = await supabase
+        .from('team_members')
+        .delete()
+        .eq('team_id', teamId)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      toast.success("Team member removed successfully");
+    } catch (error) {
+      console.error('Error removing team member:', error);
+      toast.error("Failed to remove team member");
+    }
+  };
+
   return (
     <div className="flex items-center justify-between p-3 rounded-lg border">
       <div className="flex items-center gap-3">
@@ -18,9 +46,21 @@ export function TeamMemberItem({ userId, fullName, isLeader, isReady }: TeamMemb
         )}
         <span>{fullName || 'Unknown User'}</span>
       </div>
-      {isReady && (
-        <UserCheck className="h-5 w-5 text-green-500" />
-      )}
+      <div className="flex items-center gap-2">
+        {isReady && (
+          <UserCheck className="h-5 w-5 text-green-500" />
+        )}
+        {showRemoveButton && !isLeader && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleRemoveMember}
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <UserX className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
