@@ -14,7 +14,7 @@ export default function CTA() {
           to="/register"
           className="inline-flex items-center px-8 py-4 bg-white text-primary rounded-lg hover:bg-gray-100 transition-colors duration-200"
         >
-          Join Now <ArrowRight className="ml-2 w-5 h-5" />
+          Get Started <ArrowRight className="ml-2 w-5 h-5" />
         </Link>
       </div>
     </section>
