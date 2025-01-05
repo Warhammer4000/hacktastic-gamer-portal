@@ -56,27 +56,27 @@ export function MentorCard({ mentor }: MentorCardProps) {
         </div>
 
         {/* Tech Stacks with Icons */}
-        {mentor.tech_stacks && mentor.tech_stacks.length > 0 && (
+        {mentor.mentor_tech_stacks && mentor.mentor_tech_stacks.length > 0 && (
           <div className="mt-4">
             <h3 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
               Tech Stack
             </h3>
             <div className="flex flex-wrap gap-2">
-              {mentor.tech_stacks.map((tech) => (
-                tech.technology_stack && (
+              {mentor.mentor_tech_stacks.map((tech) => (
+                tech.technology_stacks && (
                   <Badge 
                     key={tech.id} 
                     variant="secondary"
                     className="flex items-center gap-2"
                   >
-                    {tech.technology_stack.icon_url && (
+                    {tech.technology_stacks.icon_url && (
                       <img 
-                        src={tech.technology_stack.icon_url} 
-                        alt={tech.technology_stack.name}
+                        src={tech.technology_stacks.icon_url} 
+                        alt={tech.technology_stacks.name}
                         className="w-4 h-4"
                       />
                     )}
-                    {tech.technology_stack.name}
+                    {tech.technology_stacks.name}
                   </Badge>
                 )
               ))}

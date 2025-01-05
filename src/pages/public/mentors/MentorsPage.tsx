@@ -52,10 +52,7 @@ export default function MentorsPage() {
 
       if (profilesError) throw profilesError;
 
-      return profiles.map(profile => ({
-        ...profile,
-        tech_stacks: profile.mentor_tech_stacks
-      })) as Mentor[];
+      return profiles as Mentor[];
     },
   });
 
@@ -64,8 +61,8 @@ export default function MentorsPage() {
                          mentor.bio?.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesTechStack = selectedTechStacks.length === 0 || 
-      mentor.tech_stacks?.some(
-        (tech) => tech.technology_stack && selectedTechStacks.includes(tech.technology_stack.id)
+      mentor.mentor_tech_stacks?.some(
+        (tech) => tech.technology_stacks && selectedTechStacks.includes(tech.technology_stacks.id)
       );
 
     return matchesSearch && matchesTechStack;

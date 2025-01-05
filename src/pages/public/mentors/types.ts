@@ -2,7 +2,7 @@ export interface MentorTechStack {
   id: string;
   mentor_id: string;
   tech_stack_id: string;
-  technology_stack?: {
+  technology_stacks?: {
     id: string;
     name: string;
     icon_url: string;
@@ -18,5 +18,5 @@ export interface Mentor {
   bio: string | null;
   avatar_url: string | null;
   status: 'pending_approval' | 'approved' | 'flagged' | 'incomplete';
-  tech_stacks?: MentorTechStack[];
+  mentor_tech_stacks?: MentorTechStack[];
 }

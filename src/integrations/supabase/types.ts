@@ -215,6 +215,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "mentor_tech_stacks_mentor_id_fkey_profiles"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "mentor_tech_stacks_tech_stack_id_fkey"
             columns: ["tech_stack_id"]
             isOneToOne: false
