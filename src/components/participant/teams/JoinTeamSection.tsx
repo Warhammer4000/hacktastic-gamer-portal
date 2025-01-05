@@ -63,15 +63,27 @@ export function JoinTeamSection({ onTeamJoined }: JoinTeamSectionProps) {
 
   const handleJoinWithCode = async (data: { joinCode: string }) => {
     try {
+      // First check if the team exists and has available slots
       const { data: team, error: teamError } = await supabase
         .from('teams')
-        .select('id')
+        .select(`
+          id,
+          team_members (
+            id
+          )
+        `)
         .eq('join_code', data.joinCode.toUpperCase())
-        .eq('status', 'open')
+        .in('status', ['open', 'draft'])
         .maybeSingle();
 
       if (teamError || !team) {
         toast.error("Invalid team code. Please try again.");
+        return;
+      }
+
+      // Check if team has available slots
+      if (team.team_members.length >= 3) {
+        toast.error("This team is already full.");
         return;
       }
 
