@@ -154,6 +154,7 @@ export default function TeamPage() {
             onViewTeam={() => setIsViewTeamOpen(true)}
             onDeleteTeam={() => setIsDeleteDialogOpen(true)}
             isLocked={team.status === 'locked'}
+            currentUserId={currentUser?.id || ''}
           />
           <TeamCodeCard joinCode={team.join_code} />
           <TeamMentorCard mentorId={team.mentor_id} />
