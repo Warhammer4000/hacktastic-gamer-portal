@@ -4,7 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 import { SearchInput } from "@/components/participant/teams/components/SearchInput";
 import { useState } from "react";
 import { CouponsTable } from "./CouponsTable";
-import { CouponsPagination } from "./CouponsPagination";
 
 export const CouponsTab = () => {
   const { toast } = useToast();
@@ -90,9 +89,6 @@ export const CouponsTab = () => {
         coupons={couponsData?.data || []} 
         onSort={handleSort}
         sortField={sortField}
-      />
-
-      <CouponsPagination
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
