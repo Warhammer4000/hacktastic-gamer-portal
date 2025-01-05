@@ -1,8 +1,9 @@
-import { Copy } from "lucide-react";
+import { Copy, Github, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { TeamMentorDetails } from "./TeamMentorDetails";
 import { TeamRepositorySection } from "./repository/TeamRepositorySection";
+import { Badge } from "@/components/ui/badge";
 
 interface TeamDetailsSectionProps {
   name: string;
@@ -39,42 +40,73 @@ export function TeamDetailsSection({
     toast.success("Team code copied to clipboard!");
   };
 
-  return (
-    <div className="space-y-2">
-      <h3 className="text-lg font-semibold">{name}</h3>
-      {description && (
-        <p className="text-sm text-muted-foreground">
-          {description}
-        </p>
-      )}
-      <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-        <p>Status: {status}</p>
-        {techStack && (
-          <p>Tech Stack: {techStack.name}</p>
-        )}
-        <div className="flex items-center gap-2">
-          <p>Team Code: {joinCode}</p>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={copyTeamCode}
-            className="h-6 w-6"
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        {isLeader && isLocked && !mentorId && (
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={onAssignMentor}
-            className="mt-2"
-          >
-            Assign Mentor
-          </Button>
-        )}
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'draft':
+        return 'bg-gray-100 text-gray-800';
+      case 'open':
+        return 'bg-blue-100 text-blue-800';
+      case 'locked':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'pending_mentor':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
+  return (
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-2xl font-semibold">{name}</h3>
+          <Badge className={getStatusColor(status)}>
+            {status.replace('_', ' ').toUpperCase()}
+          </Badge>
+        </div>
+        {description && (
+          <p className="text-muted-foreground">
+            {description}
+          </p>
+        )}
+      </div>
+
+      {/* Team Info Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Tech Stack Info */}
+        <div className="space-y-2 p-4 rounded-lg border">
+          <h4 className="font-medium text-sm text-muted-foreground">Tech Stack</h4>
+          <p className="font-medium">
+            {techStack?.name || 'Not specified'}
+          </p>
+        </div>
+
+        {/* Team Code */}
+        <div className="space-y-2 p-4 rounded-lg border">
+          <h4 className="font-medium text-sm text-muted-foreground">Team Code</h4>
+          <div className="flex items-center gap-2">
+            <code className="bg-muted px-2 py-1 rounded">{joinCode}</code>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={copyTeamCode}
+              className="h-8 w-8"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Repository Section */}
+      <div className="border rounded-lg p-4">
+        <h4 className="font-medium mb-4 flex items-center gap-2">
+          <Github className="h-5 w-5" />
+          Repository
+        </h4>
         <TeamRepositorySection
           teamId={teamId}
           isLeader={isLeader}
@@ -82,8 +114,24 @@ export function TeamDetailsSection({
           repositoryUrl={repositoryUrl}
         />
       </div>
-      
-      <TeamMentorDetails mentorId={mentorId} />
+
+      {/* Mentor Section */}
+      <div className="border rounded-lg p-4">
+        <h4 className="font-medium mb-4 flex items-center gap-2">
+          <Users className="h-5 w-5" />
+          Team Mentor
+        </h4>
+        {isLeader && isLocked && !mentorId && (
+          <Button 
+            variant="outline" 
+            onClick={onAssignMentor}
+            className="w-full mb-4"
+          >
+            Assign Mentor
+          </Button>
+        )}
+        <TeamMentorDetails mentorId={mentorId} />
+      </div>
     </div>
   );
 }
