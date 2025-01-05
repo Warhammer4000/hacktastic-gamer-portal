@@ -1,9 +1,8 @@
-import { Copy, Github } from "lucide-react";
+import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { TeamMentorDetails } from "./TeamMentorDetails";
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { TeamRepositorySection } from "./repository/TeamRepositorySection";
 
 interface TeamDetailsSectionProps {
   name: string;
@@ -18,7 +17,7 @@ interface TeamDetailsSectionProps {
   isLeader: boolean;
   isLocked: boolean;
   onAssignMentor: () => Promise<void>;
-  teamId: string; // Added teamId to props
+  teamId: string;
 }
 
 export function TeamDetailsSection({
@@ -31,45 +30,11 @@ export function TeamDetailsSection({
   isLeader,
   isLocked,
   onAssignMentor,
-  teamId, // Added teamId to destructuring
+  teamId,
 }: TeamDetailsSectionProps) {
-  const [isCreatingRepo, setIsCreatingRepo] = useState(false);
-  const [repositoryUrl, setRepositoryUrl] = useState<string | null>(null);
-
   const copyTeamCode = () => {
     navigator.clipboard.writeText(joinCode);
     toast.success("Team code copied to clipboard!");
-  };
-
-  const handleAssignMentor = async () => {
-    try {
-      console.log('Attempting to assign mentor...');
-      await onAssignMentor();
-    } catch (error) {
-      console.error('Error in handleAssignMentor:', error);
-      toast.error("Failed to assign mentor. Please try again.");
-    }
-  };
-
-  const createRepository = async () => {
-    if (!isLeader || !mentorId) return;
-    
-    setIsCreatingRepo(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-team-repository', {
-        body: { teamId: teamId } // Using teamId from props
-      });
-
-      if (error) throw error;
-
-      setRepositoryUrl(data.repository_url);
-      toast.success("Repository created successfully!");
-    } catch (error) {
-      console.error('Error creating repository:', error);
-      toast.error("Failed to create repository. Please try again.");
-    } finally {
-      setIsCreatingRepo(false);
-    }
   };
 
   return (
@@ -101,39 +66,19 @@ export function TeamDetailsSection({
           <Button 
             variant="outline" 
             size="sm"
-            onClick={handleAssignMentor}
+            onClick={onAssignMentor}
             className="mt-2"
           >
             Assign Mentor
           </Button>
         )}
 
-        {isLeader && mentorId && status === 'active' && !repositoryUrl && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={createRepository}
-            disabled={isCreatingRepo}
-            className="mt-2 gap-2"
-          >
-            <Github className="h-4 w-4" />
-            Create Team Repository
-          </Button>
-        )}
-
-        {repositoryUrl && (
-          <div className="mt-2">
-            <a
-              href={repositoryUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline flex items-center gap-2"
-            >
-              <Github className="h-4 w-4" />
-              View Repository
-            </a>
-          </div>
-        )}
+        <TeamRepositorySection
+          teamId={teamId}
+          isLeader={isLeader}
+          mentorId={mentorId}
+          repositoryUrl={null}
+        />
       </div>
       
       <TeamMentorDetails mentorId={mentorId} />
