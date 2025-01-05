@@ -36,6 +36,7 @@ export default function AdminUsers() {
 
   const deleteAdmin = useMutation({
     mutationFn: async (userId: string) => {
+      // First remove the admin role
       const { error: deleteRoleError } = await supabase
         .from('user_roles')
         .delete()
@@ -43,6 +44,21 @@ export default function AdminUsers() {
         .eq('role', 'admin');
 
       if (deleteRoleError) throw deleteRoleError;
+
+      // Then delete the profile if they have no other roles
+      const { data: remainingRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+
+      if (!remainingRoles?.length) {
+        const { error: deleteProfileError } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', userId);
+
+        if (deleteProfileError) throw deleteProfileError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
