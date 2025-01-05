@@ -13,8 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Users, CheckSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
+import { UserSelectionList } from "./UserSelectionList";
 
 interface AssignCouponsDialogProps {
   batch: {
@@ -37,8 +36,8 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
 
   // Get array of already assigned user IDs
   const assignedUserIds = batch.coupons
-    .filter(c => c.assigned_to)
-    .map(c => c.assigned_to);
+    .filter((c) => c.assigned_to)
+    .map((c) => c.assigned_to);
 
   // Fetch eligible users based on roles
   const { data: eligibleUsers, isLoading: isLoadingUsers } = useQuery({
@@ -46,7 +45,8 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
     queryFn: async () => {
       const { data: usersWithRoles, error } = await supabase
         .from("user_roles")
-        .select(`
+        .select(
+          `
           user_id,
           role,
           user:profiles!inner(
@@ -54,14 +54,15 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
             full_name,
             email
           )
-        `)
+        `
+        )
         .in("role", batch.eligible_roles);
 
       if (error) throw error;
 
       // Filter out users who already have coupons from this batch
       return usersWithRoles.filter(
-        user => !assignedUserIds.includes(user.user_id)
+        (user) => !assignedUserIds.includes(user.user_id)
       );
     },
     enabled: open,
@@ -131,25 +132,18 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
 
   const handleSelectAll = () => {
     if (!eligibleUsers) return;
-    
+
     if (selectedUsers.length === eligibleUsers.length) {
-      // If all users are selected, deselect all
       setSelectedUsers([]);
     } else {
-      // Otherwise, select all eligible users
-      setSelectedUsers(eligibleUsers.map(user => user.user_id));
+      setSelectedUsers(eligibleUsers.map((user) => user.user_id));
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          data-batch-id={batch.id}
-          variant="ghost" 
-          size="icon"
-          className="hidden"
-        >
+        <Button data-batch-id={batch.id} variant="ghost" size="icon" className="hidden">
           <Users className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -176,40 +170,14 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
                   : "Select All"}
               </Button>
             </div>
-            {isLoadingUsers ? (
-              <div>Loading users...</div>
-            ) : (
-              <ScrollArea className="h-[300px] rounded-md border p-4">
-                {eligibleUsers?.map((user) => (
-                  <div key={user.user_id} className="flex items-center space-x-2 py-2">
-                    <Checkbox
-                      id={user.user_id}
-                      checked={selectedUsers.includes(user.user_id)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedUsers([...selectedUsers, user.user_id]);
-                        } else {
-                          setSelectedUsers(selectedUsers.filter(id => id !== user.user_id));
-                        }
-                      }}
-                    />
-                    <Label htmlFor={user.user_id} className="flex-1">
-                      {user.user.full_name || user.user.email}
-                      <div className="text-sm text-gray-500">
-                        {user.role}
-                      </div>
-                    </Label>
-                  </div>
-                ))}
-                {eligibleUsers?.length === 0 && (
-                  <div className="text-sm text-gray-500">
-                    No eligible users found or all users already have coupons from this batch
-                  </div>
-                )}
-              </ScrollArea>
-            )}
+            <UserSelectionList
+              users={eligibleUsers || []}
+              selectedUsers={selectedUsers}
+              onSelectionChange={setSelectedUsers}
+              isLoading={isLoadingUsers}
+            />
           </div>
-          <Button 
+          <Button
             onClick={handleAssign}
             disabled={selectedUsers.length === 0 || assignCouponsMutation.isPending}
           >
