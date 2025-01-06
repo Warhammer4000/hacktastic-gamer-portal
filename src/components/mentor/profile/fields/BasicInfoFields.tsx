@@ -2,6 +2,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "@/hooks/useMentorProfile";
+import { InstitutionField } from "./InstitutionField";
 
 interface BasicInfoFieldsProps {
   form: UseFormReturn<ProfileFormValues>;
@@ -9,7 +10,7 @@ interface BasicInfoFieldsProps {
 
 export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
   return (
-    <>
+    <div className="space-y-4">
       <FormField
         control={form.control}
         name="full_name"
@@ -17,7 +18,7 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
           <FormItem>
             <FormLabel>Full Name</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input placeholder="Enter your full name" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -31,12 +32,14 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
           <FormItem>
             <FormLabel>Email</FormLabel>
             <FormControl>
-              <Input type="email" {...field} />
+              <Input type="email" placeholder="Enter your email" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-    </>
+
+      <InstitutionField form={form} />
+    </div>
   );
 }

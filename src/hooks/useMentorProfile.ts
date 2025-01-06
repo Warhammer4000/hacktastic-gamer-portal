@@ -8,6 +8,7 @@ export const profileSchema = z.object({
   linkedin_profile_id: z.string().min(1, "LinkedIn profile ID is required"),
   github_username: z.string().min(1, "GitHub username is required"),
   email: z.string().email("Invalid email address"),
+  institution_id: z.string().uuid("Please select an organization"),
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
