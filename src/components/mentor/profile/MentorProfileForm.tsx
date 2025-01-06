@@ -40,28 +40,36 @@ export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: Men
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <BasicInfoFields form={form} />
-        <AvatarField form={form} />
-        <SocialProfileFields 
-          form={form} 
-          onValidationChange={setValidationState}
-          validationState={validationState}
-        />
+        <div className="relative -mt-16 px-6">
+          <AvatarField form={form} />
+        </div>
+        
+        <div className="p-6 space-y-8">
+          <div className="space-y-6">
+            <BasicInfoFields form={form} />
+            <SocialProfileFields 
+              form={form} 
+              onValidationChange={setValidationState}
+              validationState={validationState}
+            />
+          </div>
 
-        <Button 
-          type="submit"
-          disabled={isSubmitting || !isFormValid}
-          className="w-full"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving
-            </>
-          ) : (
-            'Save Profile'
-          )}
-        </Button>
+          <Button 
+            type="submit"
+            disabled={isSubmitting || !isFormValid}
+            className="w-full"
+            size="lg"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving Changes
+              </>
+            ) : (
+              'Save Profile'
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );

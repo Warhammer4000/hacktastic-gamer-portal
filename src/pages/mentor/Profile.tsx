@@ -59,21 +59,24 @@ export default function MentorProfile() {
   };
 
   return (
-    <div className="container max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Mentor Profile</h1>
-      
-      <MentorProfileForm
-        defaultValues={{
-          full_name: profile?.full_name || "",
-          avatar_url: profile?.avatar_url || "",
-          linkedin_profile_id: profile?.linkedin_profile_id || "",
-          github_username: profile?.github_username || "",
-          email: profile?.email || "",
-        }}
-        onSubmit={handleSubmit}
-        isSubmitting={updateProfile.isPending}
-      />
-
+    <div className="container max-w-3xl mx-auto p-6">
+      <div className="bg-background rounded-xl shadow-lg overflow-hidden">
+        <div className="h-32 bg-gradient-to-r from-primary/20 to-secondary/20" />
+        {profile && (
+          <MentorProfileForm
+            defaultValues={{
+              full_name: profile?.full_name || "",
+              avatar_url: profile?.avatar_url || "",
+              linkedin_profile_id: profile?.linkedin_profile_id || "",
+              github_username: profile?.github_username || "",
+              email: profile?.email || "",
+              institution_id: profile?.institution_id || "",
+            }}
+            onSubmit={handleSubmit}
+            isSubmitting={updateProfile.isPending}
+          />
+        )}
+      </div>
       {renderStatusMessage()}
     </div>
   );
