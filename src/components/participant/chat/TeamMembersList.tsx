@@ -4,8 +4,10 @@ import { Users } from "lucide-react";
 
 interface TeamMembersListProps {
   members?: Array<{
+    id: string;
     user_id: string;
     profiles?: {
+      id: string;
       full_name: string | null;
       avatar_url: string | null;
     } | null;
@@ -23,7 +25,7 @@ export function TeamMembersList({ members }: TeamMembersListProps) {
       <ScrollArea className="flex-1 px-4">
         <div className="space-y-4">
           {members?.map((member) => (
-            <div key={member.user_id} className="flex items-center gap-3">
+            <div key={member.id} className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 {member.profiles?.avatar_url ? (
                   <img

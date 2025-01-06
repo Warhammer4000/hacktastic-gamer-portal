@@ -23,9 +23,10 @@ export default function Chat() {
         .select(`
           id,
           name,
-          team_members (
+          team_members!inner (
             user_id,
             profiles (
+              id,
               full_name,
               avatar_url
             )
@@ -53,14 +54,42 @@ export default function Chat() {
       const { data, error } = await supabase
         .from('team_messages')
         .select(`
-          *,
+          id,
+          content,
+          created_at,
           sender:profiles!team_messages_sender_id_fkey (
+            id,
             full_name,
             avatar_url
           )
         `)
         .eq('team_id', selectedTeamId)
         .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedTeamId,
+  });
+
+  // Fetch team members
+  const { data: teamMembers } = useQuery({
+    queryKey: ['team-members', selectedTeamId],
+    queryFn: async () => {
+      if (!selectedTeamId) return [];
+
+      const { data, error } = await supabase
+        .from('team_members')
+        .select(`
+          id,
+          user_id,
+          profiles (
+            id,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('team_id', selectedTeamId);
 
       if (error) throw error;
       return data;
@@ -88,13 +117,27 @@ export default function Chat() {
           table: 'team_messages',
           filter: `team_id=eq.${selectedTeamId}`,
         },
-        (payload) => {
+        async (payload) => {
           if (payload.eventType === 'INSERT') {
-            setMessages(prev => [payload.new, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setMessages(prev => 
-              prev.map(msg => msg.id === payload.new.id ? payload.new : msg)
-            );
+            // Fetch the complete message data including sender profile
+            const { data: newMessage } = await supabase
+              .from('team_messages')
+              .select(`
+                id,
+                content,
+                created_at,
+                sender:profiles!team_messages_sender_id_fkey (
+                  id,
+                  full_name,
+                  avatar_url
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (newMessage) {
+              setMessages(prev => [newMessage, ...prev]);
+            }
           }
         }
       )
@@ -110,7 +153,6 @@ export default function Chat() {
   return (
     <div className="container mx-auto p-6 h-[calc(100vh-4rem)]">
       <div className="grid grid-cols-12 gap-6 h-full">
-        {/* Teams List */}
         <div className="col-span-3 glass-card rounded-lg">
           <TeamsList
             teams={teams}
@@ -119,7 +161,6 @@ export default function Chat() {
           />
         </div>
 
-        {/* Chat Area */}
         <div className="col-span-6 glass-card rounded-lg flex flex-col">
           {selectedTeamId ? (
             <>
@@ -143,9 +184,8 @@ export default function Chat() {
           )}
         </div>
 
-        {/* Team Members */}
         <div className="col-span-3 glass-card rounded-lg">
-          <TeamMembersList members={currentTeam?.team_members} />
+          <TeamMembersList members={teamMembers} />
         </div>
       </div>
     </div>
