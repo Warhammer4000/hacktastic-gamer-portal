@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Users, UserCheck } from "lucide-react";
+import { Users, UserCheck, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface TeamMembersCount {
   count: number;
@@ -11,6 +12,7 @@ interface TeamMembersCount {
 
 interface TechnologyStack {
   name: string;
+  icon_url: string;
 }
 
 interface Team {
@@ -21,6 +23,9 @@ interface Team {
 }
 
 export function UnassignedTeams() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: teams } = useQuery({
     queryKey: ["unassigned-teams"],
     queryFn: async () => {
@@ -33,7 +38,8 @@ export function UnassignedTeams() {
             count
           ),
           technology_stacks (
-            name
+            name,
+            icon_url
           )
         `)
         .is('mentor_id', null)
@@ -48,7 +54,17 @@ export function UnassignedTeams() {
       .rpc('assign_mentor_to_team', { team_id: teamId });
     
     if (mentorId) {
-      console.log('Mentor assigned successfully:', mentorId);
+      toast({
+        title: "Success",
+        description: "Mentor assigned successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["unassigned-teams"] });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No eligible mentor found",
+      });
     }
   };
 
@@ -70,9 +86,34 @@ export function UnassignedTeams() {
               >
                 <div>
                   <h4 className="font-semibold">{team.name}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {team.technology_stacks?.name} • {team.team_members[0]?.count} members
-                  </p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    {team.technology_stacks?.icon_url ? (
+                      <img 
+                        src={team.technology_stacks.icon_url} 
+                        alt={team.technology_stacks.name}
+                        className="w-4 h-4"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            const icon = document.createElement('div');
+                            icon.className = 'w-4 h-4';
+                            parent.appendChild(icon);
+                            const codeIcon = document.createElement('span');
+                            codeIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>';
+                            parent.appendChild(codeIcon);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <Code className="w-4 h-4" />
+                    )}
+                    <span>{team.technology_stacks?.name}</span>
+                    <span>•</span>
+                    <span>{team.team_members[0]?.count} members</span>
+                  </div>
                 </div>
                 <Button
                   variant="outline"

@@ -2,11 +2,24 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { Code } from "lucide-react";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 interface TeamMembersCount {
   count: number;
+}
+
+interface TechnologyStack {
+  name: string;
+  icon_url: string;
+}
+
+interface Team {
+  id: string;
+  name: string;
+  team_members: TeamMembersCount[];
+  technology_stacks: TechnologyStack;
 }
 
 export function TeamSizeDistribution() {
@@ -19,6 +32,10 @@ export function TeamSizeDistribution() {
           id,
           team_members!inner (
             count
+          ),
+          technology_stacks (
+            name,
+            icon_url
           )
         `);
 
