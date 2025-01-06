@@ -42,41 +42,17 @@ export default function AdminUsers() {
 
   const deleteAdmin = useMutation({
     mutationFn: async (userId: string) => {
-      // First remove the admin role
-      const { error: deleteRoleError } = await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId)
-        .eq('role', 'admin');
+      const { data, error } = await supabase
+        .rpc('delete_user_cascade', {
+          user_id: userId
+        });
 
-      if (deleteRoleError) {
-        console.error('Error deleting admin role:', deleteRoleError);
-        throw deleteRoleError;
+      if (error) {
+        console.error('Error deleting user:', error);
+        throw error;
       }
 
-      // Check if the user has any remaining roles
-      const { data: remainingRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
-
-      if (rolesError) {
-        console.error('Error checking remaining roles:', rolesError);
-        throw rolesError;
-      }
-
-      // If no other roles exist, delete the profile
-      if (!remainingRoles?.length) {
-        const { error: deleteProfileError } = await supabase
-          .from('profiles')
-          .delete()
-          .eq('id', userId);
-
-        if (deleteProfileError) {
-          console.error('Error deleting profile:', deleteProfileError);
-          throw deleteProfileError;
-        }
-      }
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });

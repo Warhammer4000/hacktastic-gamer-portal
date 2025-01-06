@@ -996,6 +996,12 @@ export type Database = {
         }
         Returns: string
       }
+      delete_user_cascade: {
+        Args: {
+          user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       coupon_state: "unassigned" | "assigned" | "revealed"
