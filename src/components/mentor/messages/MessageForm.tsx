@@ -28,7 +28,6 @@ export function MessageForm({ teamId }: MessageFormProps) {
     }
 
     setMessage("");
-    toast.success("Message sent successfully");
   };
 
   return (
@@ -38,6 +37,12 @@ export function MessageForm({ teamId }: MessageFormProps) {
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         className="min-h-[80px]"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+          }
+        }}
       />
       <Button onClick={handleSendMessage}>Send</Button>
     </div>

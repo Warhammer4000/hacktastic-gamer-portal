@@ -1,7 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface MessageListProps {
   messages: Array<{
@@ -13,18 +13,18 @@ interface MessageListProps {
       avatar_url: string | null;
     } | null;
   }>;
-  onArchive: (messageId: string) => void;
+  className?: string;
 }
 
-export function MessageList({ messages, onArchive }: MessageListProps) {
+export function MessageList({ messages, className }: MessageListProps) {
   return (
-    <ScrollArea className="h-[300px] w-full rounded-md border p-4">
+    <ScrollArea className={cn("p-4", className)}>
       <div className="space-y-4">
         {messages.map((msg) => (
           <div key={msg.id} className="flex gap-4 items-start">
             <Avatar className="w-8 h-8">
               <AvatarImage src={msg.sender?.avatar_url || ''} alt={msg.sender?.full_name || ''} />
-              <AvatarFallback>{msg.sender?.full_name?.charAt(0) || '?'}</AvatarFallback>
+              <AvatarFallback>{msg.sender?.full_name?.[0] || '?'}</AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-1">
               <div className="flex justify-between items-center">
@@ -34,13 +34,6 @@ export function MessageList({ messages, onArchive }: MessageListProps) {
                 </span>
               </div>
               <p className="text-sm">{msg.content}</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onArchive(msg.id)}
-              >
-                Archive
-              </Button>
             </div>
           </div>
         ))}
