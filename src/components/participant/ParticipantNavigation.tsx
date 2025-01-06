@@ -66,9 +66,9 @@ export default function ParticipantNavigation() {
       requiresProfile: true
     },
     {
-      to: "/participant/messages",
+      to: "/participant/chat",
       icon: MessageSquare,
-      label: "Messages",
+      label: "Chat",
       requiresProfile: true
     },
     {

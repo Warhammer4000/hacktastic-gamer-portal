@@ -5,6 +5,7 @@ import ParticipantDashboard from "@/pages/participant/Dashboard";
 import ParticipantProfile from "@/pages/participant/Profile";
 import TeamPage from "@/pages/participant/Team";
 import Benefits from "@/pages/participant/Benefits";
+import Chat from "@/pages/participant/Chat";
 
 export const participantRoutes = (
   <Route path="/participant">
@@ -14,6 +15,7 @@ export const participantRoutes = (
       <Route path="profile" element={<ParticipantProfile />} />
       <Route path="team" element={<TeamPage />} />
       <Route path="benefits" element={<Benefits />} />
+      <Route path="chat" element={<Chat />} />
     </Route>
   </Route>
 );
