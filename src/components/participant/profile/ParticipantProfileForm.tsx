@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, User, Mail, Building2, Camera, Github, Save } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { BasicInfoFields } from "./fields/BasicInfoFields";
 import { AvatarUrlField } from "./fields/AvatarUrlField";
 import { GitHubUsernameField } from "./fields/GitHubUsernameField";
 import { profileSchema, type ProfileFormValues } from "./schema";
+import { Card } from "@/components/ui/card";
 
 interface ParticipantProfileFormProps {
   profile: ProfileFormValues;
@@ -51,25 +52,47 @@ export function ParticipantProfileForm({ profile }: ParticipantProfileFormProps)
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((values) => updateProfile.mutate(values))} className="space-y-6">
-        <BasicInfoFields form={form} />
-        <AvatarUrlField form={form} />
-        <GitHubUsernameField form={form} />
-        
-        <Button 
-          type="submit" 
-          className="w-full"
-          disabled={updateProfile.isPending || !form.getValues("github_username")}
-        >
-          {updateProfile.isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving
-            </>
-          ) : (
-            'Save Profile'
-          )}
-        </Button>
+      <form onSubmit={form.handleSubmit((values) => updateProfile.mutate(values))} className="space-y-8">
+        <div className="relative -mt-16 px-6">
+          <AvatarUrlField form={form} />
+        </div>
+
+        <div className="p-6 space-y-8">
+          <Card className="p-6 space-y-6">
+            <div className="flex items-center gap-2 text-lg font-semibold text-primary">
+              <User className="h-5 w-5" />
+              <h2>Basic Information</h2>
+            </div>
+            <BasicInfoFields form={form} />
+          </Card>
+
+          <Card className="p-6 space-y-6">
+            <div className="flex items-center gap-2 text-lg font-semibold text-primary">
+              <Github className="h-5 w-5" />
+              <h2>GitHub Integration</h2>
+            </div>
+            <GitHubUsernameField form={form} />
+          </Card>
+
+          <Button 
+            type="submit" 
+            size="lg"
+            className="w-full"
+            disabled={updateProfile.isPending || !form.getValues("github_username")}
+          >
+            {updateProfile.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving Changes
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Profile
+              </>
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );

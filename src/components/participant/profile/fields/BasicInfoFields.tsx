@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "../schema";
 import { InstitutionField } from "./InstitutionField";
+import { Mail, User } from "lucide-react";
 
 interface BasicInfoFieldsProps {
   form: UseFormReturn<ProfileFormValues>;
@@ -10,7 +11,7 @@ interface BasicInfoFieldsProps {
 
 export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
   return (
-    <>
+    <div className="space-y-4">
       <FormField
         control={form.control}
         name="full_name"
@@ -18,7 +19,10 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
           <FormItem>
             <FormLabel>Full Name</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <div className="relative">
+                <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                <Input className="pl-10" placeholder="Your full name" {...field} />
+              </div>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -32,7 +36,10 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
           <FormItem>
             <FormLabel>Email</FormLabel>
             <FormControl>
-              <Input type="email" {...field} />
+              <div className="relative">
+                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                <Input type="email" className="pl-10" placeholder="Your email address" {...field} />
+              </div>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -40,6 +47,6 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
       />
 
       <InstitutionField form={form} />
-    </>
+    </div>
   );
 }

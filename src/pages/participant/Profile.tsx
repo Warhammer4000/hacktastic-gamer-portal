@@ -30,9 +30,11 @@ export default function ParticipantProfile() {
   }
 
   return (
-    <div className="container max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">My Profile</h1>
-      {profile && <ParticipantProfileForm profile={profile} />}
+    <div className="container max-w-3xl mx-auto p-6">
+      <div className="bg-background rounded-xl shadow-lg overflow-hidden">
+        <div className="h-32 bg-gradient-to-r from-primary/20 to-secondary/20" />
+        {profile && <ParticipantProfileForm profile={profile} />}
+      </div>
     </div>
   );
 }
