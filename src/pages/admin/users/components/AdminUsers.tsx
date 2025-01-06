@@ -42,7 +42,7 @@ export default function AdminUsers() {
 
   const deleteAdmin = useMutation({
     mutationFn: async (userId: string) => {
-      // First call our RPC function to delete all user data
+      // Call our RPC function to delete all user data
       const { error: rpcError } = await supabase
         .rpc('delete_user_cascade', {
           user_id: userId
@@ -52,9 +52,6 @@ export default function AdminUsers() {
         console.error('Error in delete_user_cascade:', rpcError);
         throw rpcError;
       }
-
-      // No need to delete from auth.users as the cascade delete in profiles table
-      // will trigger the deletion in auth.users due to the ON DELETE CASCADE constraint
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
