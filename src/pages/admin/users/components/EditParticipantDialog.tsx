@@ -23,26 +23,6 @@ export default function EditParticipantDialog({
 }: EditParticipantDialogProps) {
   const queryClient = useQueryClient();
 
-  const updateParticipant = useMutation({
-    mutationFn: async (values: any) => {
-      const { error } = await supabase
-        .from("profiles")
-        .update(values)
-        .eq("id", participant.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["participants"] });
-      toast.success("Participant updated successfully");
-      onOpenChange(false);
-    },
-    onError: (error) => {
-      toast.error("Failed to update participant");
-      console.error("Error:", error);
-    },
-  });
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
@@ -51,10 +31,7 @@ export default function EditParticipantDialog({
         </DialogHeader>
         <div className="mt-4">
           {participant && (
-            <ParticipantProfileForm
-              profile={participant}
-              onSubmit={(values) => updateParticipant.mutate(values)}
-            />
+            <ParticipantProfileForm profile={participant} />
           )}
         </div>
       </DialogContent>
