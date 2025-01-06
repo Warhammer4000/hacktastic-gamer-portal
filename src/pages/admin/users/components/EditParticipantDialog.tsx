@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -7,10 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { ParticipantProfileForm } from "@/components/participant/profile/ParticipantProfileForm";
 
 interface EditParticipantDialogProps {
   open: boolean;
@@ -23,26 +21,13 @@ export default function EditParticipantDialog({
   onOpenChange,
   participant,
 }: EditParticipantDialogProps) {
-  const [fullName, setFullName] = useState("");
-  const [githubUsername, setGithubUsername] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (participant) {
-      setFullName(participant.full_name || "");
-      setGithubUsername(participant.github_username || "");
-    }
-  }, [participant]);
-
   const updateParticipant = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (values: any) => {
       const { error } = await supabase
         .from("profiles")
-        .update({
-          full_name: fullName,
-          github_username: githubUsername,
-        })
+        .update(values)
         .eq("id", participant.id);
 
       if (error) throw error;
@@ -56,54 +41,22 @@ export default function EditParticipantDialog({
       toast.error("Failed to update participant");
       console.error("Error:", error);
     },
-    onSettled: () => {
-      setIsSubmitting(false);
-    },
   });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    updateParticipant.mutate();
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Edit Participant</DialogTitle>
+          <DialogTitle>Edit Participant Profile</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input
-              id="fullName"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
+        <div className="mt-4">
+          {participant && (
+            <ParticipantProfileForm
+              profile={participant}
+              onSubmit={(values) => updateParticipant.mutate(values)}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="githubUsername">GitHub Username</Label>
-            <Input
-              id="githubUsername"
-              value={githubUsername}
-              onChange={(e) => setGithubUsername(e.target.value)}
-            />
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
-        </form>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
