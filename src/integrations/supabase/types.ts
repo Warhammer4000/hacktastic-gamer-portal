@@ -998,7 +998,7 @@ export type Database = {
       }
       delete_user_cascade: {
         Args: {
-          user_id: string
+          input_user_id: string
         }
         Returns: undefined
       }

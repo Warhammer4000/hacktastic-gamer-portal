@@ -81,7 +81,7 @@ const AdminLayout = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <Sidebar>
+        <Sidebar className="z-50 bg-background border-r">
           <SidebarContent>
             <SidebarGroup>
               <div className="flex items-center justify-between px-4 py-2">
@@ -137,7 +137,7 @@ const AdminLayout = () => {
             </SidebarGroup>
           </SidebarContent>
         </Sidebar>
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 bg-background relative z-0 overflow-auto">
           <Outlet />
         </main>
       </div>
