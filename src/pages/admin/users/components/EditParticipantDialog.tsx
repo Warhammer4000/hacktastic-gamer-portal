@@ -20,16 +20,14 @@ export default function EditParticipantDialog({
 }: EditParticipantDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-0">
+      <DialogContent className="max-w-3xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle>Edit Participant Profile</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="flex-1">
-          <div className="p-6 pt-0">
-            {participant && (
-              <ParticipantProfileForm profile={participant} />
-            )}
-          </div>
+        <ScrollArea className="flex-1 px-6 py-4">
+          {participant && (
+            <ParticipantProfileForm profile={participant} />
+          )}
         </ScrollArea>
       </DialogContent>
     </Dialog>
