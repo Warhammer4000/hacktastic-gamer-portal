@@ -34,7 +34,6 @@ export default function AdminUsers() {
         throw error;
       }
 
-      // Filter out any non-admin profiles (shouldn't happen due to the query, but just to be safe)
       return profiles.filter(profile => 
         profile.user_roles?.some(role => role.role === 'admin')
       );
@@ -50,13 +49,21 @@ export default function AdminUsers() {
         .eq('user_id', userId)
         .eq('role', 'admin');
 
-      if (deleteRoleError) throw deleteRoleError;
+      if (deleteRoleError) {
+        console.error('Error deleting admin role:', deleteRoleError);
+        throw deleteRoleError;
+      }
 
-      // Then check for remaining roles
-      const { data: remainingRoles } = await supabase
+      // Check if the user has any remaining roles
+      const { data: remainingRoles, error: rolesError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId);
+
+      if (rolesError) {
+        console.error('Error checking remaining roles:', rolesError);
+        throw rolesError;
+      }
 
       // If no other roles exist, delete the profile
       if (!remainingRoles?.length) {
@@ -65,7 +72,10 @@ export default function AdminUsers() {
           .delete()
           .eq('id', userId);
 
-        if (deleteProfileError) throw deleteProfileError;
+        if (deleteProfileError) {
+          console.error('Error deleting profile:', deleteProfileError);
+          throw deleteProfileError;
+        }
       }
     },
     onSuccess: () => {
@@ -73,8 +83,8 @@ export default function AdminUsers() {
       toast.success('Administrator removed successfully');
     },
     onError: (error) => {
+      console.error('Error removing administrator:', error);
       toast.error('Failed to remove administrator');
-      console.error('Error:', error);
     },
   });
 
