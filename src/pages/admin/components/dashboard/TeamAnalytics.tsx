@@ -2,6 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { Code } from "lucide-react";
+
+interface TechStackData {
+  name: string;
+  value: number;
+  icon_url?: string;
+}
 
 export function TeamAnalytics() {
   const { data: techStackData } = useQuery({
@@ -11,24 +18,62 @@ export function TeamAnalytics() {
         .from("teams")
         .select(`
           tech_stack:technology_stacks (
-            name
+            name,
+            icon_url
           )
         `);
 
-      const stackCounts = data?.reduce((acc: Record<string, number>, team) => {
+      const stackCounts = data?.reduce((acc: Record<string, { count: number; icon_url?: string }>, team) => {
         const stackName = team.tech_stack?.name || "Unassigned";
-        acc[stackName] = (acc[stackName] || 0) + 1;
+        if (!acc[stackName]) {
+          acc[stackName] = { 
+            count: 0, 
+            icon_url: team.tech_stack?.icon_url 
+          };
+        }
+        acc[stackName].count += 1;
         return acc;
       }, {});
 
-      return Object.entries(stackCounts || {}).map(([name, value]) => ({
+      return Object.entries(stackCounts || {}).map(([name, { count, icon_url }]) => ({
         name,
-        value,
+        value: count,
+        icon_url
       }));
     },
   });
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, icon_url }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <g>
+        {icon_url ? (
+          <image
+            x={x - 12}
+            y={y - 12}
+            width={24}
+            height={24}
+            xlinkHref={icon_url}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+        ) : (
+          <Code className="h-6 w-6" x={x - 12} y={y - 12} />
+        )}
+        <text x={x} y={y + 20} fill="#666" textAnchor="middle" dominantBaseline="middle">
+          {name}
+        </text>
+      </g>
+    );
+  };
 
   return (
     <Card className="col-span-2">
@@ -44,12 +89,10 @@ export function TeamAnalytics() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
+                label={renderCustomizedLabel}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
-                label={({ name, percent }) => 
-                  `${name} ${(percent * 100).toFixed(0)}%`
-                }
               >
                 {techStackData?.map((entry, index) => (
                   <Cell 
