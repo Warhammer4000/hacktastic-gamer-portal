@@ -24,6 +24,7 @@ export function ParticipantProfileForm({ profile }: ParticipantProfileFormProps)
       email: profile?.email || "",
       avatar_url: profile?.avatar_url || "",
       github_username: profile?.github_username || "",
+      institution_id: profile?.institution_id || "",
     },
   });
 

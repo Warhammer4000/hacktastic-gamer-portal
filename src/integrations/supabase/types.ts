@@ -568,6 +568,7 @@ export type Database = {
           full_name: string | null
           github_username: string | null
           id: string
+          institution_id: string | null
           is_profile_approved: boolean | null
           is_profile_completed: boolean | null
           linkedin_profile_id: string | null
@@ -582,6 +583,7 @@ export type Database = {
           full_name?: string | null
           github_username?: string | null
           id: string
+          institution_id?: string | null
           is_profile_approved?: boolean | null
           is_profile_completed?: boolean | null
           linkedin_profile_id?: string | null
@@ -596,13 +598,22 @@ export type Database = {
           full_name?: string | null
           github_username?: string | null
           id?: string
+          institution_id?: string | null
           is_profile_approved?: boolean | null
           is_profile_completed?: boolean | null
           linkedin_profile_id?: string | null
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       registration_settings: {
         Row: {

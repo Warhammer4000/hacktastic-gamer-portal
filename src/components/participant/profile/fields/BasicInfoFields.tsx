@@ -2,6 +2,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "../schema";
+import { InstitutionField } from "./InstitutionField";
 
 interface BasicInfoFieldsProps {
   form: UseFormReturn<ProfileFormValues>;
@@ -37,6 +38,8 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
           </FormItem>
         )}
       />
+
+      <InstitutionField form={form} />
     </>
   );
 }
