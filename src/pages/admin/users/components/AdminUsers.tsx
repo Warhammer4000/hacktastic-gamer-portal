@@ -52,6 +52,9 @@ export default function AdminUsers() {
         console.error('Error in delete_user_cascade:', rpcError);
         throw rpcError;
       }
+
+      // No need to delete from auth.users as the cascade delete in profiles table
+      // will trigger the deletion in auth.users due to the ON DELETE CASCADE constraint
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
