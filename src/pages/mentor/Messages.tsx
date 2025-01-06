@@ -12,7 +12,6 @@ export default function Messages() {
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
 
-  // Fetch mentor's teams
   const { data: teams } = useQuery({
     queryKey: ['mentor-teams'],
     queryFn: async () => {
@@ -43,7 +42,7 @@ export default function Messages() {
     }
   }, [teams]);
 
-  // Fetch messages for selected team
+  // Fetch messages for selected team - Note the ascending order
   const { data: teamMessages } = useQuery({
     queryKey: ['team-messages', selectedTeamId],
     queryFn: async () => {
@@ -59,7 +58,7 @@ export default function Messages() {
           )
         `)
         .eq('team_id', selectedTeamId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true }); // Changed to ascending
 
       if (error) throw error;
       return data;
@@ -87,9 +86,24 @@ export default function Messages() {
           table: 'team_messages',
           filter: `team_id=eq.${selectedTeamId}`,
         },
-        (payload) => {
+        async (payload) => {
           if (payload.eventType === 'INSERT') {
-            setMessages(prev => [payload.new, ...prev]);
+            // Fetch the complete message data including sender profile
+            const { data: newMessage } = await supabase
+              .from('team_messages')
+              .select(`
+                *,
+                sender:profiles!team_messages_sender_id_fkey (
+                  full_name,
+                  avatar_url
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (newMessage) {
+              setMessages(prev => [...prev, newMessage]); // Add new message at the end
+            }
           } else if (payload.eventType === 'UPDATE') {
             setMessages(prev => 
               prev.map(msg => msg.id === payload.new.id ? payload.new : msg)
@@ -161,7 +175,6 @@ export default function Messages() {
   return (
     <div className="container mx-auto p-6 h-[calc(100vh-4rem)]">
       <div className="grid grid-cols-12 gap-6 h-full">
-        {/* Teams List */}
         <div className="col-span-3 glass-card rounded-lg">
           <TeamsList
             teams={teams}
@@ -170,7 +183,6 @@ export default function Messages() {
           />
         </div>
 
-        {/* Chat Area */}
         <div className="col-span-6 glass-card rounded-lg flex flex-col">
           {selectedTeamId ? (
             <>
@@ -197,7 +209,6 @@ export default function Messages() {
           )}
         </div>
 
-        {/* Team Members */}
         <div className="col-span-3 glass-card rounded-lg">
           <TeamMembersList members={currentTeam?.team_members} />
         </div>

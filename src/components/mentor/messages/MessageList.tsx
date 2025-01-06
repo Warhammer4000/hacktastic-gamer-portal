@@ -2,6 +2,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef } from "react";
 
 interface MessageListProps {
   messages: Array<{
@@ -17,8 +18,17 @@ interface MessageListProps {
 }
 
 export function MessageList({ messages, className }: MessageListProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
-    <ScrollArea className={cn("p-4", className)}>
+    <ScrollArea ref={scrollRef} className={cn("p-4", className)}>
       <div className="space-y-4">
         {messages.map((msg) => (
           <div key={msg.id} className="flex gap-4 items-start">
