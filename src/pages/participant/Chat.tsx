@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { MessageForm } from "@/components/participant/messages/MessageForm";
 import { MessageList } from "@/components/participant/messages/MessageList";
 import { TeamsList } from "@/components/participant/chat/TeamsList";
@@ -12,7 +11,6 @@ export default function Chat() {
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
 
-  // Fetch participant's teams
   const { data: teams } = useQuery({
     queryKey: ['participant-teams'],
     queryFn: async () => {
@@ -45,7 +43,7 @@ export default function Chat() {
     }
   }, [teams]);
 
-  // Fetch messages for selected team
+  // Fetch messages for selected team - Note the ascending order
   const { data: teamMessages } = useQuery({
     queryKey: ['team-messages', selectedTeamId],
     queryFn: async () => {
@@ -64,7 +62,7 @@ export default function Chat() {
           )
         `)
         .eq('team_id', selectedTeamId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true }); // Changed to ascending
 
       if (error) throw error;
       return data;
@@ -72,7 +70,6 @@ export default function Chat() {
     enabled: !!selectedTeamId,
   });
 
-  // Fetch team members
   const { data: teamMembers } = useQuery({
     queryKey: ['team-members', selectedTeamId],
     queryFn: async () => {
@@ -119,7 +116,6 @@ export default function Chat() {
         },
         async (payload) => {
           if (payload.eventType === 'INSERT') {
-            // Fetch the complete message data including sender profile
             const { data: newMessage } = await supabase
               .from('team_messages')
               .select(`
@@ -136,7 +132,7 @@ export default function Chat() {
               .single();
 
             if (newMessage) {
-              setMessages(prev => [newMessage, ...prev]);
+              setMessages(prev => [...prev, newMessage]); // Add new message at the end
             }
           }
         }
