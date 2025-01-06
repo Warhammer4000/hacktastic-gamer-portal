@@ -1,4 +1,11 @@
-import { MessageSquare } from "lucide-react";
+import { 
+  MessageSquare, 
+  LayoutDashboard, 
+  User, 
+  Settings, 
+  Gift, 
+  Users 
+} from "lucide-react";
 import { MentorNavigationItem } from "./navigation/MentorNavigationItem";
 import { LogoutButton } from "./navigation/LogoutButton";
 
@@ -8,58 +15,46 @@ export default function MentorNavigation() {
       <nav className="space-y-2 p-4">
         <MentorNavigationItem 
           to="/mentor/dashboard" 
-          icon="LayoutDashboard"
+          icon={LayoutDashboard}
           label="Dashboard"
           isActive={false}
           isDisabled={false}
-        >
-          Dashboard
-        </MentorNavigationItem>
+        />
         <MentorNavigationItem 
           to="/mentor/profile" 
-          icon="User"
+          icon={User}
           label="Profile"
           isActive={false}
           isDisabled={false}
-        >
-          Profile
-        </MentorNavigationItem>
+        />
         <MentorNavigationItem 
           to="/mentor/preferences" 
-          icon="Settings"
+          icon={Settings}
           label="Preferences"
           isActive={false}
           isDisabled={false}
-        >
-          Preferences
-        </MentorNavigationItem>
+        />
         <MentorNavigationItem 
           to="/mentor/benefits" 
-          icon="Gift"
+          icon={Gift}
           label="Benefits"
           isActive={false}
           isDisabled={false}
-        >
-          Benefits
-        </MentorNavigationItem>
+        />
         <MentorNavigationItem 
           to="/mentor/mentees" 
-          icon="Users"
+          icon={Users}
           label="Mentees"
           isActive={false}
           isDisabled={false}
-        >
-          Mentees
-        </MentorNavigationItem>
+        />
         <MentorNavigationItem 
           to="/mentor/messages" 
           icon={MessageSquare}
           label="Messages"
           isActive={false}
           isDisabled={false}
-        >
-          Messages
-        </MentorNavigationItem>
+        />
       </nav>
       <div className="p-4">
         <LogoutButton />
