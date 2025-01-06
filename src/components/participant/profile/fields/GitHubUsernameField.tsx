@@ -7,6 +7,7 @@ import { Loader2, Github, CheckCircle2 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { validateProfiles } from "@/utils/profileValidation";
 import { ProfileFormValues } from "../schema";
+import { cn } from "@/lib/utils";
 
 interface GitHubUsernameFieldProps {
   form: UseFormReturn<ProfileFormValues>;
