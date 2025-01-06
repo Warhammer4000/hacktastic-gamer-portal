@@ -1,13 +1,10 @@
-import { useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ParticipantProfileForm } from "@/components/participant/profile/ParticipantProfileForm";
 
 interface EditParticipantDialogProps {
@@ -21,19 +18,19 @@ export default function EditParticipantDialog({
   onOpenChange,
   participant,
 }: EditParticipantDialogProps) {
-  const queryClient = useQueryClient();
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="p-6 pb-0">
           <DialogTitle>Edit Participant Profile</DialogTitle>
         </DialogHeader>
-        <div className="mt-4">
-          {participant && (
-            <ParticipantProfileForm profile={participant} />
-          )}
-        </div>
+        <ScrollArea className="flex-1">
+          <div className="p-6 pt-0">
+            {participant && (
+              <ParticipantProfileForm profile={participant} />
+            )}
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
