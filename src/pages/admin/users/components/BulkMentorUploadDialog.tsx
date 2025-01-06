@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -22,7 +22,7 @@ export default function BulkMentorUploadDialog({ open, onOpenChange }: BulkMento
       const results = [];
 
       for (const row of rows) {
-        const [email, fullName, githubUsername, linkedinProfileId] = row.split(',').map(field => field.trim());
+        const [email, fullName, githubUsername, linkedinProfileId, institutionName, teamCount] = row.split(',').map(field => field.trim());
         if (!email || !fullName) continue;
 
         const password = Math.random().toString(36).slice(-8); // Generate random password
@@ -61,18 +61,46 @@ export default function BulkMentorUploadDialog({ open, onOpenChange }: BulkMento
           continue;
         }
 
+        // Find institution if provided
+        let institutionId = null;
+        if (institutionName) {
+          const { data: institutions } = await supabase
+            .from('institutions')
+            .select('id')
+            .eq('name', institutionName)
+            .single();
+          
+          institutionId = institutions?.id;
+        }
+
         // Update profile with additional information
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
             github_username: githubUsername,
-            linkedin_profile_id: linkedinProfileId
+            linkedin_profile_id: linkedinProfileId,
+            institution_id: institutionId
           })
           .eq('id', authData.user.id);
 
         if (profileError) {
           results.push({ email, success: false, error: profileError.message });
           continue;
+        }
+
+        // Set mentor preferences if team count is provided
+        if (teamCount) {
+          const { error: prefError } = await supabase
+            .from('mentor_preferences')
+            .insert({
+              mentor_id: authData.user.id,
+              team_count: parseInt(teamCount)
+            });
+
+          if (prefError) {
+            results.push({ email, success: false, error: prefError.message });
+            continue;
+          }
         }
 
         results.push({ email, success: true });
@@ -121,7 +149,7 @@ export default function BulkMentorUploadDialog({ open, onOpenChange }: BulkMento
   };
 
   const downloadTemplate = () => {
-    const csvContent = "email,full_name,github_username,linkedin_profile_id\nexample@email.com,John Doe,johndoe,john-doe-123";
+    const csvContent = "email,full_name,github_username,linkedin_profile_id,institution_name,team_count\nexample@email.com,John Doe,johndoe,john-doe-123,Example University,2";
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -138,6 +166,9 @@ export default function BulkMentorUploadDialog({ open, onOpenChange }: BulkMento
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Bulk Upload Mentors</DialogTitle>
+          <DialogDescription>
+            Upload a CSV file with mentor information. Download the template for the correct format.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -149,7 +180,7 @@ export default function BulkMentorUploadDialog({ open, onOpenChange }: BulkMento
               required
             />
             <p className="text-sm text-muted-foreground">
-              Upload a CSV file with columns: email, full_name, github_username, linkedin_profile_id
+              Upload a CSV file with columns: email, full_name, github_username, linkedin_profile_id, institution_name, team_count
             </p>
           </div>
 

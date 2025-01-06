@@ -3,13 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserPlus, Upload, Search } from "lucide-react";
+import { UserPlus, Upload, Search, Download } from "lucide-react";
 import AddMentorDialog from "./AddMentorDialog";
 import BulkMentorUploadDialog from "./BulkMentorUploadDialog";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { UserCard } from "@/components/admin/users/UserCard";
 import { MentorTable } from "./mentor/MentorTable";
 import { useMentorActions } from "./mentor/useMentorActions";
+import * as XLSX from 'xlsx';
 
 export default function MentorUsers() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,7 +25,19 @@ export default function MentorUsers() {
         .from('profiles')
         .select(`
           *,
-          user_roles!inner (role)
+          user_roles!inner (role),
+          mentor_preferences (
+            team_count
+          ),
+          mentor_tech_stacks (
+            tech_stack_id,
+            technology_stacks (
+              name
+            )
+          ),
+          institutions (
+            name
+          )
         `)
         .eq('user_roles.role', 'mentor');
 
@@ -39,6 +52,30 @@ export default function MentorUsers() {
   });
 
   const { handleEdit, handleDelete } = useMentorActions();
+
+  const handleExport = () => {
+    if (!mentors) return;
+
+    const exportData = mentors.map(mentor => ({
+      email: mentor.email,
+      full_name: mentor.full_name || '',
+      github_username: mentor.github_username || '',
+      linkedin_profile_id: mentor.linkedin_profile_id || '',
+      institution: mentor.institutions?.name || '',
+      team_count: mentor.mentor_preferences?.[0]?.team_count || 1,
+      tech_stacks: mentor.mentor_tech_stacks
+        ?.map(stack => stack.technology_stacks?.name)
+        .filter(Boolean)
+        .join(', ') || '',
+      status: mentor.status,
+      bio: mentor.bio || ''
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Mentors");
+    XLSX.writeFile(wb, "mentors.xlsx");
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -56,6 +93,10 @@ export default function MentorUsers() {
             <Button variant="outline" onClick={() => setIsBulkUploadOpen(true)}>
               <Upload className="mr-2 h-4 w-4" />
               Bulk Upload
+            </Button>
+            <Button variant="outline" onClick={handleExport}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
             </Button>
           </div>
           <ViewToggle view={view} onViewChange={setView} />
