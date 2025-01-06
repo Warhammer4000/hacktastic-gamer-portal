@@ -88,19 +88,19 @@ export function MenteeTeamCard({ team }: MenteeTeamCardProps) {
               <div className="flex items-center gap-4">
                 <Avatar className="h-10 w-10">
                   <AvatarImage
-                    src={member.profile.avatar_url || ""}
-                    alt={member.profile.full_name || ""}
+                    src={member.profile?.avatar_url || ""}
+                    alt={member.profile?.full_name || "Team Member"}
                   />
                   <AvatarFallback>
-                    {member.profile.full_name?.charAt(0) || "?"}
+                    {member.profile?.full_name?.charAt(0) || "?"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-medium">
-                      {member.profile.full_name || "Unknown User"}
+                      {member.profile?.full_name || "Unknown User"}
                     </h3>
-                    {team.leader_id === member.profile.id && (
+                    {team.leader_id === member.profile?.id && (
                       <Badge variant="secondary" className="gap-1">
                         <Star className="h-3 w-3" />
                         Leader
@@ -108,13 +108,15 @@ export function MenteeTeamCard({ team }: MenteeTeamCardProps) {
                     )}
                   </div>
                   <div className="flex flex-col gap-1 mt-1">
-                    <div className="flex items-center gap-1">
-                      <Mail className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
-                        {member.profile.email}
-                      </span>
-                    </div>
-                    {member.profile.institution && (
+                    {member.profile?.email && (
+                      <div className="flex items-center gap-1">
+                        <Mail className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">
+                          {member.profile.email}
+                        </span>
+                      </div>
+                    )}
+                    {member.profile?.institution && (
                       <div className="flex items-center gap-1">
                         <School className="h-3 w-3 text-muted-foreground" />
                         <span className="text-xs text-muted-foreground">
@@ -126,7 +128,7 @@ export function MenteeTeamCard({ team }: MenteeTeamCardProps) {
                 </div>
               </div>
               <div className="flex gap-2">
-                {member.profile.github_username && (
+                {member.profile?.github_username && (
                   <a
                     href={`https://github.com/${member.profile.github_username}`}
                     target="_blank"
@@ -146,7 +148,7 @@ export function MenteeTeamCard({ team }: MenteeTeamCardProps) {
                     </svg>
                   </a>
                 )}
-                {member.profile.linkedin_profile_id && (
+                {member.profile?.linkedin_profile_id && (
                   <a
                     href={`https://linkedin.com/in/${member.profile.linkedin_profile_id}`}
                     target="_blank"
