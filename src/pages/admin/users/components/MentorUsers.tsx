@@ -12,15 +12,31 @@ import { MentorTable } from "./mentor/MentorTable";
 import { useMentorActions } from "./mentor/useMentorActions";
 import { MentorData } from "../types/mentor";
 import * as XLSX from 'xlsx';
+import { MultiSelect } from "@/components/ui/multi-select";
 
 export default function MentorUsers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddMentorOpen, setIsAddMentorOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [view, setView] = useState<"table" | "card">("table");
+  const [selectedTechStacks, setSelectedTechStacks] = useState<string[]>([]);
+
+  // Query to fetch tech stacks for the filter
+  const { data: techStacks } = useQuery({
+    queryKey: ['tech-stacks'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('technology_stacks')
+        .select('*')
+        .eq('status', 'active');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: mentors, isLoading } = useQuery({
-    queryKey: ['mentor-users', searchQuery],
+    queryKey: ['mentor-users', searchQuery, selectedTechStacks],
     queryFn: async () => {
       const query = supabase
         .from('profiles')
@@ -46,10 +62,19 @@ export default function MentorUsers() {
         query.or(`email.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`);
       }
 
+      if (selectedTechStacks.length > 0) {
+        query.in(
+          'id',
+          supabase
+            .from('mentor_tech_stacks')
+            .select('mentor_id')
+            .in('tech_stack_id', selectedTechStacks)
+        );
+      }
+
       const { data, error } = await query;
       if (error) throw error;
 
-      // Transform the data to match our expected types
       return (data as any[]).map(mentor => ({
         ...mentor,
         mentor_preferences: mentor.mentor_preferences || [],
@@ -88,10 +113,16 @@ export default function MentorUsers() {
     return <div>Loading...</div>;
   }
 
+  const techStackOptions = techStacks?.map(stack => ({
+    value: stack.id,
+    label: stack.name,
+    icon: stack.icon_url
+  })) || [];
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center">
           <div className="space-x-2">
             <Button onClick={() => setIsAddMentorOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" />
@@ -108,14 +139,23 @@ export default function MentorUsers() {
           </div>
           <ViewToggle view={view} onViewChange={setView} />
         </div>
-        <div className="relative w-64">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search mentors..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
+        <div className="flex flex-col gap-4 md:flex-row md:items-center">
+          <div className="relative w-64">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search mentors..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          <MultiSelect
+            options={techStackOptions}
+            selected={selectedTechStacks}
+            onChange={setSelectedTechStacks}
+            placeholder="Filter by tech stack..."
+            className="w-64"
           />
         </div>
       </div>
