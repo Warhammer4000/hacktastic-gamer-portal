@@ -6,6 +6,7 @@ import Preferences from "@/pages/mentor/Preferences";
 import Register from "@/pages/mentor/Register";
 import Benefits from "@/pages/mentor/Benefits";
 import Mentees from "@/pages/mentor/Mentees";
+import Messages from "@/pages/mentor/Messages";
 
 export const mentorRoutes = (
   <Route path="/mentor">
@@ -16,6 +17,7 @@ export const mentorRoutes = (
       <Route path="preferences" element={<Preferences />} />
       <Route path="benefits" element={<Benefits />} />
       <Route path="mentees" element={<Mentees />} />
+      <Route path="messages" element={<Messages />} />
     </Route>
   </Route>
 );
