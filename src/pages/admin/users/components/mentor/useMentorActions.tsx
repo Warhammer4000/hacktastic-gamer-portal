@@ -7,24 +7,25 @@ export function useMentorActions() {
 
   const deleteMentor = useMutation({
     mutationFn: async (userId: string) => {
-      // Call our RPC function to delete all user data
-      const { error: rpcError } = await supabase
+      const { data, error } = await supabase
         .rpc('delete_user_cascade', {
           user_id: userId
         });
 
-      if (rpcError) {
-        console.error('Error in delete_user_cascade:', rpcError);
-        throw rpcError;
+      if (error) {
+        console.error('Error in delete_user_cascade:', error);
+        throw new Error(error.message);
       }
+
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mentor-users'] });
       toast.success('Mentor removed successfully');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Error removing mentor:', error);
-      toast.error('Failed to remove mentor');
+      toast.error(`Failed to remove mentor: ${error.message}`);
     },
   });
 
