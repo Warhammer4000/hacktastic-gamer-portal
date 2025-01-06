@@ -4,28 +4,17 @@ import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "../schema";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Check } from "lucide-react";
 
 interface InstitutionFieldProps {
   form: UseFormReturn<ProfileFormValues>;
 }
 
 export function InstitutionField({ form }: InstitutionFieldProps) {
-  const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: institutions, isLoading } = useQuery({
     queryKey: ['universities'],
@@ -42,6 +31,10 @@ export function InstitutionField({ form }: InstitutionFieldProps) {
     },
   });
 
+  const filteredInstitutions = institutions?.filter(institution =>
+    institution.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <FormField
       control={form.control}
@@ -49,58 +42,46 @@ export function InstitutionField({ form }: InstitutionFieldProps) {
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>Institution</FormLabel>
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <FormControl>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className={cn(
-                    "w-full justify-between",
-                    !field.value && "text-muted-foreground"
-                  )}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    "Loading institutions..."
-                  ) : field.value ? (
-                    institutions?.find((institution) => institution.id === field.value)
-                      ?.name
-                  ) : (
-                    "Select institution"
-                  )}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </FormControl>
-            </PopoverTrigger>
-            <PopoverContent className="w-[400px] p-0">
-              <Command>
-                <CommandInput placeholder="Search institution..." />
-                <CommandEmpty>No institution found.</CommandEmpty>
-                <CommandGroup className="max-h-[300px] overflow-y-auto">
-                  {institutions?.map((institution) => (
-                    <CommandItem
-                      key={institution.id}
-                      value={institution.name}
-                      onSelect={() => {
-                        form.setValue("institution_id", institution.id);
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
+          <FormControl>
+            <div className="relative">
+              <Input
+                placeholder="Search institutions..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="mb-2"
+              />
+              <ScrollArea className="h-[200px] border rounded-md bg-background">
+                {isLoading ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    Loading institutions...
+                  </div>
+                ) : filteredInstitutions?.length === 0 ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    No institutions found
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 p-2 gap-1">
+                    {filteredInstitutions?.map((institution) => (
+                      <button
+                        key={institution.id}
+                        type="button"
+                        onClick={() => form.setValue("institution_id", institution.id)}
                         className={cn(
-                          "mr-2 h-4 w-4",
-                          field.value === institution.id ? "opacity-100" : "opacity-0"
+                          "flex items-center justify-between w-full px-4 py-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground",
+                          field.value === institution.id && "bg-accent text-accent-foreground"
                         )}
-                      />
-                      {institution.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                      >
+                        {institution.name}
+                        {field.value === institution.id && (
+                          <Check className="h-4 w-4 ml-2" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+          </FormControl>
           <FormMessage />
         </FormItem>
       )}
