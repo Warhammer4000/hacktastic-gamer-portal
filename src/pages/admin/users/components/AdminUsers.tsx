@@ -42,17 +42,16 @@ export default function AdminUsers() {
 
   const deleteAdmin = useMutation({
     mutationFn: async (userId: string) => {
-      const { data, error } = await supabase
+      // First call our RPC function to delete all user data
+      const { error: rpcError } = await supabase
         .rpc('delete_user_cascade', {
           user_id: userId
         });
 
-      if (error) {
-        console.error('Error deleting user:', error);
-        throw error;
+      if (rpcError) {
+        console.error('Error in delete_user_cascade:', rpcError);
+        throw rpcError;
       }
-
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
