@@ -7,6 +7,8 @@ import { MentorInsights } from "./components/dashboard/MentorInsights";
 import { ParticipantAnalytics } from "./components/dashboard/ParticipantAnalytics";
 import { SystemHealth } from "./components/dashboard/SystemHealth";
 import { RegistrationAnalytics } from "./components/dashboard/RegistrationAnalytics";
+import { TeamSizeDistribution } from "./components/dashboard/teams/TeamSizeDistribution";
+import { UnassignedTeams } from "./components/dashboard/teams/UnassignedTeams";
 
 const AdminDashboard = () => {
   return (
@@ -31,7 +33,11 @@ const AdminDashboard = () => {
         </TabsContent>
 
         <TabsContent value="teams" className="space-y-4">
-          <TeamAnalytics />
+          <div className="grid gap-4 md:grid-cols-2">
+            <TeamAnalytics />
+            <TeamSizeDistribution />
+          </div>
+          <UnassignedTeams />
         </TabsContent>
 
         <TabsContent value="mentors" className="space-y-4">
