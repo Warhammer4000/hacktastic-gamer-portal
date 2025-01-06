@@ -1,7 +1,8 @@
-import { Users, Code2, School } from "lucide-react";
+import { Users, Code2, School, Mail, Star } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface MenteeTeamCardProps {
   team: {
@@ -9,6 +10,7 @@ interface MenteeTeamCardProps {
     name: string;
     description: string | null;
     status: string;
+    repository_url: string | null;
     tech_stack: {
       name: string;
       icon_url: string;
@@ -19,6 +21,7 @@ interface MenteeTeamCardProps {
       profile: {
         id: string;
         full_name: string | null;
+        email: string;
         avatar_url: string | null;
         github_username: string | null;
         linkedin_profile_id: string | null;
@@ -27,6 +30,7 @@ interface MenteeTeamCardProps {
         } | null;
       };
     }[];
+    leader_id: string;
   };
 }
 
@@ -44,14 +48,35 @@ export function MenteeTeamCard({ team }: MenteeTeamCardProps) {
         {team.description && (
           <p className="text-sm text-muted-foreground">{team.description}</p>
         )}
-        {team.tech_stack && (
-          <div className="flex items-center gap-2 mt-2">
-            <Code2 className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
-              {team.tech_stack.name}
-            </span>
-          </div>
-        )}
+        <div className="flex flex-col gap-2 mt-2">
+          {team.tech_stack && (
+            <div className="flex items-center gap-2">
+              <Code2 className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                {team.tech_stack.name}
+              </span>
+            </div>
+          )}
+          {team.repository_url && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                asChild
+              >
+                <a
+                  href={team.repository_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Code2 className="h-4 w-4" />
+                  View Repository
+                </a>
+              </Button>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -71,17 +96,33 @@ export function MenteeTeamCard({ team }: MenteeTeamCardProps) {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-medium">
-                    {member.profile.full_name || "Unknown User"}
-                  </h3>
-                  {member.profile.institution && (
-                    <div className="flex items-center gap-1 mt-1">
-                      <School className="h-3 w-3 text-muted-foreground" />
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium">
+                      {member.profile.full_name || "Unknown User"}
+                    </h3>
+                    {team.leader_id === member.profile.id && (
+                      <Badge variant="secondary" className="gap-1">
+                        <Star className="h-3 w-3" />
+                        Leader
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1 mt-1">
+                    <div className="flex items-center gap-1">
+                      <Mail className="h-3 w-3 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
-                        {member.profile.institution.name}
+                        {member.profile.email}
                       </span>
                     </div>
-                  )}
+                    {member.profile.institution && (
+                      <div className="flex items-center gap-1">
+                        <School className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">
+                          {member.profile.institution.name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex gap-2">
