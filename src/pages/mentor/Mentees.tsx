@@ -17,6 +17,8 @@ export default function MenteesPage() {
           name,
           description,
           status,
+          repository_url,
+          leader_id,
           tech_stack:tech_stack_id (
             name,
             icon_url
@@ -27,6 +29,7 @@ export default function MenteesPage() {
             profile:profiles (
               id,
               full_name,
+              email,
               avatar_url,
               github_username,
               linkedin_profile_id,
