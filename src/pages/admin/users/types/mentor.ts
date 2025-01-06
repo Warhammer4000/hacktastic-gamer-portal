@@ -1,4 +1,4 @@
-import { Database } from "@/integrations/supabase/types";
+import { ProfilesTable } from "@/integrations/supabase/types/tables/profiles";
 
 export interface MentorPreference {
   team_count: number;
@@ -11,13 +11,13 @@ export interface MentorTechStack {
   } | null;
 }
 
-export interface MentorData extends Database["public"]["Tables"]["profiles"]["Row"] {
+export interface MentorData extends ProfilesTable["Row"] {
   mentor_preferences: MentorPreference[];
   mentor_tech_stacks: MentorTechStack[];
   institutions: {
     name: string;
   } | null;
   user_roles: {
-    role: Database["public"]["Enums"]["user_role"];
+    role: "admin" | "mentor" | "participant";
   }[];
 }
