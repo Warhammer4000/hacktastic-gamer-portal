@@ -27,10 +27,10 @@ export default function MentorUsers() {
         .select(`
           *,
           user_roles!inner (role),
-          mentor_preferences (
+          mentor_preferences!left (
             team_count
           ),
-          mentor_tech_stacks (
+          mentor_tech_stacks!left (
             tech_stack_id,
             technology_stacks (
               name
@@ -48,7 +48,13 @@ export default function MentorUsers() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as MentorData[];
+
+      // Transform the data to match our expected types
+      return (data as any[]).map(mentor => ({
+        ...mentor,
+        mentor_preferences: mentor.mentor_preferences || [],
+        mentor_tech_stacks: mentor.mentor_tech_stacks || []
+      })) as MentorData[];
     },
   });
 
