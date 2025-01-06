@@ -22,59 +22,16 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"] & {
 interface ParticipantTableProps {
   participants: Profile[];
   isLoading: boolean;
+  onEdit: (userId: string) => void;
+  onDelete: (userId: string) => void;
 }
 
-export default function ParticipantTable({ participants, isLoading }: ParticipantTableProps) {
-  const queryClient = useQueryClient();
-
-  const deleteParticipant = useMutation({
-    mutationFn: async (userId: string) => {
-      // First delete related records
-      const deletions = [
-        // Delete user roles
-        supabase.from('user_roles').delete().eq('user_id', userId),
-        // Delete levels
-        supabase.from('levels').delete().eq('user_id', userId),
-        // Delete team memberships
-        supabase.from('team_members').delete().eq('user_id', userId),
-        // Delete profile
-        supabase.from('profiles').delete().eq('id', userId),
-      ];
-
-      // Execute all deletions
-      const results = await Promise.all(deletions);
-      
-      // Check for errors
-      const errors = results.filter(result => result.error);
-      if (errors.length > 0) {
-        throw new Error('Failed to delete user data');
-      }
-
-      // Finally delete the auth user
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      if (authError) throw authError;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['participant-users'] });
-      toast.success('Participant removed successfully');
-    },
-    onError: (error: Error) => {
-      toast.error('Failed to remove participant');
-      console.error('Error:', error);
-    },
-  });
-
-  const handleEdit = (userId: string) => {
-    // Implement edit functionality
-    console.log('Edit participant:', userId);
-  };
-
-  const handleDelete = (userId: string) => {
-    if (window.confirm('Are you sure you want to delete this participant?')) {
-      deleteParticipant.mutate(userId);
-    }
-  };
-
+export default function ParticipantTable({ 
+  participants, 
+  isLoading,
+  onEdit,
+  onDelete 
+}: ParticipantTableProps) {
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -109,10 +66,10 @@ export default function ParticipantTable({ participants, isLoading }: Participan
             </TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end gap-2">
-                <Button variant="outline" size="icon" onClick={() => handleEdit(participant.id)}>
+                <Button variant="outline" size="icon" onClick={() => onEdit(participant.id)}>
                   <Pencil className="h-4 w-4" />
                 </Button>
-                <Button variant="destructive" size="icon" onClick={() => handleDelete(participant.id)}>
+                <Button variant="destructive" size="icon" onClick={() => onDelete(participant.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>

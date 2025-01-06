@@ -10,11 +10,14 @@ import BulkParticipantUploadDialog from "./BulkParticipantUploadDialog";
 import ParticipantTable from "./ParticipantTable";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { UserCard } from "@/components/admin/users/UserCard";
+import EditParticipantDialog from "./EditParticipantDialog";
 
 export default function ParticipantUsers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [view, setView] = useState<"table" | "card">("table");
   const queryClient = useQueryClient();
 
@@ -82,8 +85,11 @@ export default function ParticipantUsers() {
   });
 
   const handleEdit = (userId: string) => {
-    // Implement edit functionality
-    console.log('Edit participant:', userId);
+    const participant = participants?.find(p => p.id === userId);
+    if (participant) {
+      setSelectedParticipant(participant);
+      setShowEditDialog(true);
+    }
   };
 
   const handleDelete = (userId: string) => {
@@ -128,6 +134,8 @@ export default function ParticipantUsers() {
         <ParticipantTable 
           participants={participants || []} 
           isLoading={isLoading} 
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -151,6 +159,14 @@ export default function ParticipantUsers() {
         open={showBulkUploadDialog}
         onOpenChange={setShowBulkUploadDialog}
       />
+
+      {selectedParticipant && (
+        <EditParticipantDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          participant={selectedParticipant}
+        />
+      )}
     </div>
   );
 }
