@@ -42,10 +42,9 @@ export default function AdminUsers() {
 
   const deleteAdmin = useMutation({
     mutationFn: async (userId: string) => {
-      // Call our RPC function to delete all user data
       const { error: rpcError } = await supabase
         .rpc('delete_user_cascade', {
-          user_id: userId
+          input_user_id: userId
         });
 
       if (rpcError) {

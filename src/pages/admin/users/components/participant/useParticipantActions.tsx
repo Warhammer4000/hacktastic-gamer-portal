@@ -9,7 +9,7 @@ export function useParticipantActions() {
     mutationFn: async (userId: string) => {
       const { data, error } = await supabase
         .rpc('delete_user_cascade', {
-          user_id: userId
+          input_user_id: userId
         });
 
       if (error) {
