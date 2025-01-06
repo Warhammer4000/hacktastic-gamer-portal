@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { formatDate } from "@/lib/utils";
+import { MessageForm } from "@/components/mentor/messages/MessageForm";
+import { MessageList } from "@/components/mentor/messages/MessageList";
 
 export default function Messages() {
-  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any[]>([]);
 
   // Fetch mentor's teams
@@ -102,26 +100,6 @@ export default function Messages() {
     };
   }, [teams]);
 
-  const handleSendMessage = async (teamId: string) => {
-    if (!message.trim()) return;
-
-    const { error } = await supabase
-      .from('team_messages')
-      .insert({
-        team_id: teamId,
-        content: message,
-        sender_id: (await supabase.auth.getUser()).data.user?.id,
-      });
-
-    if (error) {
-      toast.error("Failed to send message");
-      return;
-    }
-
-    setMessage("");
-    toast.success("Message sent successfully");
-  };
-
   const handleArchiveMessage = async (messageId: string) => {
     const { error } = await supabase
       .from('team_messages')
@@ -142,7 +120,7 @@ export default function Messages() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {teams?.map((team) => (
-          <div key={team.id} className="border rounded-lg p-4 space-y-4 bg-card">
+          <Card key={team.id} className="p-4 space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">{team.name}</h2>
               <span className="text-sm text-muted-foreground">
@@ -152,48 +130,13 @@ export default function Messages() {
             
             <Separator />
             
-            <ScrollArea className="h-[300px] w-full rounded-md border p-4">
-              <div className="space-y-4">
-                {messages
-                  .filter(msg => msg.team_id === team.id && !msg.is_archived)
-                  .map((msg) => (
-                    <div key={msg.id} className="flex gap-4 items-start">
-                      <img
-                        src={msg.sender.avatar_url || "/placeholder.svg"}
-                        alt={msg.sender.full_name}
-                        className="w-8 h-8 rounded-full"
-                      />
-                      <div className="flex-1 space-y-1">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">{msg.sender.full_name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {formatDate(msg.created_at)}
-                          </span>
-                        </div>
-                        <p className="text-sm">{msg.content}</p>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleArchiveMessage(msg.id)}
-                        >
-                          Archive
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </ScrollArea>
+            <MessageList 
+              messages={messages.filter(msg => msg.team_id === team.id && !msg.is_archived)}
+              onArchive={handleArchiveMessage}
+            />
 
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Type your message..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="min-h-[80px]"
-              />
-              <Button onClick={() => handleSendMessage(team.id)}>Send</Button>
-            </div>
-          </div>
+            <MessageForm teamId={team.id} />
+          </Card>
         ))}
       </div>
     </div>
