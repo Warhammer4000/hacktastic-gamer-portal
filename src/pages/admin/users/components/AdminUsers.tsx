@@ -29,8 +29,15 @@ export default function AdminUsers() {
         `)
         .eq('user_roles.role', 'admin');
 
-      if (error) throw error;
-      return profiles;
+      if (error) {
+        console.error('Error fetching admins:', error);
+        throw error;
+      }
+
+      // Filter out any non-admin profiles (shouldn't happen due to the query, but just to be safe)
+      return profiles.filter(profile => 
+        profile.user_roles?.some(role => role.role === 'admin')
+      );
     },
   });
 
