@@ -10,6 +10,7 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { UserCard } from "@/components/admin/users/UserCard";
 import { MentorTable } from "./mentor/MentorTable";
 import { useMentorActions } from "./mentor/useMentorActions";
+import { MentorData } from "../types/mentor";
 import * as XLSX from 'xlsx';
 
 export default function MentorUsers() {
@@ -47,7 +48,7 @@ export default function MentorUsers() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data as MentorData[];
     },
   });
 
