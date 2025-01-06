@@ -6,6 +6,7 @@ import { TeamAnalytics } from "./components/dashboard/TeamAnalytics";
 import { MentorInsights } from "./components/dashboard/MentorInsights";
 import { ParticipantAnalytics } from "./components/dashboard/ParticipantAnalytics";
 import { SystemHealth } from "./components/dashboard/SystemHealth";
+import { RegistrationAnalytics } from "./components/dashboard/RegistrationAnalytics";
 
 const AdminDashboard = () => {
   return (
@@ -16,13 +17,18 @@ const AdminDashboard = () => {
       <OverviewStats />
 
       {/* Detailed Analytics Tabs */}
-      <Tabs defaultValue="teams" className="space-y-4">
+      <Tabs defaultValue="registration" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="teams">Team Analytics</TabsTrigger>
-          <TabsTrigger value="mentors">Mentor Insights</TabsTrigger>
-          <TabsTrigger value="participants">Participant Analytics</TabsTrigger>
-          <TabsTrigger value="system">System Health</TabsTrigger>
+          <TabsTrigger value="registration">Registration</TabsTrigger>
+          <TabsTrigger value="teams">Teams</TabsTrigger>
+          <TabsTrigger value="mentors">Mentors</TabsTrigger>
+          <TabsTrigger value="participants">Participants</TabsTrigger>
+          <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="registration" className="space-y-4">
+          <RegistrationAnalytics />
+        </TabsContent>
 
         <TabsContent value="teams" className="space-y-4">
           <TeamAnalytics />
