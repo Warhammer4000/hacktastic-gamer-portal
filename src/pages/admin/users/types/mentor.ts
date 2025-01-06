@@ -12,8 +12,8 @@ export interface MentorTechStack {
 }
 
 export type MentorData = ProfilesTable["Row"] & {
-  mentor_preferences: MentorPreference[];
-  mentor_tech_stacks: MentorTechStack[];
+  mentor_preferences: MentorPreference[] | null;
+  mentor_tech_stacks: MentorTechStack[] | null;
   institutions: {
     name: string;
   } | null;
