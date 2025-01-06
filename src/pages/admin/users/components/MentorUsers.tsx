@@ -13,6 +13,7 @@ import { useMentorActions } from "./mentor/useMentorActions";
 import { MentorData } from "../types/mentor";
 import * as XLSX from 'xlsx';
 import { Toggle } from "@/components/ui/toggle";
+import { useNavigate } from "react-router-dom";
 
 export default function MentorUsers() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +21,8 @@ export default function MentorUsers() {
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [view, setView] = useState<"table" | "card">("table");
   const [selectedTechStacks, setSelectedTechStacks] = useState<string[]>([]);
+  const navigate = useNavigate();
+  const { deleteMentor } = useMentorActions();
 
   // Query to fetch tech stacks for the filter
   const { data: techStacks } = useQuery({
@@ -84,7 +87,15 @@ export default function MentorUsers() {
     },
   });
 
-  const { handleEdit, handleDelete } = useMentorActions();
+  const handleEdit = (mentorId: string) => {
+    navigate(`/admin/mentors/edit/${mentorId}`);
+  };
+
+  const handleDelete = (mentorId: string) => {
+    if (window.confirm('Are you sure you want to delete this mentor?')) {
+      deleteMentor.mutate(mentorId);
+    }
+  };
 
   const handleExport = () => {
     if (!mentors) return;
