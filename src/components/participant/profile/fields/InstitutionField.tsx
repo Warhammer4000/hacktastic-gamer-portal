@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface InstitutionFieldProps {
@@ -18,7 +18,7 @@ export function InstitutionField({ form }: InstitutionFieldProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: institutions, isLoading } = useQuery({
+  const { data: institutions = [], isLoading } = useQuery({
     queryKey: ['universities'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -29,15 +29,15 @@ export function InstitutionField({ form }: InstitutionFieldProps) {
         .order('name');
       
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
-  const filteredInstitutions = institutions?.filter(institution =>
+  const filteredInstitutions = institutions.filter(institution =>
     institution.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const selectedInstitution = institutions?.find(
+  const selectedInstitution = institutions.find(
     institution => institution.id === form.getValues("institution_id")
   );
 
@@ -61,8 +61,17 @@ export function InstitutionField({ form }: InstitutionFieldProps) {
                   )}
                   disabled={isLoading}
                 >
-                  {selectedInstitution?.name || "Select your institution"}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      {selectedInstitution?.name || "Select your institution"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </>
+                  )}
                 </Button>
               </FormControl>
             </PopoverTrigger>
@@ -75,7 +84,7 @@ export function InstitutionField({ form }: InstitutionFieldProps) {
                 />
                 <CommandEmpty>No institution found.</CommandEmpty>
                 <CommandGroup className="max-h-[300px] overflow-auto">
-                  {filteredInstitutions?.map((institution) => (
+                  {filteredInstitutions.map((institution) => (
                     <CommandItem
                       key={institution.id}
                       value={institution.name}
