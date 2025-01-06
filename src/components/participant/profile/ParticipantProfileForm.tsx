@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Loader2, User, Mail, Building2, Camera, Github, Save } from "lucide-react";
+import { Loader2, User, Github, Save } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,9 +14,10 @@ import { Card } from "@/components/ui/card";
 
 interface ParticipantProfileFormProps {
   profile: ProfileFormValues;
+  onSuccess?: () => void;
 }
 
-export function ParticipantProfileForm({ profile }: ParticipantProfileFormProps) {
+export function ParticipantProfileForm({ profile, onSuccess }: ParticipantProfileFormProps) {
   const queryClient = useQueryClient();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -31,19 +32,18 @@ export function ParticipantProfileForm({ profile }: ParticipantProfileFormProps)
 
   const updateProfile = useMutation({
     mutationFn: async (values: ProfileFormValues) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
       const { error } = await supabase
         .from('profiles')
         .update(values)
-        .eq('id', user.id);
+        .eq('id', profile.id);
 
       if (error) throw error;
+      return values;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['participant-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['participants'] });
       toast.success("Profile updated successfully");
+      onSuccess?.();
     },
     onError: (error) => {
       toast.error(`Failed to update profile: ${error.message}`);
