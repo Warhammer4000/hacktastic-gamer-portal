@@ -12,7 +12,7 @@ import { MentorTable } from "./mentor/MentorTable";
 import { useMentorActions } from "./mentor/useMentorActions";
 import { MentorData } from "../types/mentor";
 import * as XLSX from 'xlsx';
-import { MultiSelect } from "@/components/ui/multi-select";
+import { Toggle } from "@/components/ui/toggle";
 
 export default function MentorUsers() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,7 +38,7 @@ export default function MentorUsers() {
   const { data: mentors, isLoading } = useQuery({
     queryKey: ['mentor-users', searchQuery, selectedTechStacks],
     queryFn: async () => {
-      const query = supabase
+      let query = supabase
         .from('profiles')
         .select(`
           *,
@@ -59,17 +59,18 @@ export default function MentorUsers() {
         .eq('user_roles.role', 'mentor');
 
       if (searchQuery) {
-        query.or(`email.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`);
+        query = query.or(`email.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`);
       }
 
       if (selectedTechStacks.length > 0) {
-        query.in(
-          'id',
-          supabase
-            .from('mentor_tech_stacks')
-            .select('mentor_id')
-            .in('tech_stack_id', selectedTechStacks)
-        );
+        const mentorIds = await supabase
+          .from('mentor_tech_stacks')
+          .select('mentor_id')
+          .in('tech_stack_id', selectedTechStacks);
+
+        if (mentorIds.data) {
+          query = query.in('id', mentorIds.data.map(item => item.mentor_id));
+        }
       }
 
       const { data, error } = await query;
@@ -113,12 +114,6 @@ export default function MentorUsers() {
     return <div>Loading...</div>;
   }
 
-  const techStackOptions = techStacks?.map(stack => ({
-    value: stack.id,
-    label: stack.name,
-    icon: stack.icon_url
-  })) || [];
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -150,13 +145,28 @@ export default function MentorUsers() {
               className="pl-8"
             />
           </div>
-          <MultiSelect
-            options={techStackOptions}
-            selected={selectedTechStacks}
-            onChange={setSelectedTechStacks}
-            placeholder="Filter by tech stack..."
-            className="w-64"
-          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium">Filter by Technology</h3>
+        <div className="flex flex-wrap gap-2">
+          {techStacks?.map((stack) => (
+            <Toggle
+              key={stack.id}
+              pressed={selectedTechStacks.includes(stack.id)}
+              onPressedChange={(pressed) => {
+                setSelectedTechStacks(prev =>
+                  pressed
+                    ? [...prev, stack.id]
+                    : prev.filter(id => id !== stack.id)
+                );
+              }}
+              className="bg-emerald-500 data-[state=on]:bg-emerald-700 text-white hover:bg-emerald-600"
+            >
+              {stack.name}
+            </Toggle>
+          ))}
         </div>
       </div>
 
