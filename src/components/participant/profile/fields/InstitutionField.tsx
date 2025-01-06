@@ -18,7 +18,7 @@ export function InstitutionField({ form }: InstitutionFieldProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: institutions = [], isLoading } = useQuery({
+  const { data: institutions, isLoading } = useQuery({
     queryKey: ['universities'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -29,13 +29,41 @@ export function InstitutionField({ form }: InstitutionFieldProps) {
         .order('name');
       
       if (error) throw error;
-      return data || [];
+      return data;
     },
   });
 
-  const filteredInstitutions = institutions.filter(institution =>
-    institution.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  if (!institutions) {
+    return (
+      <FormField
+        control={form.control}
+        name="institution_id"
+        render={({ field }) => (
+          <FormItem className="flex flex-col">
+            <FormLabel>Institution</FormLabel>
+            <FormControl>
+              <Button
+                variant="outline"
+                role="combobox"
+                className="w-full justify-between"
+                disabled
+              >
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </Button>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
+  }
+
+  const filteredInstitutions = searchQuery 
+    ? institutions.filter(institution =>
+        institution.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : institutions;
 
   const selectedInstitution = institutions.find(
     institution => institution.id === form.getValues("institution_id")
