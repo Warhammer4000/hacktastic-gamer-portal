@@ -5,6 +5,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Users, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+interface TeamMembersCount {
+  count: number;
+}
+
+interface TechnologyStack {
+  name: string;
+}
+
+interface Team {
+  id: string;
+  name: string;
+  team_members: TeamMembersCount[];
+  technology_stacks: TechnologyStack;
+}
+
 export function UnassignedTeams() {
   const { data: teams } = useQuery({
     queryKey: ["unassigned-teams"],
@@ -14,7 +29,7 @@ export function UnassignedTeams() {
         .select(`
           id,
           name,
-          team_members (
+          team_members!inner (
             count
           ),
           technology_stacks (
@@ -24,7 +39,7 @@ export function UnassignedTeams() {
         .is('mentor_id', null)
         .eq('status', 'locked');
 
-      return data;
+      return data as Team[];
     },
   });
 
@@ -56,7 +71,7 @@ export function UnassignedTeams() {
                 <div>
                   <h4 className="font-semibold">{team.name}</h4>
                   <p className="text-sm text-muted-foreground">
-                    {team.technology_stacks?.name} • {team.team_members?.count} members
+                    {team.technology_stacks?.name} • {team.team_members[0]?.count} members
                   </p>
                 </div>
                 <Button

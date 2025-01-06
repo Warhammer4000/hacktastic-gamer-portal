@@ -5,6 +5,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
+interface TeamMembersCount {
+  count: number;
+}
+
 export function TeamSizeDistribution() {
   const { data: teamSizes } = useQuery({
     queryKey: ["team-size-distribution"],
@@ -13,13 +17,13 @@ export function TeamSizeDistribution() {
         .from("teams")
         .select(`
           id,
-          team_members (
+          team_members!inner (
             count
           )
         `);
 
       const distribution = teams?.reduce((acc: Record<string, number>, team) => {
-        const size = team.team_members?.count || 0;
+        const size = (team.team_members as TeamMembersCount[])[0]?.count || 0;
         acc[`${size} Members`] = (acc[`${size} Members`] || 0) + 1;
         return acc;
       }, {});
