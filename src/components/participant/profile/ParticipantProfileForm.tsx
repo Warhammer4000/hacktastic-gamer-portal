@@ -22,6 +22,7 @@ export function ParticipantProfileForm({ profile, onSuccess }: ParticipantProfil
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
+      id: profile.id,
       full_name: profile?.full_name || "",
       email: profile?.email || "",
       avatar_url: profile?.avatar_url || "",
@@ -35,7 +36,7 @@ export function ParticipantProfileForm({ profile, onSuccess }: ParticipantProfil
       const { error } = await supabase
         .from('profiles')
         .update(values)
-        .eq('id', profile.id);
+        .eq('id', values.id);
 
       if (error) throw error;
       return values;
