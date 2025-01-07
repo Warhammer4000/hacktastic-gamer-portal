@@ -11,7 +11,7 @@ import { RegistrationClosed } from "@/components/mentor/registration/Registratio
 export default function MentorRegister() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { data: registrationSettings, isLoading: isLoadingSettings } = useRegistrationSettings();
+  const { data: registrationSettings, isLoading: isLoadingSettings, error } = useRegistrationSettings();
 
   // Add debug logs
   console.log('Registration Settings:', registrationSettings);
@@ -81,6 +81,11 @@ export default function MentorRegister() {
 
   if (isLoadingSettings) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  }
+
+  if (error) {
+    console.error("Error loading registration settings:", error);
+    return <RegistrationClosed />;
   }
 
   if (!isRegistrationAllowed) {
