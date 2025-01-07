@@ -32,6 +32,18 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
       setIsDeleting(true);
       console.log('Starting team deletion process for team:', teamId);
 
+      // Get the repository URL before deleting the team
+      const { data: team, error: teamError } = await supabase
+        .from('teams')
+        .select('repository_url')
+        .eq('id', teamId)
+        .single();
+
+      if (teamError) {
+        console.error('Error fetching team:', teamError);
+        throw new Error('Failed to fetch team details');
+      }
+
       // First try to delete the team and its related records from the database
       const { data: success, error: dbError } = await supabase
         .rpc('delete_team_cascade', { team_id_input: teamId });
@@ -44,19 +56,24 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
       console.log('Successfully deleted team from database');
 
       // Only try to delete the GitHub repository if database deletion was successful
-      try {
-        const { error: repoError } = await supabase.functions.invoke('delete-team-repository', {
-          body: { teamId }
-        });
+      // and if the team had a repository URL
+      if (team?.repository_url) {
+        try {
+          const { error: repoError } = await supabase.functions.invoke('delete-team-repository', {
+            body: { 
+              teamId,
+              repositoryUrl: team.repository_url
+            }
+          });
 
-        if (repoError) {
-          console.error('Error deleting repository:', repoError);
-          // Don't throw here since the team is already deleted from the database
+          if (repoError) {
+            console.error('Error deleting repository:', repoError);
+            toast.error("Team deleted but failed to delete GitHub repository");
+          }
+        } catch (repoError) {
+          console.error('Repository deletion error:', repoError);
           toast.error("Team deleted but failed to delete GitHub repository");
         }
-      } catch (repoError) {
-        console.error('Repository deletion error:', repoError);
-        toast.error("Team deleted but failed to delete GitHub repository");
       }
 
       toast.success("Team deleted successfully");

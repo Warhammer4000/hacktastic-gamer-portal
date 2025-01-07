@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { teamId } = await req.json()
+    const { teamId, repositoryUrl } = await req.json()
 
     // Create Supabase client
     const supabaseClient = createClient(
@@ -20,7 +20,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get GitHub settings and team details
+    // Get GitHub settings
     const { data: settings, error: settingsError } = await supabaseClient
       .from('github_settings')
       .select('*')
@@ -31,23 +31,17 @@ serve(async (req) => {
       throw new Error('GitHub settings not found')
     }
 
-    // Get team repository URL
-    const { data: team, error: teamError } = await supabaseClient
-      .from('teams')
-      .select('repository_url')
-      .eq('id', teamId)
-      .single()
-
-    if (teamError || !team?.repository_url) {
-      console.error('Team or repository URL not found:', teamError)
-      throw new Error('Team or repository URL not found')
+    if (!repositoryUrl) {
+      throw new Error('Repository URL is required')
     }
 
     // Extract repository name from URL
-    const repoName = team.repository_url.split('/').pop()
+    const repoName = repositoryUrl.split('/').pop()
     if (!repoName) {
       throw new Error('Invalid repository URL')
     }
+
+    console.log('Attempting to delete repository:', repoName)
 
     // Delete repository in GitHub
     const deleteRepoResponse = await fetch(
