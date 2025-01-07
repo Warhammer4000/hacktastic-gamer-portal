@@ -11,7 +11,7 @@ export function useRegistrationSettings() {
         .from("registration_settings")
         .select("*")
         .limit(1)
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error("Error fetching registration settings:", error);

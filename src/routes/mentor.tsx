@@ -1,21 +1,23 @@
 import { Route } from "react-router-dom";
+import PrivateRoute from "@/components/auth/PrivateRoute";
 import MentorLayout from "@/pages/mentor/MentorLayout";
 import MentorDashboard from "@/pages/mentor/Dashboard";
-import Profile from "@/pages/mentor/Profile";
-import Preferences from "@/pages/mentor/Preferences";
-import Benefits from "@/pages/mentor/Benefits";
-import Mentees from "@/pages/mentor/Mentees";
-import Messages from "@/pages/mentor/Messages";
+import MentorProfile from "@/pages/mentor/Profile";
+import MentorPreferences from "@/pages/mentor/Preferences";
+import MentorBenefits from "@/pages/mentor/Benefits";
+import MentorMentees from "@/pages/mentor/Mentees";
+import MentorMessages from "@/pages/mentor/Messages";
 
 export const mentorRoutes = (
   <Route path="/mentor">
-    <Route element={<MentorLayout />}>
+    <Route element={<PrivateRoute><MentorLayout /></PrivateRoute>}>
+      <Route index element={<MentorDashboard />} />
       <Route path="dashboard" element={<MentorDashboard />} />
-      <Route path="profile" element={<Profile />} />
-      <Route path="preferences" element={<Preferences />} />
-      <Route path="benefits" element={<Benefits />} />
-      <Route path="mentees" element={<Mentees />} />
-      <Route path="messages" element={<Messages />} />
+      <Route path="profile" element={<MentorProfile />} />
+      <Route path="preferences" element={<MentorPreferences />} />
+      <Route path="benefits" element={<MentorBenefits />} />
+      <Route path="mentees" element={<MentorMentees />} />
+      <Route path="messages" element={<MentorMessages />} />
     </Route>
   </Route>
 );

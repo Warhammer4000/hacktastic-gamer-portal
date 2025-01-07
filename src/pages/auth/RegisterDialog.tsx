@@ -37,9 +37,8 @@ export default function RegisterDialog({ isOpen, onClose }: RegisterDialogProps)
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      // Redirect based on role
       if (values.role === "mentor") {
-        navigate("/mentor/register");
+        navigate("/public/register-mentor");
       } else {
         navigate("/participant/register");
       }
