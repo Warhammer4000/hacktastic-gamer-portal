@@ -5,6 +5,7 @@ import NewsPage from "@/pages/public/news/NewsPage";
 import NewsDetailPage from "@/pages/public/news/NewsDetailPage";
 import GalleryPage from "@/pages/public/gallery/GalleryPage";
 import FAQPage from "@/pages/public/faq/FAQPage";
+import MentorRegister from "@/pages/public/register/MentorRegister";
 
 export const publicRoutes = (
   <Route path="/public" element={<PublicLayout />}>
@@ -13,5 +14,6 @@ export const publicRoutes = (
     <Route path="news/:id" element={<NewsDetailPage />} />
     <Route path="gallery" element={<GalleryPage />} />
     <Route path="faq" element={<FAQPage />} />
+    <Route path="register-mentor" element={<MentorRegister />} />
   </Route>
 );

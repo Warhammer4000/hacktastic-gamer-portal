@@ -3,14 +3,12 @@ import MentorLayout from "@/pages/mentor/MentorLayout";
 import MentorDashboard from "@/pages/mentor/Dashboard";
 import Profile from "@/pages/mentor/Profile";
 import Preferences from "@/pages/mentor/Preferences";
-import Register from "@/pages/mentor/Register";
 import Benefits from "@/pages/mentor/Benefits";
 import Mentees from "@/pages/mentor/Mentees";
 import Messages from "@/pages/mentor/Messages";
 
 export const mentorRoutes = (
   <Route path="/mentor">
-    <Route path="register" element={<Register />} />
     <Route element={<MentorLayout />}>
       <Route path="dashboard" element={<MentorDashboard />} />
       <Route path="profile" element={<Profile />} />
