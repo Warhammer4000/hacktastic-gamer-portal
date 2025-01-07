@@ -13,10 +13,19 @@ export default function MentorRegister() {
   const [isLoading, setIsLoading] = useState(false);
   const { data: registrationSettings, isLoading: isLoadingSettings } = useRegistrationSettings();
 
+  // Add debug logs
+  console.log('Registration Settings:', registrationSettings);
+  
   // Check if registration is currently allowed
   const isRegistrationAllowed = registrationSettings?.mentor_registration_enabled && 
     (!registrationSettings?.mentor_registration_start || new Date(registrationSettings.mentor_registration_start) <= new Date()) &&
     (!registrationSettings?.mentor_registration_end || new Date(registrationSettings.mentor_registration_end) >= new Date());
+
+  // Add more debug logs
+  console.log('Registration enabled:', registrationSettings?.mentor_registration_enabled);
+  console.log('Start date:', registrationSettings?.mentor_registration_start);
+  console.log('End date:', registrationSettings?.mentor_registration_end);
+  console.log('Is registration allowed:', isRegistrationAllowed);
 
   async function onSubmit(values: MentorRegistrationFormData) {
     if (!isRegistrationAllowed) {
