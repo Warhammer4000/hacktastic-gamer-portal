@@ -5,21 +5,14 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DeleteTeamDialog } from "./dialogs/DeleteTeamDialog";
+import { AssignMentorDialog } from "./dialogs/AssignMentorDialog";
+import { ReassignMentorDialog } from "./dialogs/ReassignMentorDialog";
 
 interface AdminTeamActionsProps {
   teamId: string;
@@ -39,7 +32,18 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
       setIsDeleting(true);
       console.log('Starting team deletion process for team:', teamId);
 
-      // First, delete the GitHub repository if it exists
+      // First try to delete the team and its related records from the database
+      const { data: success, error: dbError } = await supabase
+        .rpc('delete_team_cascade', { team_id_input: teamId });
+
+      if (dbError || !success) {
+        console.error('Error deleting team from database:', dbError);
+        throw new Error(dbError?.message || 'Failed to delete team from database');
+      }
+
+      console.log('Successfully deleted team from database');
+
+      // Only try to delete the GitHub repository if database deletion was successful
       try {
         const { error: repoError } = await supabase.functions.invoke('delete-team-repository', {
           body: { teamId }
@@ -47,38 +51,14 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
 
         if (repoError) {
           console.error('Error deleting repository:', repoError);
-          // Don't throw here, continue with team deletion even if repo deletion fails
+          // Don't throw here since the team is already deleted from the database
+          toast.error("Team deleted but failed to delete GitHub repository");
         }
       } catch (repoError) {
         console.error('Repository deletion error:', repoError);
-        // Continue with team deletion even if repo deletion fails
+        toast.error("Team deleted but failed to delete GitHub repository");
       }
 
-      // Delete all team members
-      const { error: membersError } = await supabase
-        .from('team_members')
-        .delete()
-        .eq('team_id', teamId);
-
-      if (membersError) {
-        console.error('Error deleting team members:', membersError);
-        throw new Error(`Failed to delete team members: ${membersError.message}`);
-      }
-
-      console.log('Successfully deleted team members');
-
-      // Delete the team itself
-      const { error: teamError } = await supabase
-        .from('teams')
-        .delete()
-        .eq('id', teamId);
-
-      if (teamError) {
-        console.error('Error deleting team:', teamError);
-        throw new Error(`Failed to delete team: ${teamError.message}`);
-      }
-
-      console.log('Successfully deleted team');
       toast.success("Team deleted successfully");
       queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
     } catch (error) {
@@ -182,72 +162,27 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Delete Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Team</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete the team "{teamName}"? This action cannot be undone.
-              All team members will be removed, the GitHub repository will be deleted, and any associated data will be permanently deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteTeam}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Deleting..." : "Delete Team"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteTeamDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        teamName={teamName}
+        isDeleting={isDeleting}
+        onConfirm={handleDeleteTeam}
+      />
 
-      {/* Assign Mentor Dialog */}
-      <AlertDialog open={isAssignMentorDialogOpen} onOpenChange={setIsAssignMentorDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Assign Mentor</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to assign a mentor to the team "{teamName}"?
-              The system will automatically select an eligible mentor based on:
-              - Tech stack matching
-              - Current mentor workload
-              - Mentor preferences
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleAssignMentor}>
-              Assign Mentor
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AssignMentorDialog
+        isOpen={isAssignMentorDialogOpen}
+        onOpenChange={setIsAssignMentorDialogOpen}
+        teamName={teamName}
+        onConfirm={handleAssignMentor}
+      />
 
-      {/* Reassign Mentor Dialog */}
-      <AlertDialog open={isReassignMentorDialogOpen} onOpenChange={setIsReassignMentorDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reassign Mentor</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to reassign a new mentor to the team "{teamName}"?
-              This will remove the current mentor and assign a new one based on:
-              - Tech stack matching
-              - Current mentor workload
-              - Mentor preferences
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleReassignMentor}>
-              Reassign Mentor
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ReassignMentorDialog
+        isOpen={isReassignMentorDialogOpen}
+        onOpenChange={setIsReassignMentorDialogOpen}
+        teamName={teamName}
+        onConfirm={handleReassignMentor}
+      />
     </>
   );
 }

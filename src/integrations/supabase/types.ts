@@ -996,6 +996,12 @@ export type Database = {
         }
         Returns: string
       }
+      delete_team_cascade: {
+        Args: {
+          team_id_input: string
+        }
+        Returns: boolean
+      }
       delete_user_cascade: {
         Args: {
           input_user_id: string
