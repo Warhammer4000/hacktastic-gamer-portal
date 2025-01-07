@@ -24,6 +24,30 @@ export function RegistrationCard({
   onStartDateChange,
   onEndDateChange,
 }: RegistrationCardProps) {
+  // Function to format date string to datetime-local format
+  const formatDateForInput = (dateString: string | null): string => {
+    if (!dateString) return "";
+    try {
+      const date = new Date(dateString);
+      // Format: YYYY-MM-DDThh:mm
+      return date.toISOString().slice(0, 16);
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
+  };
+
+  // Function to handle date changes and ensure correct format
+  const handleDateChange = (value: string, onChange: (date: string) => void) => {
+    try {
+      // Convert the input value to ISO string format
+      const date = new Date(value);
+      onChange(date.toISOString());
+    } catch (error) {
+      console.error("Error parsing date:", error);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -44,16 +68,16 @@ export function RegistrationCard({
             <Label>Start Date</Label>
             <Input
               type="datetime-local"
-              value={startDate || ""}
-              onChange={(e) => onStartDateChange(e.target.value)}
+              value={formatDateForInput(startDate)}
+              onChange={(e) => handleDateChange(e.target.value, onStartDateChange)}
             />
           </div>
           <div className="space-y-2">
             <Label>End Date</Label>
             <Input
               type="datetime-local"
-              value={endDate || ""}
-              onChange={(e) => onEndDateChange(e.target.value)}
+              value={formatDateForInput(endDate)}
+              onChange={(e) => handleDateChange(e.target.value, onEndDateChange)}
             />
           </div>
         </div>
