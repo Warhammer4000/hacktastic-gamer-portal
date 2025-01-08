@@ -1,11 +1,7 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { RichTextEditor } from "@/pages/admin/events/components/event-form/RichTextEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
@@ -14,37 +10,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { TimeSlotManager } from "./TimeSlotManager";
-
-interface FormValues {
-  name: string;
-  description: string;
-  duration: number;
-  tech_stack_id?: string;
-  start_date: Date;
-  end_date: Date;
-  max_slots_per_mentor: number;
-  time_slots: Array<{
-    day: number;
-    startTime: string;
-    endTime: string;
-  }>;
-}
+import { useSessionForm } from "../hooks/useSessionForm";
+import { supabase } from "@/integrations/supabase/client";
 
 export function CreateSessionForm() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const form = useForm<FormValues>({
-    defaultValues: {
-      name: "",
-      description: "",
-      duration: 30,
-      max_slots_per_mentor: 1,
-      start_date: new Date(),
-      end_date: new Date(),
-      time_slots: [],
-    },
-  });
+  const { form, createSession } = useSessionForm();
 
   const { data: techStacks = [] } = useQuery({
     queryKey: ["techStacks"],
@@ -60,73 +30,19 @@ export function CreateSessionForm() {
     },
   });
 
-  const createSession = useMutation({
-    mutationFn: async (values: FormValues) => {
-      // First create the session template
-      const { data: sessionTemplate, error: sessionError } = await supabase
-        .from("session_templates")
-        .insert([
-          {
-            name: values.name,
-            description: values.description,
-            duration: values.duration,
-            tech_stack_id: values.tech_stack_id,
-            start_date: values.start_date.toISOString(),
-            end_date: values.end_date.toISOString(),
-            max_slots_per_mentor: values.max_slots_per_mentor,
-          },
-        ])
-        .select()
-        .single();
-
-      if (sessionError) throw sessionError;
-
-      // Then create the availability slots
-      const availabilityPromises = values.time_slots.map(slot => 
-        supabase
-          .from("session_availabilities")
-          .insert({
-            session_template_id: sessionTemplate.id,
-            day_of_week: slot.day,
-            start_time: slot.startTime,
-            end_time: slot.endTime,
-          })
-      );
-
-      await Promise.all(availabilityPromises);
-
-      return sessionTemplate;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["session-templates"] });
-      toast({
-        title: "Success",
-        description: "Session template created successfully",
-      });
-      form.reset();
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to create session template: " + error.message,
-      });
-    },
+  const onSubmit = form.handleSubmit((values) => {
+    createSession.mutate(values);
   });
 
-  const onSubmit = (values: FormValues) => {
-    createSession.mutate(values);
-  };
-
   return (
-    <div className="space-y-6 max-w-2xl mx-auto py-8">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Create Session Template</h1>
         <p className="text-muted-foreground">Set up a new mentoring session template</p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={onSubmit} className="space-y-6">
           <FormField
             control={form.control}
             name="name"
