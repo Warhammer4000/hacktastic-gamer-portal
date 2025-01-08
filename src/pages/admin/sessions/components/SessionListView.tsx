@@ -13,6 +13,20 @@ interface SessionListViewProps {
 export function SessionListView({ onEditSession }: SessionListViewProps) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [techStackFilter, setTechStackFilter] = useState<string>("all");
+
+  const { data: techStacks = [] } = useQuery({
+    queryKey: ["techStacks"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("technology_stacks")
+        .select("*")
+        .eq("status", "active");
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: sessions, isLoading } = useQuery({
     queryKey: ['session-templates'],
@@ -43,7 +57,12 @@ export function SessionListView({ onEditSession }: SessionListViewProps) {
   const filteredSessions = sessions?.filter(session => {
     const matchesSearch = session.name.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" ? true : session.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesTechStack = techStackFilter === "all" 
+      ? true 
+      : techStackFilter === "none" 
+        ? !session.tech_stack_id
+        : session.tech_stack_id === techStackFilter;
+    return matchesSearch && matchesStatus && matchesTechStack;
   });
 
   if (isLoading) {
@@ -64,13 +83,27 @@ export function SessionListView({ onEditSession }: SessionListViewProps) {
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="inactive">Inactive</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={techStackFilter} onValueChange={setTechStackFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by tech stack" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Tech Stacks</SelectItem>
+            <SelectItem value="none">No Tech Stack</SelectItem>
+            {techStacks.map((stack) => (
+              <SelectItem key={stack.id} value={stack.id}>
+                {stack.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-      <ScrollArea className="h-[calc(100vh-12rem)] rounded-md border p-4">
+      <ScrollArea className="h-[calc(100vh-6rem)] rounded-md border p-4">
         <div className="space-y-4">
           {filteredSessions?.map((session) => (
             <SessionCard 

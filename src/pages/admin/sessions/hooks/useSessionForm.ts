@@ -2,30 +2,14 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Session, SessionFormValues } from "../types/session-form";
 
-interface TimeSlot {
-  day: number;
-  startTime: string;
-  endTime: string;
-}
-
-interface FormValues {
-  name: string;
-  description: string;
-  duration: number;
-  tech_stack_id?: string;
-  start_date: Date;
-  end_date: Date;
-  max_slots_per_mentor: number;
-  time_slots: TimeSlot[];
-}
-
-export function useSessionForm() {
+export function useSessionForm(sessionToEdit?: Session) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<FormValues>({
-    defaultValues: {
+  const form = useForm<SessionFormValues>({
+    defaultValues: sessionToEdit || {
       name: "",
       description: "",
       duration: 30,
@@ -37,12 +21,12 @@ export function useSessionForm() {
   });
 
   const createSession = useMutation({
-    mutationFn: async (values: FormValues) => {
-      // First create the session template
-      const { data: sessionTemplate, error: sessionError } = await supabase
-        .from("session_templates")
-        .insert([
-          {
+    mutationFn: async (values: SessionFormValues) => {
+      if (sessionToEdit) {
+        // Update existing session
+        const { error: sessionError } = await supabase
+          .from("session_templates")
+          .update({
             name: values.name,
             description: values.description,
             duration: values.duration,
@@ -50,34 +34,56 @@ export function useSessionForm() {
             start_date: values.start_date.toISOString(),
             end_date: values.end_date.toISOString(),
             max_slots_per_mentor: values.max_slots_per_mentor,
-          },
-        ])
-        .select()
-        .single();
-
-      if (sessionError) throw sessionError;
-
-      // Then create the availability slots
-      const availabilityPromises = values.time_slots.map(slot => 
-        supabase
-          .from("session_availabilities")
-          .insert({
-            session_template_id: sessionTemplate.id,
-            day_of_week: slot.day,
-            start_time: slot.startTime,
-            end_time: slot.endTime,
           })
-      );
+          .eq('id', sessionToEdit.id);
 
-      await Promise.all(availabilityPromises);
+        if (sessionError) throw sessionError;
 
-      return sessionTemplate;
+        // Delete existing availabilities
+        await supabase
+          .from("session_availabilities")
+          .delete()
+          .eq('session_template_id', sessionToEdit.id);
+      } else {
+        // Create new session
+        const { data: sessionTemplate, error: sessionError } = await supabase
+          .from("session_templates")
+          .insert([
+            {
+              name: values.name,
+              description: values.description,
+              duration: values.duration,
+              tech_stack_id: values.tech_stack_id,
+              start_date: values.start_date.toISOString(),
+              end_date: values.end_date.toISOString(),
+              max_slots_per_mentor: values.max_slots_per_mentor,
+            },
+          ])
+          .select()
+          .single();
+
+        if (sessionError) throw sessionError;
+
+        // Create availabilities for new session
+        const availabilityPromises = values.time_slots.map(slot =>
+          supabase
+            .from("session_availabilities")
+            .insert({
+              session_template_id: sessionTemplate.id,
+              day_of_week: slot.day,
+              start_time: slot.startTime,
+              end_time: slot.endTime,
+            })
+        );
+
+        await Promise.all(availabilityPromises);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["session-templates"] });
       toast({
         title: "Success",
-        description: "Session template created successfully",
+        description: sessionToEdit ? "Session updated successfully" : "Session created successfully",
       });
       form.reset();
     },
@@ -85,7 +91,7 @@ export function useSessionForm() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create session template: " + error.message,
+        description: `Failed to ${sessionToEdit ? 'update' : 'create'} session: ${error.message}`,
       });
     },
   });
