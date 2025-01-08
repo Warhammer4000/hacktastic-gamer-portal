@@ -4,9 +4,11 @@ import { Card } from "@/components/ui/card";
 import { InstitutionCard } from "./components/InstitutionCard";
 import type { Institution } from "@/integrations/supabase/types/tables/institutions";
 
+type InstitutionType = "university" | "organization";
+
 interface InstitutionsListProps {
   search: string;
-  typeFilter: string;
+  typeFilter: InstitutionType | "all";
 }
 
 export function InstitutionsList({ search, typeFilter }: InstitutionsListProps) {
@@ -23,7 +25,7 @@ export function InstitutionsList({ search, typeFilter }: InstitutionsListProps) 
       }
 
       if (typeFilter !== "all") {
-        query = query.eq("type", typeFilter);
+        query = query.eq("type", typeFilter as InstitutionType);
       }
 
       const { data, error } = await query;
