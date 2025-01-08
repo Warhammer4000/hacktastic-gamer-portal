@@ -18,9 +18,7 @@ export function TimeSlotField({ form }: TimeSlotFieldProps) {
           <FormControl>
             <TimeSlotManager 
               value={field.value} 
-              onChange={(slots: TimeSlot[]) => {
-                field.onChange(slots);
-              }} 
+              onChange={field.onChange} 
             />
           </FormControl>
           <FormMessage />

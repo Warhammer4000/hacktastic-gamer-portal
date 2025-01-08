@@ -15,9 +15,9 @@ export const timeSlotSchema = z.object({
 export const sessionFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
-  duration: z.number().min(15, "Duration must be at least 15 minutes"),
+  duration: z.coerce.number().min(15, "Duration must be at least 15 minutes"),
   tech_stack_id: z.string().optional(),
-  max_slots_per_mentor: z.number().min(1, "Must allow at least 1 slot per mentor"),
+  max_slots_per_mentor: z.coerce.number().min(1, "Must allow at least 1 slot per mentor"),
   start_date: z.date(),
   end_date: z.date(),
   time_slots: z.array(timeSlotSchema)

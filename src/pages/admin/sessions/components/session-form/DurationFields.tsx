@@ -17,7 +17,13 @@ export function DurationFields({ form }: DurationFieldsProps) {
           <FormItem>
             <FormLabel>Duration (minutes)</FormLabel>
             <FormControl>
-              <Input type="number" min={15} step={15} {...field} />
+              <Input 
+                type="number" 
+                min={15} 
+                step={15} 
+                {...field}
+                onChange={e => field.onChange(e.target.valueAsNumber)}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -31,7 +37,12 @@ export function DurationFields({ form }: DurationFieldsProps) {
           <FormItem>
             <FormLabel>Maximum Slots per Mentor</FormLabel>
             <FormControl>
-              <Input type="number" min={1} {...field} />
+              <Input 
+                type="number" 
+                min={1} 
+                {...field}
+                onChange={e => field.onChange(e.target.valueAsNumber)}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
