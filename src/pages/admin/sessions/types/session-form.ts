@@ -2,14 +2,14 @@ import { z } from "zod";
 
 export interface TimeSlot {
   day: number;
-  startTime: string;
-  endTime: string;
+  startTime: string | null;
+  endTime: string | null;
 }
 
 export const timeSlotSchema = z.object({
   day: z.number(),
-  startTime: z.string().min(1, "Start time is required"),
-  endTime: z.string().min(1, "End time is required")
+  startTime: z.string().nullable(),
+  endTime: z.string().nullable()
 });
 
 export const sessionFormSchema = z.object({
@@ -45,7 +45,7 @@ export interface Session {
   session_availabilities?: Array<{
     id: string;
     day_of_week: number;
-    start_time: string;
-    end_time: string;
+    start_time: string | null;
+    end_time: string | null;
   }>;
 }
