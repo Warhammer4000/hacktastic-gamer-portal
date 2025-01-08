@@ -45,3 +45,4 @@ export interface InstitutionsTable {
 export type Institution = InstitutionsTable["Row"];
 export type InsertInstitution = InstitutionsTable["Insert"];
 export type UpdateInstitution = InstitutionsTable["Update"];
+export type InstitutionType = InstitutionsTable["Row"]["type"];
