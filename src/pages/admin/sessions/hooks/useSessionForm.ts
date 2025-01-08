@@ -1,8 +1,9 @@
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Session, SessionFormValues, TimeSlot } from "../types/session-form";
+import { Session, SessionFormValues, sessionFormSchema } from "../types/session-form";
 
 export function useSessionForm(sessionToEdit?: Session) {
   const { toast } = useToast();
@@ -32,6 +33,7 @@ export function useSessionForm(sessionToEdit?: Session) {
   };
 
   const form = useForm<SessionFormValues>({
+    resolver: zodResolver(sessionFormSchema),
     defaultValues
   });
 

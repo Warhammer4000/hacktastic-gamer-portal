@@ -34,7 +34,7 @@ export function SessionCard({ session, onEdit }: SessionCardProps) {
         )}
         <div className="mt-4 space-y-2">
           <p className="text-sm font-medium">Available Times:</p>
-          {session.session_availabilities?.map((availability: any) => (
+          {session.session_availabilities?.map((availability) => (
             <div key={availability.id} className="text-sm text-muted-foreground">
               {DAYS[availability.day_of_week]}: {availability.start_time} - {availability.end_time}
             </div>

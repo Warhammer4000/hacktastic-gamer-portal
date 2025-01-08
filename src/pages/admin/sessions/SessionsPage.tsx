@@ -3,7 +3,7 @@ import { SessionListView } from "./components/SessionListView";
 import { SessionForm } from "./components/session-form/SessionForm";
 import { Session } from "./types/session-form";
 
-const SessionsPage = () => {
+export function SessionsPage() {
   const [selectedSession, setSelectedSession] = useState<Session | undefined>();
 
   const handleEditSession = (session: Session) => {
@@ -27,6 +27,4 @@ const SessionsPage = () => {
       </div>
     </div>
   );
-};
-
-export { SessionsPage };
+}

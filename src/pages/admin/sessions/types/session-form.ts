@@ -1,19 +1,21 @@
-export interface TimeSlot {
-  day: number;
-  startTime: string;
-  endTime: string;
-}
+import { z } from "zod";
 
-export interface SessionFormValues {
-  name: string;
-  description: string;
-  duration: number;
-  tech_stack_id?: string;
-  start_date: Date;
-  end_date: Date;
-  max_slots_per_mentor: number;
-  time_slots: TimeSlot[];
-}
+export const sessionFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  duration: z.number().min(15, "Duration must be at least 15 minutes"),
+  tech_stack_id: z.string().optional(),
+  max_slots_per_mentor: z.number().min(1, "Must allow at least 1 slot per mentor"),
+  start_date: z.date(),
+  end_date: z.date(),
+  time_slots: z.array(z.object({
+    day: z.number(),
+    startTime: z.string(),
+    endTime: z.string()
+  }))
+});
+
+export type SessionFormValues = z.infer<typeof sessionFormSchema>;
 
 export interface Session {
   id: string;
@@ -27,7 +29,11 @@ export interface Session {
   status: 'active' | 'inactive';
   created_at: string;
   updated_at: string;
-  time_slots?: TimeSlot[];
+  time_slots?: Array<{
+    day: number;
+    startTime: string;
+    endTime: string;
+  }>;
   technology_stacks?: {
     id: string;
     name: string;
