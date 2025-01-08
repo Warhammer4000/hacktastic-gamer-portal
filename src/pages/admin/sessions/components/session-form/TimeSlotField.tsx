@@ -17,8 +17,16 @@ export function TimeSlotField({ form }: TimeSlotFieldProps) {
           <FormLabel>Available Time Slots</FormLabel>
           <FormControl>
             <TimeSlotManager 
-              value={field.value} 
-              onChange={(slots: TimeSlot[]) => field.onChange(slots)} 
+              value={field.value || []} 
+              onChange={(slots: TimeSlot[]) => {
+                // Ensure all slots have required properties before updating form
+                const validSlots = slots.map(slot => ({
+                  day: slot.day,
+                  startTime: slot.startTime,
+                  endTime: slot.endTime
+                }));
+                field.onChange(validSlots);
+              }} 
             />
           </FormControl>
           <FormMessage />
