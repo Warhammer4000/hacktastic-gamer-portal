@@ -39,7 +39,7 @@ export function useSessionForm(sessionToEdit?: Session) {
 
   const createSession = useMutation({
     mutationFn: async (values: SessionFormValues) => {
-      // Create session template
+      // First create session template and wait for the response
       const { data: sessionTemplate, error: sessionError } = await supabase
         .from("session_templates")
         .insert([{
@@ -55,8 +55,9 @@ export function useSessionForm(sessionToEdit?: Session) {
         .single();
 
       if (sessionError) throw sessionError;
+      if (!sessionTemplate) throw new Error("Failed to create session template");
 
-      // Create availabilities
+      // Then create availabilities using the session template id
       const availabilityPromises = values.time_slots.map(slot =>
         supabase
           .from("session_availabilities")
@@ -69,6 +70,7 @@ export function useSessionForm(sessionToEdit?: Session) {
       );
 
       await Promise.all(availabilityPromises);
+      return sessionTemplate;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["session-templates"] });
@@ -82,7 +84,7 @@ export function useSessionForm(sessionToEdit?: Session) {
 
   const updateSession = useMutation({
     mutationFn: async ({ id, ...values }: SessionFormValues & { id: string }) => {
-      // Update session template
+      // First update session template
       const { error: sessionError } = await supabase
         .from("session_templates")
         .update({
@@ -99,10 +101,12 @@ export function useSessionForm(sessionToEdit?: Session) {
       if (sessionError) throw sessionError;
 
       // Delete existing availabilities
-      await supabase
+      const { error: deleteError } = await supabase
         .from("session_availabilities")
         .delete()
         .eq('session_template_id', id);
+
+      if (deleteError) throw deleteError;
 
       // Create new availabilities
       const availabilityPromises = values.time_slots.map(slot =>
