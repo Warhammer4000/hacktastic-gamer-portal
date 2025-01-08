@@ -7,10 +7,11 @@ import { BulkInstitutionsUpload } from "./BulkInstitutionsUpload";
 import { ExportInstitutions } from "./ExportInstitutions";
 import { Button } from "@/components/ui/button";
 import { Upload, Plus } from "lucide-react";
+import type { InstitutionType } from "@/integrations/supabase/types/tables/institutions";
 
 export function InstitutionsTab() {
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState<InstitutionType | "all">("all");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
 
@@ -53,7 +54,7 @@ export function InstitutionsTab() {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"
         />
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
+        <Select value={typeFilter} onValueChange={(value: InstitutionType | "all") => setTypeFilter(value)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
