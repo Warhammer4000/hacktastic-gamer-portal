@@ -12,18 +12,31 @@ export function TimeSlotField({ form }: TimeSlotFieldProps) {
     <FormField
       control={form.control}
       name="time_slots"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Available Time Slots</FormLabel>
-          <FormControl>
-            <TimeSlotManager 
-              value={field.value} 
-              onChange={field.onChange} 
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
+      render={({ field }) => {
+        // Initialize slots for all days if not already set
+        const initializedSlots = field.value?.map(slot => ({
+          day: slot.day,
+          startTime: slot.startTime,
+          endTime: slot.endTime
+        })) || Array.from({ length: 7 }, (_, i) => ({
+          day: i,
+          startTime: null,
+          endTime: null
+        }));
+
+        return (
+          <FormItem>
+            <FormLabel>Available Time Slots</FormLabel>
+            <FormControl>
+              <TimeSlotManager 
+                value={initializedSlots}
+                onChange={field.onChange}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }

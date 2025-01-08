@@ -14,15 +14,14 @@ const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
 export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
   // Initialize slots with all days, ensuring each day has a slot
   const initializeSlots = (inputSlots: TimeSlot[]) => {
-    const initializedSlots: TimeSlot[] = DAYS.map((_, index) => {
+    return DAYS.map((_, index) => {
       const existingSlot = inputSlots.find(slot => slot.day === index);
-      return existingSlot || {
+      return {
         day: index,
-        startTime: null,
-        endTime: null
+        startTime: existingSlot?.startTime ?? null,
+        endTime: existingSlot?.endTime ?? null
       };
     });
-    return initializedSlots;
   };
 
   const [slots, setSlots] = useState<TimeSlot[]>(initializeSlots(value || []));
