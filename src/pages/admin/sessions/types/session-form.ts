@@ -37,6 +37,11 @@ export interface Session {
   status: 'active' | 'inactive';
   created_at: string;
   updated_at: string;
+  technology_stacks?: {
+    id: string;
+    name: string;
+    icon_url: string;
+  };
   session_availabilities?: Array<{
     id: string;
     day_of_week: number;
