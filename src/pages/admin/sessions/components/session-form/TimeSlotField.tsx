@@ -1,7 +1,7 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { TimeSlotManager } from "../TimeSlotManager";
 import { UseFormReturn } from "react-hook-form";
-import { SessionFormValues, TimeSlot } from "../../types/session-form";
+import { SessionFormValues } from "../../types/session-form";
 
 interface TimeSlotFieldProps {
   form: UseFormReturn<SessionFormValues>;
