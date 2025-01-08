@@ -16,10 +16,10 @@ const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => {
 }).flat();
 
 export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
-  const [slots, setSlots] = useState<TimeSlot[]>(value || []);
+  const [slots, setSlots] = useState<TimeSlot[]>(value);
 
   useEffect(() => {
-    setSlots(value || []);
+    setSlots(value);
   }, [value]);
 
   const addSlot = (day: number, e: React.MouseEvent) => {
