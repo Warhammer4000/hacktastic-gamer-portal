@@ -4,7 +4,7 @@ import { SessionListView } from "./components/SessionListView";
 import { SessionForm } from "./components/session-form/SessionForm";
 import { Session } from "./types/session-form";
 
-export function SessionsPage() {
+const SessionsPage = () => {
   const [selectedSession, setSelectedSession] = useState<Session | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -30,4 +30,6 @@ export function SessionsPage() {
       </Dialog>
     </div>
   );
-}
+};
+
+export { SessionsPage };
