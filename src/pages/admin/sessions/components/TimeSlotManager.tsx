@@ -71,7 +71,7 @@ export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
                     <div key={slotIndex} className="flex items-center space-x-2">
                       <Select
                         value={slot.startTime}
-                        onValueChange={(value) => updateSlot(slotIndex, 'startTime', value)}
+                        onValueChange={(value) => updateSlot(slots.indexOf(slot), 'startTime', value)}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
@@ -86,7 +86,7 @@ export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
                       </Select>
                       <Select
                         value={slot.endTime}
-                        onValueChange={(value) => updateSlot(slotIndex, 'endTime', value)}
+                        onValueChange={(value) => updateSlot(slots.indexOf(slot), 'endTime', value)}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
@@ -103,7 +103,7 @@ export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={(e) => removeSlot(slotIndex, e)}
+                        onClick={(e) => removeSlot(slots.indexOf(slot), e)}
                       >
                         <X className="h-4 w-4" />
                       </Button>
