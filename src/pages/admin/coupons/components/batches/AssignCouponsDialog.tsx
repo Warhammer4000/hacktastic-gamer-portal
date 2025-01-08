@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Users, CheckSquare } from "lucide-react";
@@ -15,10 +14,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { UserSelectionList } from "./UserSelectionList";
 
+type UserRole = "participant" | "mentor" | "admin" | "organizer" | "moderator";
+
 interface AssignCouponsDialogProps {
   batch: {
     id: string;
-    eligible_roles: string[];
+    eligible_roles: UserRole[];
     coupons: {
       id: string;
       code: string;
@@ -56,7 +57,7 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
           )
         `
         )
-        .in("role", batch.eligible_roles);
+        .in("role", batch.eligible_roles as UserRole[]);
 
       if (error) throw error;
 
@@ -143,16 +144,13 @@ export function AssignCouponsDialog({ batch }: AssignCouponsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button data-batch-id={batch.id} variant="ghost" size="icon" className="hidden">
+        <Button variant="ghost" size="icon">
           <Users className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Assign Coupons</DialogTitle>
-          <DialogDescription>
-            Select users to assign coupons from this batch.
-          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">

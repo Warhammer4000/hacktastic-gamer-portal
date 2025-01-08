@@ -15,9 +15,11 @@ import { EditInstitution } from "./EditInstitution";
 import { DeleteInstitution } from "./DeleteInstitution";
 import type { Institution } from "@/integrations/supabase/types/tables/institutions";
 
+type InstitutionType = "university" | "organization";
+
 interface InstitutionsTableProps {
   search: string;
-  typeFilter: string;
+  typeFilter: InstitutionType | "all";
 }
 
 export function InstitutionsTable({ search, typeFilter }: InstitutionsTableProps) {
@@ -40,7 +42,7 @@ export function InstitutionsTable({ search, typeFilter }: InstitutionsTableProps
       }
 
       if (typeFilter !== "all") {
-        query = query.eq("type", typeFilter);
+        query = query.eq("type", typeFilter as InstitutionType);
       }
 
       const { data, error } = await query;
