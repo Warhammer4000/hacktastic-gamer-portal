@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Session, SessionFormValues } from "../types/session-form";
+import { Session, SessionFormValues, TimeSlot } from "../types/session-form";
 
 export function useSessionForm(sessionToEdit?: Session) {
   const { toast } = useToast();
@@ -37,76 +37,90 @@ export function useSessionForm(sessionToEdit?: Session) {
 
   const createSession = useMutation({
     mutationFn: async (values: SessionFormValues) => {
-      if (sessionToEdit) {
-        // Update existing session
-        const { error: sessionError } = await supabase
-          .from("session_templates")
-          .update({
-            name: values.name,
-            description: values.description,
-            duration: values.duration,
-            tech_stack_id: values.tech_stack_id,
-            start_date: values.start_date.toISOString(),
-            end_date: values.end_date.toISOString(),
-            max_slots_per_mentor: values.max_slots_per_mentor,
-          })
-          .eq('id', sessionToEdit.id);
+      // Create session template
+      const { data: sessionTemplate, error: sessionError } = await supabase
+        .from("session_templates")
+        .insert([{
+          name: values.name,
+          description: values.description,
+          duration: values.duration,
+          tech_stack_id: values.tech_stack_id,
+          start_date: values.start_date.toISOString(),
+          end_date: values.end_date.toISOString(),
+          max_slots_per_mentor: values.max_slots_per_mentor,
+        }])
+        .select()
+        .single();
 
-        if (sessionError) throw sessionError;
+      if (sessionError) throw sessionError;
 
-        // Delete existing availabilities
-        await supabase
+      // Create availabilities
+      const availabilityPromises = values.time_slots.map(slot =>
+        supabase
           .from("session_availabilities")
-          .delete()
-          .eq('session_template_id', sessionToEdit.id);
-      } else {
-        // Create new session
-        const { data: sessionTemplate, error: sessionError } = await supabase
-          .from("session_templates")
-          .insert([
-            {
-              name: values.name,
-              description: values.description,
-              duration: values.duration,
-              tech_stack_id: values.tech_stack_id,
-              start_date: values.start_date.toISOString(),
-              end_date: values.end_date.toISOString(),
-              max_slots_per_mentor: values.max_slots_per_mentor,
-            },
-          ])
-          .select()
-          .single();
+          .insert({
+            session_template_id: sessionTemplate.id,
+            day_of_week: slot.day,
+            start_time: slot.startTime,
+            end_time: slot.endTime,
+          })
+      );
 
-        if (sessionError) throw sessionError;
-
-        // Create availabilities for new session
-        const availabilityPromises = values.time_slots.map(slot =>
-          supabase
-            .from("session_availabilities")
-            .insert({
-              session_template_id: sessionTemplate.id,
-              day_of_week: slot.day,
-              start_time: slot.startTime,
-              end_time: slot.endTime,
-            })
-        );
-
-        await Promise.all(availabilityPromises);
-      }
+      await Promise.all(availabilityPromises);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["session-templates"] });
       toast({
         title: "Success",
-        description: sessionToEdit ? "Session updated successfully" : "Session created successfully",
+        description: "Session created successfully",
       });
       form.reset();
     },
-    onError: (error) => {
+  });
+
+  const updateSession = useMutation({
+    mutationFn: async ({ id, ...values }: SessionFormValues & { id: string }) => {
+      // Update session template
+      const { error: sessionError } = await supabase
+        .from("session_templates")
+        .update({
+          name: values.name,
+          description: values.description,
+          duration: values.duration,
+          tech_stack_id: values.tech_stack_id,
+          start_date: values.start_date.toISOString(),
+          end_date: values.end_date.toISOString(),
+          max_slots_per_mentor: values.max_slots_per_mentor,
+        })
+        .eq('id', id);
+
+      if (sessionError) throw sessionError;
+
+      // Delete existing availabilities
+      await supabase
+        .from("session_availabilities")
+        .delete()
+        .eq('session_template_id', id);
+
+      // Create new availabilities
+      const availabilityPromises = values.time_slots.map(slot =>
+        supabase
+          .from("session_availabilities")
+          .insert({
+            session_template_id: id,
+            day_of_week: slot.day,
+            start_time: slot.startTime,
+            end_time: slot.endTime,
+          })
+      );
+
+      await Promise.all(availabilityPromises);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["session-templates"] });
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: `Failed to ${sessionToEdit ? 'update' : 'create'} session: ${error.message}`,
+        title: "Success",
+        description: "Session updated successfully",
       });
     },
   });
@@ -114,5 +128,6 @@ export function useSessionForm(sessionToEdit?: Session) {
   return {
     form,
     createSession,
+    updateSession,
   };
 }

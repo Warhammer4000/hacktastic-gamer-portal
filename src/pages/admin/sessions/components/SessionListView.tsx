@@ -118,7 +118,7 @@ export function SessionListView({ onEditSession }: SessionListViewProps) {
             return (
               <SessionCard 
                 key={session.id} 
-                session={session}
+                session={sessionWithTimeSlots}
                 onEdit={() => onEditSession(sessionWithTimeSlots)}
               />
             );
