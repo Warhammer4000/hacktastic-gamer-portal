@@ -43,9 +43,4 @@ export interface Session {
     start_time: string;
     end_time: string;
   }>;
-  technology_stacks?: {
-    id: string;
-    name: string;
-    icon_url: string;
-  };
 }
