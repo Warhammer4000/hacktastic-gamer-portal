@@ -12,6 +12,7 @@ import EditMentorPage from "@/pages/admin/mentors/EditMentorPage";
 import TeamsPage from "@/pages/admin/teams/TeamsPage";
 import EventsPage from "@/pages/admin/events/EventsPage";
 import CouponsPage from "@/pages/admin/coupons/CouponsPage";
+import SessionsPage from "@/pages/admin/sessions/SessionsPage";
 
 export const adminRoutes = (
   <Route path="/admin" element={<AdminLayout />}>
@@ -28,5 +29,6 @@ export const adminRoutes = (
     <Route path="users" element={<UsersPage />} />
     <Route path="teams" element={<TeamsPage />} />
     <Route path="coupons" element={<CouponsPage />} />
+    <Route path="sessions" element={<SessionsPage />} />
   </Route>
 );

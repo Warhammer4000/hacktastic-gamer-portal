@@ -701,6 +701,94 @@ export type Database = {
         }
         Relationships: []
       }
+      session_availabilities: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          session_template_id: string | null
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          session_template_id?: string | null
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          session_template_id?: string | null
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_availabilities_session_template_id_fkey"
+            columns: ["session_template_id"]
+            isOneToOne: false
+            referencedRelation: "session_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_templates: {
+        Row: {
+          created_at: string
+          description: string
+          duration: number
+          end_date: string
+          id: string
+          max_slots_per_mentor: number
+          name: string
+          start_date: string
+          status: Database["public"]["Enums"]["session_status"] | null
+          tech_stack_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          duration: number
+          end_date: string
+          id?: string
+          max_slots_per_mentor?: number
+          name: string
+          start_date: string
+          status?: Database["public"]["Enums"]["session_status"] | null
+          tech_stack_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          duration?: number
+          end_date?: string
+          id?: string
+          max_slots_per_mentor?: number
+          name?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["session_status"] | null
+          tech_stack_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_templates_tech_stack_id_fkey"
+            columns: ["tech_stack_id"]
+            isOneToOne: false
+            referencedRelation: "technology_stacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_media_links: {
         Row: {
           created_at: string
@@ -1019,6 +1107,7 @@ export type Database = {
       partner_status: "active" | "inactive"
       privacy_policy_status: "draft" | "published"
       profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
+      session_status: "active" | "inactive"
       social_media_platform:
         | "facebook"
         | "twitter"

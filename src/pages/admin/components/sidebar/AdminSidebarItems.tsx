@@ -11,6 +11,7 @@ import {
   UserCheck,
   Users,
   UsersRound,
+  Clock,
 } from "lucide-react";
 
 export const adminSidebarItems = [
@@ -63,6 +64,11 @@ export const adminSidebarItems = [
     title: "Settings",
     icon: Settings,
     path: "/admin/settings",
+  },
+  {
+    title: "Sessions",
+    icon: Clock,
+    path: "/admin/sessions",
   },
 ];
 
