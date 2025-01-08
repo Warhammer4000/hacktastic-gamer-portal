@@ -20,7 +20,7 @@ export const sessionFormSchema = z.object({
   max_slots_per_mentor: z.number().min(1, "Must allow at least 1 slot per mentor"),
   start_date: z.date(),
   end_date: z.date(),
-  time_slots: z.array(timeSlotSchema)
+  time_slots: z.array(timeSlotSchema).default([])
 });
 
 export type SessionFormValues = z.infer<typeof sessionFormSchema>;
