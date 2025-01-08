@@ -6,7 +6,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SessionCard } from "./SessionCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export function SessionListView() {
+interface SessionListViewProps {
+  onEditSession: (session: any) => void;
+}
+
+export function SessionListView({ onEditSession }: SessionListViewProps) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
@@ -66,10 +70,14 @@ export function SessionListView() {
           </SelectContent>
         </Select>
       </div>
-      <ScrollArea className="h-[600px] rounded-md border p-4">
+      <ScrollArea className="h-[calc(100vh-12rem)] rounded-md border p-4">
         <div className="space-y-4">
           {filteredSessions?.map((session) => (
-            <SessionCard key={session.id} session={session} />
+            <SessionCard 
+              key={session.id} 
+              session={session}
+              onEdit={onEditSession}
+            />
           ))}
         </div>
       </ScrollArea>

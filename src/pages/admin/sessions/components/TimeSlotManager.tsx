@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface TimeSlot {
   day: number;
@@ -22,6 +22,10 @@ const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => {
 
 export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
   const [slots, setSlots] = useState<TimeSlot[]>(value);
+
+  useEffect(() => {
+    setSlots(value);
+  }, [value]);
 
   const addSlot = (day: number) => {
     const newSlot: TimeSlot = {

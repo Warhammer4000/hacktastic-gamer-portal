@@ -11,9 +11,10 @@ const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
 
 interface SessionCardProps {
   session: any; // TODO: Add proper type
+  onEdit: (session: any) => void;
 }
 
-export function SessionCard({ session }: SessionCardProps) {
+export function SessionCard({ session, onEdit }: SessionCardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -76,12 +77,12 @@ export function SessionCard({ session }: SessionCardProps) {
               size="icon"
               onClick={() => toggleStatus.mutate()}
             >
-              <Power className={session.status === 'active' ? 'text-green-500' : 'text-gray-500'} />
+              <Power className={session.status === 'active' ? 'text-green-500' : 'text-red-500'} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => {/* TODO: Implement edit */}}
+              onClick={() => onEdit(session)}
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -94,7 +95,10 @@ export function SessionCard({ session }: SessionCardProps) {
             </Button>
           </div>
         </div>
-        <Badge variant={session.status === 'active' ? 'default' : 'secondary'}>
+        <Badge 
+          variant={session.status === 'active' ? 'default' : 'destructive'}
+          className={session.status === 'active' ? 'bg-green-500' : 'bg-red-500'}
+        >
           {session.status}
         </Badge>
       </CardHeader>
