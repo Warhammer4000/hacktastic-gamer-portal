@@ -103,7 +103,7 @@ export function SessionListView({ onEditSession }: SessionListViewProps) {
           </SelectContent>
         </Select>
       </div>
-      <ScrollArea className="h-[calc(100vh-6rem)] rounded-md border p-4">
+      <ScrollArea className="h-[calc(130vh-6rem)] rounded-md border p-4">
         <div className="space-y-4">
           {filteredSessions?.map((session) => (
             <SessionCard 
