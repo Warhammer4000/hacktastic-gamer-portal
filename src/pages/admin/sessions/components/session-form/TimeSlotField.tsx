@@ -16,7 +16,10 @@ export function TimeSlotField({ form }: TimeSlotFieldProps) {
         <FormItem>
           <FormLabel>Available Time Slots</FormLabel>
           <FormControl>
-            <TimeSlotManager value={field.value} onChange={field.onChange} />
+            <TimeSlotManager 
+              value={field.value || []} 
+              onChange={field.onChange} 
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

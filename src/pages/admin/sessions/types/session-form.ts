@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export interface TimeSlot {
+  day: number;
+  startTime: string;
+  endTime: string;
+}
+
 export const sessionFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
@@ -29,11 +35,6 @@ export interface Session {
   status: 'active' | 'inactive';
   created_at: string;
   updated_at: string;
-  time_slots?: Array<{
-    day: number;
-    startTime: string;
-    endTime: string;
-  }>;
   technology_stacks?: {
     id: string;
     name: string;

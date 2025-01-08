@@ -2,12 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
-
-interface TimeSlot {
-  day: number;
-  startTime: string;
-  endTime: string;
-}
+import { TimeSlot } from "../types/session-form";
 
 interface TimeSlotManagerProps {
   value: TimeSlot[];
@@ -21,14 +16,13 @@ const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => {
 }).flat();
 
 export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
-  const [slots, setSlots] = useState<TimeSlot[]>(value);
+  const [slots, setSlots] = useState<TimeSlot[]>(value || []);
 
   useEffect(() => {
-    setSlots(value);
+    setSlots(value || []);
   }, [value]);
 
   const addSlot = (day: number, e: React.MouseEvent) => {
-    // Prevent the button from submitting the form
     e.preventDefault();
     
     const newSlot: TimeSlot = {
@@ -42,7 +36,6 @@ export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
   };
 
   const removeSlot = (index: number, e: React.MouseEvent) => {
-    // Prevent the button from submitting the form
     e.preventDefault();
     
     const newSlots = slots.filter((_, i) => i !== index);
@@ -107,7 +100,7 @@ export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
                         </SelectContent>
                       </Select>
                       <Button
-                        type="button" // Explicitly set type to button
+                        type="button"
                         variant="ghost"
                         size="icon"
                         onClick={(e) => removeSlot(slotIndex, e)}
@@ -120,7 +113,7 @@ export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
               )}
             </div>
             <Button
-              type="button" // Explicitly set type to button
+              type="button"
               variant="ghost"
               size="icon"
               onClick={(e) => addSlot(index, e)}
