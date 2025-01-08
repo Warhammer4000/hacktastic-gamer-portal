@@ -13,7 +13,12 @@ import { TimeSlotManager } from "./TimeSlotManager";
 import { useSessionForm } from "../hooks/useSessionForm";
 import { supabase } from "@/integrations/supabase/client";
 
-export function CreateSessionForm() {
+interface CreateSessionFormProps {
+  sessionToEdit?: any; // TODO: Add proper type
+  onComplete?: () => void;
+}
+
+export function CreateSessionForm({ sessionToEdit, onComplete }: CreateSessionFormProps) {
   const { form, createSession } = useSessionForm();
 
   const { data: techStacks = [] } = useQuery({
@@ -32,6 +37,7 @@ export function CreateSessionForm() {
 
   const onSubmit = form.handleSubmit((values) => {
     createSession.mutate(values);
+    onComplete?.();
   });
 
   return (

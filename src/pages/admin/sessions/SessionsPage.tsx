@@ -9,7 +9,10 @@ export default function SessionsPage() {
     <div className="container mx-auto py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <CreateSessionForm sessionToEdit={sessionToEdit} onComplete={() => setSessionToEdit(null)} />
+          <CreateSessionForm 
+            sessionToEdit={sessionToEdit} 
+            onComplete={() => setSessionToEdit(null)} 
+          />
         </div>
         <div>
           <SessionListView onEditSession={setSessionToEdit} />
