@@ -28,8 +28,8 @@ export default function PrivateRoute({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === "SIGNED_OUT" || event === "USER_DELETED") {
+      async (event) => {
+        if (event === "SIGNED_OUT") {
           navigate("/login");
         }
       }
