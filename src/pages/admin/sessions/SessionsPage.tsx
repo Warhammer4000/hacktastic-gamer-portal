@@ -1,33 +1,30 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { SessionListView } from "./components/SessionListView";
 import { SessionForm } from "./components/session-form/SessionForm";
 import { Session } from "./types/session-form";
 
 const SessionsPage = () => {
   const [selectedSession, setSelectedSession] = useState<Session | undefined>();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleEditSession = (session: Session) => {
     setSelectedSession(session);
-    setIsDialogOpen(true);
   };
 
   return (
     <div className="container mx-auto py-6">
-      <SessionListView onEditSession={handleEditSession} />
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="order-2 md:order-1">
           <SessionForm
             sessionToEdit={selectedSession}
             onComplete={() => {
-              setIsDialogOpen(false);
               setSelectedSession(undefined);
             }}
           />
-        </DialogContent>
-      </Dialog>
+        </div>
+        <div className="order-1 md:order-2">
+          <SessionListView onEditSession={handleEditSession} />
+        </div>
+      </div>
     </div>
   );
 };
