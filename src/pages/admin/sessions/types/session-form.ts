@@ -6,6 +6,12 @@ export interface TimeSlot {
   endTime: string;
 }
 
+export const timeSlotSchema = z.object({
+  day: z.number(),
+  startTime: z.string(),
+  endTime: z.string()
+});
+
 export const sessionFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
@@ -14,11 +20,7 @@ export const sessionFormSchema = z.object({
   max_slots_per_mentor: z.number().min(1, "Must allow at least 1 slot per mentor"),
   start_date: z.date(),
   end_date: z.date(),
-  time_slots: z.array(z.object({
-    day: z.number(),
-    startTime: z.string(),
-    endTime: z.string()
-  }))
+  time_slots: z.array(timeSlotSchema)
 });
 
 export type SessionFormValues = z.infer<typeof sessionFormSchema>;
