@@ -106,20 +106,23 @@ export function SessionListView({ onEditSession }: SessionListViewProps) {
       </div>
       <ScrollArea className="h-[calc(130vh-6rem)] rounded-md border p-4">
         <div className="space-y-4">
-          {filteredSessions?.map((session) => (
-            <SessionCard 
-              key={session.id} 
-              session={session}
-              onEdit={() => onEditSession({
-                ...session,
-                time_slots: session.session_availabilities?.map(avail => ({
-                  day: avail.day_of_week,
-                  startTime: avail.start_time,
-                  endTime: avail.end_time
-                })) || []
-              })}
-            />
-          ))}
+          {filteredSessions?.map((session) => {
+            const sessionWithTimeSlots = {
+              ...session,
+              time_slots: session.session_availabilities?.map(avail => ({
+                day: avail.day_of_week,
+                startTime: avail.start_time,
+                endTime: avail.end_time
+              })) || []
+            };
+            return (
+              <SessionCard 
+                key={session.id} 
+                session={session}
+                onEdit={() => onEditSession(sessionWithTimeSlots)}
+              />
+            );
+          })}
         </div>
       </ScrollArea>
     </div>

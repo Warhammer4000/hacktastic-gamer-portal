@@ -27,6 +27,7 @@ export interface Session {
   status: 'active' | 'inactive';
   created_at: string;
   updated_at: string;
+  time_slots?: TimeSlot[];
   technology_stacks?: {
     id: string;
     name: string;
