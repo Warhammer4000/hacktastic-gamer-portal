@@ -27,7 +27,10 @@ export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
     setSlots(value);
   }, [value]);
 
-  const addSlot = (day: number) => {
+  const addSlot = (day: number, e: React.MouseEvent) => {
+    // Prevent the button from submitting the form
+    e.preventDefault();
+    
     const newSlot: TimeSlot = {
       day,
       startTime: "09:00",
@@ -38,7 +41,10 @@ export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
     onChange(newSlots);
   };
 
-  const removeSlot = (index: number) => {
+  const removeSlot = (index: number, e: React.MouseEvent) => {
+    // Prevent the button from submitting the form
+    e.preventDefault();
+    
     const newSlots = slots.filter((_, i) => i !== index);
     setSlots(newSlots);
     onChange(newSlots);
@@ -101,9 +107,10 @@ export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
                         </SelectContent>
                       </Select>
                       <Button
+                        type="button" // Explicitly set type to button
                         variant="ghost"
                         size="icon"
-                        onClick={() => removeSlot(slotIndex)}
+                        onClick={(e) => removeSlot(slotIndex, e)}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -113,9 +120,10 @@ export function TimeSlotManager({ value, onChange }: TimeSlotManagerProps) {
               )}
             </div>
             <Button
+              type="button" // Explicitly set type to button
               variant="ghost"
               size="icon"
-              onClick={() => addSlot(index)}
+              onClick={(e) => addSlot(index, e)}
             >
               <Plus className="h-4 w-4" />
             </Button>
