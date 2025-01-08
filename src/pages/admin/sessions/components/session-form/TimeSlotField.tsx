@@ -19,7 +19,11 @@ export function TimeSlotField({ form }: TimeSlotFieldProps) {
             <TimeSlotManager 
               value={field.value || []} 
               onChange={(slots: TimeSlot[]) => {
-                field.onChange(slots);
+                field.onChange(slots.map(slot => ({
+                  day: slot.day,
+                  startTime: slot.startTime,
+                  endTime: slot.endTime
+                })));
               }} 
             />
           </FormControl>
