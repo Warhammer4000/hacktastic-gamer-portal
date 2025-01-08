@@ -5,40 +5,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Session, SessionFormValues, sessionFormSchema } from "../types/session-form";
 
-export function useSessionForm(sessionToEdit?: Session) {
+export function useSessionForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const defaultValues: SessionFormValues = sessionToEdit ? {
-    name: sessionToEdit.name,
-    description: sessionToEdit.description,
-    duration: sessionToEdit.duration,
-    tech_stack_id: sessionToEdit.tech_stack_id,
-    max_slots_per_mentor: sessionToEdit.max_slots_per_mentor,
-    start_date: new Date(sessionToEdit.start_date),
-    end_date: new Date(sessionToEdit.end_date),
-    time_slots: sessionToEdit.session_availabilities?.map(avail => ({
-      day: avail.day_of_week,
-      startTime: avail.start_time,
-      endTime: avail.end_time
-    })) || []
-  } : {
-    name: "",
-    description: "",
-    duration: 30,
-    max_slots_per_mentor: 1,
-    start_date: new Date(),
-    end_date: new Date(),
-    time_slots: [],
-  };
-
   const form = useForm<SessionFormValues>({
     resolver: zodResolver(sessionFormSchema),
-    defaultValues
+    defaultValues: {
+      name: "",
+      description: "",
+      duration: 30,
+      max_slots_per_mentor: 1,
+      start_date: new Date(),
+      end_date: new Date(),
+      time_slots: [],
+    }
   });
 
   const createSession = useMutation({
     mutationFn: async (values: SessionFormValues) => {
+      console.log('Creating session with values:', values);
       // First create session template and wait for the response
       const { data: sessionTemplate, error: sessionError } = await supabase
         .from("session_templates")
@@ -56,6 +42,8 @@ export function useSessionForm(sessionToEdit?: Session) {
 
       if (sessionError) throw sessionError;
       if (!sessionTemplate) throw new Error("Failed to create session template");
+
+      console.log('Created session template:', sessionTemplate);
 
       // Then create availabilities using the session template id
       const availabilityPromises = values.time_slots.map(slot =>
@@ -84,6 +72,9 @@ export function useSessionForm(sessionToEdit?: Session) {
 
   const updateSession = useMutation({
     mutationFn: async ({ id, ...values }: SessionFormValues & { id: string }) => {
+      console.log('Updating session with id:', id);
+      console.log('Update values:', values);
+      
       // First update session template
       const { error: sessionError } = await supabase
         .from("session_templates")
@@ -108,6 +99,7 @@ export function useSessionForm(sessionToEdit?: Session) {
 
       if (deleteError) throw deleteError;
 
+      console.log('Creating new availabilities for session:', id);
       // Create new availabilities
       const availabilityPromises = values.time_slots.map(slot =>
         supabase
