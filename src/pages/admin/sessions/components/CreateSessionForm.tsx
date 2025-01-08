@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,11 +13,7 @@ import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
-
-interface CreateSessionDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+import { TimeSlotManager } from "./TimeSlotManager";
 
 interface FormValues {
   name: string;
@@ -28,12 +23,16 @@ interface FormValues {
   start_date: Date;
   end_date: Date;
   max_slots_per_mentor: number;
+  time_slots: Array<{
+    day: number;
+    startTime: string;
+    endTime: string;
+  }>;
 }
 
-export function CreateSessionDialog({ open, onOpenChange }: CreateSessionDialogProps) {
+export function CreateSessionForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [techStacks] = useState<Array<{ id: string; name: string }>>([]);
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -43,12 +42,28 @@ export function CreateSessionDialog({ open, onOpenChange }: CreateSessionDialogP
       max_slots_per_mentor: 1,
       start_date: new Date(),
       end_date: new Date(),
+      time_slots: [],
+    },
+  });
+
+  const { data: techStacks = [] } = useQuery({
+    queryKey: ["techStacks"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("technology_stacks")
+        .select("*")
+        .eq("status", "active")
+        .order("name");
+
+      if (error) throw error;
+      return data;
     },
   });
 
   const createSession = useMutation({
     mutationFn: async (values: FormValues) => {
-      const { data, error } = await supabase
+      // First create the session template
+      const { data: sessionTemplate, error: sessionError } = await supabase
         .from("session_templates")
         .insert([
           {
@@ -64,8 +79,23 @@ export function CreateSessionDialog({ open, onOpenChange }: CreateSessionDialogP
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (sessionError) throw sessionError;
+
+      // Then create the availability slots
+      const availabilityPromises = values.time_slots.map(slot => 
+        supabase
+          .from("session_availabilities")
+          .insert({
+            session_template_id: sessionTemplate.id,
+            day_of_week: slot.day,
+            start_time: slot.startTime,
+            end_time: slot.endTime,
+          })
+      );
+
+      await Promise.all(availabilityPromises);
+
+      return sessionTemplate;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["session-templates"] });
@@ -73,7 +103,6 @@ export function CreateSessionDialog({ open, onOpenChange }: CreateSessionDialogP
         title: "Success",
         description: "Session template created successfully",
       });
-      onOpenChange(false);
       form.reset();
     },
     onError: (error) => {
@@ -90,41 +119,43 @@ export function CreateSessionDialog({ open, onOpenChange }: CreateSessionDialogP
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Create Session Template</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <div className="space-y-6 max-w-2xl mx-auto py-8">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Create Session Template</h1>
+        <p className="text-muted-foreground">Set up a new mentoring session template</p>
+      </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <RichTextEditor content={field.value} onChange={field.onChange} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <RichTextEditor content={field.value} onChange={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="duration"
@@ -141,42 +172,58 @@ export function CreateSessionDialog({ open, onOpenChange }: CreateSessionDialogP
 
             <FormField
               control={form.control}
-              name="tech_stack_id"
+              name="max_slots_per_mentor"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Technology Stack (Optional)</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a technology stack" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {techStacks.map((stack) => (
-                        <SelectItem key={stack.id} value={stack.id}>
-                          {stack.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Maximum Slots per Mentor</FormLabel>
+                  <FormControl>
+                    <Input type="number" min={1} {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+          </div>
 
+          <FormField
+            control={form.control}
+            name="tech_stack_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Technology Stack (Optional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a technology stack" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {techStacks.map((stack) => (
+                      <SelectItem key={stack.id} value={stack.id}>
+                        {stack.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="start_date"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>Start Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant={"outline"}
+                          variant="outline"
                           className={cn(
-                            "w-[240px] pl-3 text-left font-normal",
+                            "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -210,15 +257,15 @@ export function CreateSessionDialog({ open, onOpenChange }: CreateSessionDialogP
               control={form.control}
               name="end_date"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>End Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant={"outline"}
+                          variant="outline"
                           className={cn(
-                            "w-[240px] pl-3 text-left font-normal",
+                            "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -247,27 +294,27 @@ export function CreateSessionDialog({ open, onOpenChange }: CreateSessionDialogP
                 </FormItem>
               )}
             />
+          </div>
 
-            <FormField
-              control={form.control}
-              name="max_slots_per_mentor"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Maximum Slots per Mentor</FormLabel>
-                  <FormControl>
-                    <Input type="number" min={1} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="time_slots"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Available Time Slots</FormLabel>
+                <FormControl>
+                  <TimeSlotManager value={field.value} onChange={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <Button type="submit" className="w-full">
-              Create Session Template
-            </Button>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          <Button type="submit" className="w-full">
+            Create Session Template
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 }

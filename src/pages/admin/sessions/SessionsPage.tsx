@@ -1,14 +1,9 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { CreateSessionDialog } from "./components/CreateSessionDialog";
 import { SessionList } from "./components/SessionList";
+import { CreateSessionForm } from "./components/CreateSessionForm";
 
 export default function SessionsPage() {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-
   const { data: sessions, isLoading } = useQuery({
     queryKey: ['session-templates'],
     queryFn: async () => {
@@ -40,26 +35,9 @@ export default function SessionsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Session Management</h1>
-          <p className="text-muted-foreground">
-            Create and manage mentoring session templates
-          </p>
-        </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Session
-        </Button>
-      </div>
-
+    <div className="space-y-8">
+      <CreateSessionForm />
       <SessionList sessions={sessions || []} />
-
-      <CreateSessionDialog 
-        open={isCreateDialogOpen} 
-        onOpenChange={setIsCreateDialogOpen} 
-      />
     </div>
   );
 }
