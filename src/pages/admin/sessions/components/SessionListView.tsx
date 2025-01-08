@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SessionCard } from "./SessionCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Session } from "../types/session-form";
 
 interface SessionListViewProps {
-  onEditSession: (session: any) => void;
+  onEditSession: (session: Session) => void;
 }
 
 export function SessionListView({ onEditSession }: SessionListViewProps) {
@@ -50,7 +51,7 @@ export function SessionListView({ onEditSession }: SessionListViewProps) {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Session[];
     },
   });
 
@@ -109,7 +110,14 @@ export function SessionListView({ onEditSession }: SessionListViewProps) {
             <SessionCard 
               key={session.id} 
               session={session}
-              onEdit={onEditSession}
+              onEdit={() => onEditSession({
+                ...session,
+                time_slots: session.session_availabilities?.map(avail => ({
+                  day: avail.day_of_week,
+                  startTime: avail.start_time,
+                  endTime: avail.end_time
+                })) || []
+              })}
             />
           ))}
         </div>

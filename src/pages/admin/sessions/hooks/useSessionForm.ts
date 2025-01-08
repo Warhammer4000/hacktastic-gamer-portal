@@ -8,16 +8,31 @@ export function useSessionForm(sessionToEdit?: Session) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const defaultValues: SessionFormValues = sessionToEdit ? {
+    name: sessionToEdit.name,
+    description: sessionToEdit.description,
+    duration: sessionToEdit.duration,
+    tech_stack_id: sessionToEdit.tech_stack_id,
+    max_slots_per_mentor: sessionToEdit.max_slots_per_mentor,
+    start_date: new Date(sessionToEdit.start_date),
+    end_date: new Date(sessionToEdit.end_date),
+    time_slots: sessionToEdit.session_availabilities?.map(avail => ({
+      day: avail.day_of_week,
+      startTime: avail.start_time,
+      endTime: avail.end_time
+    })) || []
+  } : {
+    name: "",
+    description: "",
+    duration: 30,
+    max_slots_per_mentor: 1,
+    start_date: new Date(),
+    end_date: new Date(),
+    time_slots: [],
+  };
+
   const form = useForm<SessionFormValues>({
-    defaultValues: sessionToEdit || {
-      name: "",
-      description: "",
-      duration: 30,
-      max_slots_per_mentor: 1,
-      start_date: new Date(),
-      end_date: new Date(),
-      time_slots: [],
-    },
+    defaultValues
   });
 
   const createSession = useMutation({
