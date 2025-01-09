@@ -16,10 +16,12 @@ export function TimeSlotField({ form }: TimeSlotFieldProps) {
         // Initialize slots for all days if not already set
         const initializedSlots = field.value?.map(slot => ({
           day: slot.day,
+          slotIndex: slot.slotIndex,
           startTime: slot.startTime,
           endTime: slot.endTime
         })) || Array.from({ length: 7 }, (_, i) => ({
           day: i,
+          slotIndex: 0,  // Initialize with default slot index
           startTime: null,
           endTime: null
         }));
