@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Clock } from "lucide-react";
+import type { Session } from "@/pages/admin/sessions/types/session-form";
 
 export default function MentorSessionBookingPage() {
   const { sessionId } = useParams();
@@ -18,14 +19,15 @@ export default function MentorSessionBookingPage() {
   const [selectedDate, setSelectedDate] = useState<Date>();
 
   // Query for session details
-  const { data: session } = useQuery({
+  const { data: session } = useQuery<Session>({
     queryKey: ['session-template', sessionId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('session_templates')
         .select(`
           *,
-          technology_stacks (*)
+          technology_stacks (*),
+          session_availabilities (*)
         `)
         .eq('id', sessionId)
         .single();
@@ -142,7 +144,7 @@ export default function MentorSessionBookingPage() {
 
   // Calculate available dates based on session template and existing bookings
   const availableDates = useMemo(() => {
-    if (!session || !availabilities) return [];
+    if (!session || !session.session_availabilities) return [];
 
     const startDate = parseISO(session.start_date);
     const endDate = parseISO(session.end_date);
@@ -159,14 +161,14 @@ export default function MentorSessionBookingPage() {
     }
 
     return dates;
-  }, [session, availabilities]);
+  }, [session]);
 
   // Reset selected date when session changes
   useEffect(() => {
     setSelectedDate(undefined);
   }, [sessionId]);
 
-  if (!session || !availabilities) {
+  if (!session || !session.session_availabilities) {
     return <div>Loading...</div>;
   }
 
