@@ -4,7 +4,8 @@ import {
   User, 
   Settings, 
   Gift, 
-  Users 
+  Users,
+  Calendar
 } from "lucide-react";
 import { MentorNavigationItem } from "./navigation/MentorNavigationItem";
 import { LogoutButton } from "./navigation/LogoutButton";
@@ -52,6 +53,13 @@ export default function MentorNavigation() {
           to="/mentor/messages" 
           icon={MessageSquare}
           label="Messages"
+          isActive={false}
+          isDisabled={false}
+        />
+        <MentorNavigationItem 
+          to="/mentor/sessions" 
+          icon={Calendar}
+          label="Sessions"
           isActive={false}
           isDisabled={false}
         />
