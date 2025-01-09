@@ -25,7 +25,7 @@ export function useSessionForm() {
   const createSession = useMutation({
     mutationFn: async (values: SessionFormValues) => {
       console.log('Creating session with values:', values);
-      // First create session template and wait for the response
+      
       const { data: sessionTemplate, error: sessionError } = await supabase
         .from("session_templates")
         .insert([{
@@ -45,13 +45,13 @@ export function useSessionForm() {
 
       console.log('Created session template:', sessionTemplate);
 
-      // Then create availabilities using the session template id
       const availabilityPromises = values.time_slots.map(slot =>
         supabase
           .from("session_availabilities")
           .insert({
             session_template_id: sessionTemplate.id,
             day_of_week: slot.day,
+            slot_index: slot.slotIndex,
             start_time: slot.startTime,
             end_time: slot.endTime,
           })
@@ -75,7 +75,6 @@ export function useSessionForm() {
       console.log('Updating session with id:', id);
       console.log('Update values:', values);
       
-      // First update session template
       const { error: sessionError } = await supabase
         .from("session_templates")
         .update({
@@ -91,7 +90,6 @@ export function useSessionForm() {
 
       if (sessionError) throw sessionError;
 
-      // Delete existing availabilities
       const { error: deleteError } = await supabase
         .from("session_availabilities")
         .delete()
@@ -100,13 +98,14 @@ export function useSessionForm() {
       if (deleteError) throw deleteError;
 
       console.log('Creating new availabilities for session:', id);
-      // Create new availabilities
+      
       const availabilityPromises = values.time_slots.map(slot =>
         supabase
           .from("session_availabilities")
           .insert({
             session_template_id: id,
             day_of_week: slot.day,
+            slot_index: slot.slotIndex,
             start_time: slot.startTime,
             end_time: slot.endTime,
           })

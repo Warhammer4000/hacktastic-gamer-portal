@@ -1,13 +1,17 @@
 import { z } from "zod";
 
 export interface TimeSlot {
+  id?: string;
   day: number;
+  slotIndex: number;
   startTime: string | null;
   endTime: string | null;
 }
 
 export const timeSlotSchema = z.object({
+  id: z.string().optional(),
   day: z.number(),
+  slotIndex: z.number(),
   startTime: z.string().nullable(),
   endTime: z.string().nullable()
 });
@@ -45,6 +49,7 @@ export interface Session {
   session_availabilities?: Array<{
     id: string;
     day_of_week: number;
+    slot_index: number;
     start_time: string | null;
     end_time: string | null;
   }>;

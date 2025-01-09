@@ -21,30 +21,18 @@ export function SessionForm({ sessionToEdit, onComplete }: SessionFormProps) {
     if (sessionToEdit) {
       console.log('Setting form values for editing:', sessionToEdit);
       
-      // Convert ISO date strings to Date objects
       const startDate = new Date(sessionToEdit.start_date);
       const endDate = new Date(sessionToEdit.end_date);
 
-      // Map session availabilities to time slots format
       const timeSlots = sessionToEdit.session_availabilities?.map(avail => ({
+        id: avail.id,
         day: avail.day_of_week,
+        slotIndex: avail.slot_index,
         startTime: avail.start_time,
         endTime: avail.end_time
       })) || [];
 
       form.reset({
-        name: sessionToEdit.name,
-        description: sessionToEdit.description,
-        duration: sessionToEdit.duration,
-        tech_stack_id: sessionToEdit.tech_stack_id,
-        max_slots_per_mentor: sessionToEdit.max_slots_per_mentor,
-        start_date: startDate,
-        end_date: endDate,
-        time_slots: timeSlots
-      });
-
-      // Log the reset values for debugging
-      console.log('Form reset with values:', {
         name: sessionToEdit.name,
         description: sessionToEdit.description,
         duration: sessionToEdit.duration,

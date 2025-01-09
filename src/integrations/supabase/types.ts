@@ -708,6 +708,7 @@ export type Database = {
           end_time: string | null
           id: string
           session_template_id: string | null
+          slot_index: number
           start_time: string | null
           updated_at: string
         }
@@ -717,6 +718,7 @@ export type Database = {
           end_time?: string | null
           id?: string
           session_template_id?: string | null
+          slot_index: number
           start_time?: string | null
           updated_at?: string
         }
@@ -726,6 +728,7 @@ export type Database = {
           end_time?: string | null
           id?: string
           session_template_id?: string | null
+          slot_index?: number
           start_time?: string | null
           updated_at?: string
         }

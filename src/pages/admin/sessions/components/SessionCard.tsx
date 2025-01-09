@@ -13,6 +13,16 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session, onEdit }: SessionCardProps) {
+  // Group availabilities by day
+  const availabilitiesByDay = session.session_availabilities?.reduce((acc, availability) => {
+    const day = availability.day_of_week;
+    if (!acc[day]) {
+      acc[day] = [];
+    }
+    acc[day].push(availability);
+    return acc;
+  }, {} as Record<number, typeof session.session_availabilities>);
+
   return (
     <Card>
       <CardHeader>
@@ -34,9 +44,16 @@ export function SessionCard({ session, onEdit }: SessionCardProps) {
         )}
         <div className="mt-4 space-y-2">
           <p className="text-sm font-medium">Available Times:</p>
-          {session.session_availabilities?.map((availability) => (
-            <div key={availability.id} className="text-sm text-muted-foreground">
-              {DAYS[availability.day_of_week]}: {availability.start_time} - {availability.end_time}
+          {Object.entries(availabilitiesByDay || {}).map(([day, slots]) => (
+            <div key={day} className="text-sm text-muted-foreground">
+              <div className="font-medium">{DAYS[parseInt(day)]}</div>
+              <div className="ml-4 space-y-1">
+                {slots?.sort((a, b) => a.slot_index - b.slot_index).map((slot) => (
+                  <div key={slot.id}>
+                    {slot.start_time} - {slot.end_time}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
