@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { SessionTemplate, SessionAvailability, SessionBooking } from "../types/booking";
+import { format } from "date-fns";
 
 export function useSessionBooking(sessionId: string | undefined) {
   const navigate = useNavigate();
@@ -65,7 +66,8 @@ export function useSessionBooking(sessionId: string | undefined) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
+      // Start a transaction using the REST API
+      const { data: booking, error: bookingError } = await supabase
         .from('session_bookings')
         .insert([
           {
@@ -79,8 +81,31 @@ export function useSessionBooking(sessionId: string | undefined) {
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (bookingError) throw bookingError;
+
+      // Get the availability details for the event timing
+      const availability = availabilities?.find(a => a.id === availabilityId);
+      if (!availability) throw new Error('Availability not found');
+
+      // Create corresponding event
+      const { error: eventError } = await supabase
+        .from('events')
+        .insert([
+          {
+            title: session?.name,
+            description: session?.description,
+            tech_stacks: session?.tech_stack_id ? [session.tech_stack_id] : [],
+            roles: ['participant'],
+            start_time: `${bookingDate}T${availability.start_time}`,
+            end_time: `${bookingDate}T${availability.end_time}`,
+            status: 'published',
+            created_by: user.id
+          }
+        ]);
+
+      if (eventError) throw eventError;
+
+      return booking;
     },
     onSuccess: () => {
       toast({
