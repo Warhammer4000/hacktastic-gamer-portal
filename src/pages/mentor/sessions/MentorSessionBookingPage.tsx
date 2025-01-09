@@ -1,118 +1,33 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, isAfter, isBefore, parseISO, startOfToday } from "date-fns";
+import { useParams } from "react-router-dom";
+import { format, isAfter, isBefore, startOfToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { SessionHeader } from "./components/SessionHeader";
 import { TimeSlotSelector } from "./components/TimeSlotSelector";
 import { BookingConfirmationDialog } from "./components/BookingConfirmationDialog";
+import { useSessionBooking } from "./hooks/useSessionBooking";
 
 export default function MentorSessionBookingPage() {
   const { sessionId } = useParams();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  // Query for session details
-  const { data: session, isError: isSessionError } = useQuery({
-    queryKey: ['session-template', sessionId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('session_templates')
-        .select(`
-          *,
-          technology_stacks (*)
-        `)
-        .eq('id', sessionId)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (!data) throw new Error('Session not found');
-      return data;
-    },
-  });
-
-  // Query for session availabilities
-  const { data: availabilities } = useQuery({
-    queryKey: ['session-availabilities', sessionId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('session_availabilities')
-        .select('*')
-        .eq('session_template_id', sessionId);
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!session,
-  });
-
-  // Query for existing bookings
-  const { data: bookings } = useQuery({
-    queryKey: ['session-bookings', sessionId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('session_bookings')
-        .select('*')
-        .eq('session_template_id', sessionId)
-        .eq('status', 'confirmed');
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!session,
-  });
-
-  // Mutation for booking a slot
-  const bookSlotMutation = useMutation({
-    mutationFn: async ({ availabilityId, bookingDate }: { availabilityId: string, bookingDate: string }) => {
-      const { data, error } = await supabase
-        .from('session_bookings')
-        .insert([
-          {
-            session_template_id: sessionId,
-            availability_id: availabilityId,
-            booking_date: bookingDate,
-            mentor_id: session?.mentor_id,
-            status: 'confirmed'
-          }
-        ])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Session booked successfully!",
-      });
-      queryClient.invalidateQueries({ queryKey: ['session-bookings'] });
-      navigate('/mentor/sessions');
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to book session. Please try again.",
-        variant: "destructive",
-      });
-      console.error('Booking error:', error);
-    },
-  });
+  const {
+    session,
+    isSessionError,
+    availabilities,
+    bookings,
+    bookSlotMutation
+  } = useSessionBooking(sessionId);
 
   // Calculate available dates based on session template and existing bookings
   const availableDates = useMemo(() => {
     if (!session || !availabilities) return [];
 
-    const startDate = parseISO(session.start_date);
-    const endDate = parseISO(session.end_date);
+    const startDate = new Date(session.start_date);
+    const endDate = new Date(session.end_date);
     const today = startOfToday();
 
     // Get unique days of the week that have availabilities
@@ -123,8 +38,6 @@ export default function MentorSessionBookingPage() {
     const dates = [];
     let currentDate = startDate;
     while (!isAfter(currentDate, endDate)) {
-      // Convert JS day (0 = Sunday) to match our database day (0 = Sunday)
-      // No conversion needed since they match
       if (!isBefore(currentDate, today) && availableDays.has(currentDate.getDay())) {
         dates.push(currentDate);
       }
@@ -137,8 +50,6 @@ export default function MentorSessionBookingPage() {
   // Get available slots for selected date
   const availableSlotsForDate = useMemo(() => {
     if (!selectedDate || !availabilities) return [];
-    // Convert JS day (0 = Sunday) to match our database day (0 = Sunday)
-    // No conversion needed since they match
     const dayOfWeek = selectedDate.getDay();
     return availabilities.filter(slot => slot.day_of_week === dayOfWeek);
   }, [selectedDate, availabilities]);
