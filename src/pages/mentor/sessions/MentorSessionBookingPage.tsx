@@ -18,7 +18,7 @@ export default function MentorSessionBookingPage() {
   const [selectedDate, setSelectedDate] = useState<Date>();
 
   // Query for session details
-  const { data: session } = useQuery({
+  const { data: session, isError: isSessionError } = useQuery({
     queryKey: ['session-template', sessionId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -28,9 +28,10 @@ export default function MentorSessionBookingPage() {
           technology_stacks (*)
         `)
         .eq('id', sessionId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Session not found');
       return data;
     },
   });
@@ -47,6 +48,7 @@ export default function MentorSessionBookingPage() {
       if (error) throw error;
       return data;
     },
+    enabled: !!session,
   });
 
   // Query for existing bookings
@@ -62,6 +64,7 @@ export default function MentorSessionBookingPage() {
       if (error) throw error;
       return data;
     },
+    enabled: !!session,
   });
 
   // Mutation for booking a slot
@@ -96,7 +99,7 @@ export default function MentorSessionBookingPage() {
       }
 
       // 2. Create the corresponding event
-      const slot = session?.session_availabilities?.find(s => s.id === availabilityId);
+      const slot = availabilities?.find(s => s.id === availabilityId);
       if (!slot) throw new Error('Invalid slot');
 
       const startTime = new Date(`${bookingDate}T${slot.start_time}`);
@@ -165,6 +168,24 @@ export default function MentorSessionBookingPage() {
   useEffect(() => {
     setSelectedDate(undefined);
   }, [sessionId]);
+
+  if (isSessionError) {
+    return (
+      <div className="container mx-auto py-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Error</CardTitle>
+            <CardDescription>Session not found or has been removed.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => navigate('/mentor/sessions')}>
+              Back to Sessions
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!session || !availabilities) {
     return <div>Loading...</div>;
