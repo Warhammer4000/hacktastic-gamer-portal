@@ -1,14 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, isAfter, isBefore, parseISO, startOfToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Clock } from "lucide-react";
+import { SessionHeader } from "./components/SessionHeader";
+import { TimeSlotSelector } from "./components/TimeSlotSelector";
+import { BookingConfirmationDialog } from "./components/BookingConfirmationDialog";
 
 export default function MentorSessionBookingPage() {
   const { sessionId } = useParams();
@@ -16,6 +16,8 @@ export default function MentorSessionBookingPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedSlotId, setSelectedSlotId] = useState<string>();
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // Query for session details
   const { data: session, isError: isSessionError } = useQuery({
@@ -69,17 +71,11 @@ export default function MentorSessionBookingPage() {
 
   // Mutation for booking a slot
   const bookSlotMutation = useMutation({
-    mutationFn: async ({ 
-      availabilityId, 
-      bookingDate 
-    }: { 
-      availabilityId: string, 
-      bookingDate: string 
-    }) => {
+    mutationFn: async ({ availabilityId, bookingDate }: { availabilityId: string, bookingDate: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Start a transaction by using single requests (Supabase doesn't support true transactions)
+      // Start a transaction by using single requests
       // 1. Create the booking
       const { data: booking, error: bookingError } = await supabase
         .from('session_bookings')
@@ -120,7 +116,7 @@ export default function MentorSessionBookingPage() {
 
       if (eventError) {
         console.error('Event creation error:', eventError);
-        // Don't throw here - we still want to keep the booking
+        throw new Error('Failed to create event');
       }
 
       return booking;
@@ -151,11 +147,14 @@ export default function MentorSessionBookingPage() {
     const endDate = parseISO(session.end_date);
     const today = startOfToday();
 
-    // Filter out dates that are before today or after end date
+    // Get unique days of the week that have availabilities
+    const availableDays = new Set(availabilities.map(a => a.day_of_week));
+
+    // Filter dates that have availabilities
     const dates = [];
     let currentDate = startDate;
     while (!isAfter(currentDate, endDate)) {
-      if (!isBefore(currentDate, today)) {
+      if (!isBefore(currentDate, today) && availableDays.has(currentDate.getDay())) {
         dates.push(currentDate);
       }
       currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
@@ -164,23 +163,48 @@ export default function MentorSessionBookingPage() {
     return dates;
   }, [session, availabilities]);
 
+  // Get available slots for selected date
+  const availableSlotsForDate = useMemo(() => {
+    if (!selectedDate || !availabilities) return [];
+    return availabilities.filter(slot => slot.day_of_week === selectedDate.getDay());
+  }, [selectedDate, availabilities]);
+
+  const isSlotBooked = (slotId: string) => {
+    if (!selectedDate || !bookings) return false;
+    return bookings.some(
+      booking =>
+        booking.availability_id === slotId &&
+        booking.booking_date === format(selectedDate, 'yyyy-MM-dd')
+    );
+  };
+
+  const handleSlotSelect = (slotId: string) => {
+    setSelectedSlotId(slotId);
+    setShowConfirmation(true);
+  };
+
+  const handleBookingConfirm = () => {
+    if (!selectedDate || !selectedSlotId) return;
+    
+    bookSlotMutation.mutate({
+      availabilityId: selectedSlotId,
+      bookingDate: format(selectedDate, 'yyyy-MM-dd')
+    });
+  };
+
   // Reset selected date when session changes
   useEffect(() => {
     setSelectedDate(undefined);
+    setSelectedSlotId(undefined);
+    setShowConfirmation(false);
   }, [sessionId]);
 
   if (isSessionError) {
     return (
       <div className="container mx-auto py-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Error</CardTitle>
-            <CardDescription>Session not found or has been removed.</CardDescription>
-          </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate('/mentor/sessions')}>
-              Back to Sessions
-            </Button>
+            <p>Session not found or has been removed.</p>
           </CardContent>
         </Card>
       </div>
@@ -191,34 +215,13 @@ export default function MentorSessionBookingPage() {
     return <div>Loading...</div>;
   }
 
-  const handleBookSlot = (availabilityId: string) => {
-    if (!selectedDate) return;
-    
-    bookSlotMutation.mutate({
-      availabilityId,
-      bookingDate: format(selectedDate, 'yyyy-MM-dd')
-    });
-  };
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-start gap-6">
         <div className="flex-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>{session.name}</CardTitle>
-              <CardDescription>{session.description}</CardDescription>
-              <div className="flex items-center gap-2 mt-2">
-                <Clock className="h-4 w-4" />
-                <span className="text-sm text-muted-foreground">
-                  {session.duration} minutes per session
-                </span>
-                {session.technology_stacks && (
-                  <Badge variant="outline">{session.technology_stacks.name}</Badge>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
+          <SessionHeader session={session} />
+          <Card className="mt-6">
+            <CardContent className="pt-6">
               <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -235,42 +238,24 @@ export default function MentorSessionBookingPage() {
         </div>
 
         <div className="w-[300px]">
-          <Card>
-            <CardHeader>
-              <CardTitle>Available Slots</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {!selectedDate ? (
-                <p className="text-sm text-muted-foreground">
-                  Select a date to see available slots
-                </p>
-              ) : (
-                availabilities.map((slot) => {
-                  const isBooked = bookings?.some(
-                    booking =>
-                      booking.availability_id === slot.id &&
-                      booking.booking_date === format(selectedDate, 'yyyy-MM-dd')
-                  );
-
-                  return (
-                    <Button
-                      key={slot.id}
-                      variant="outline"
-                      className="w-full justify-start"
-                      disabled={isBooked || bookSlotMutation.isPending}
-                      onClick={() => handleBookSlot(slot.id)}
-                    >
-                      {format(parseISO(`2000-01-01T${slot.start_time}`), 'h:mm a')} -{' '}
-                      {format(parseISO(`2000-01-01T${slot.end_time}`), 'h:mm a')}
-                      {isBooked && <span className="ml-2 text-muted-foreground">(Booked)</span>}
-                    </Button>
-                  );
-                })
-              )}
-            </CardContent>
-          </Card>
+          <TimeSlotSelector
+            availableSlots={availableSlotsForDate}
+            selectedDate={selectedDate}
+            isSlotBooked={isSlotBooked}
+            onSelectSlot={handleSlotSelect}
+            isPending={bookSlotMutation.isPending}
+          />
         </div>
       </div>
+
+      <BookingConfirmationDialog
+        isOpen={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+        onConfirm={handleBookingConfirm}
+        selectedDate={selectedDate}
+        selectedSlot={availabilities.find(s => s.id === selectedSlotId)}
+        isPending={bookSlotMutation.isPending}
+      />
     </div>
   );
 }
