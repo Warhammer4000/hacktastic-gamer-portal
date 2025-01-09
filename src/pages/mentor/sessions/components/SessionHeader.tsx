@@ -1,6 +1,8 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Session {
   id: string;
@@ -26,20 +28,39 @@ interface SessionHeaderProps {
 }
 
 export function SessionHeader({ session }: SessionHeaderProps) {
+  const navigate = useNavigate();
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{session.name}</CardTitle>
-        <div className="flex items-center gap-2 mt-2">
-          <Clock className="h-4 w-4" />
-          <span className="text-sm text-muted-foreground">
-            {session.duration} minutes per session
-          </span>
-          {session.technology_stacks && (
-            <Badge variant="outline">{session.technology_stacks.name}</Badge>
-          )}
-        </div>
-      </CardHeader>
-    </Card>
+    <div className="space-y-4">
+      <Button
+        variant="outline"
+        className="mb-4"
+        onClick={() => navigate('/mentor/sessions')}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Sessions
+      </Button>
+      
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-2xl">{session.name}</CardTitle>
+              <CardDescription className="mt-2">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <span>{session.duration} minutes per session</span>
+                </div>
+              </CardDescription>
+            </div>
+            {session.technology_stacks && (
+              <Badge variant="secondary">
+                {session.technology_stacks.name}
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+      </Card>
+    </div>
   );
 }

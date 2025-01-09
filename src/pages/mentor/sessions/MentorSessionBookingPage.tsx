@@ -69,76 +69,6 @@ export default function MentorSessionBookingPage() {
     enabled: !!session,
   });
 
-  // Mutation for booking a slot
-  const bookSlotMutation = useMutation({
-    mutationFn: async ({ availabilityId, bookingDate }: { availabilityId: string, bookingDate: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      // Start a transaction by using single requests
-      // 1. Create the booking
-      const { data: booking, error: bookingError } = await supabase
-        .from('session_bookings')
-        .insert({
-          session_template_id: sessionId,
-          mentor_id: user.id,
-          availability_id: availabilityId,
-          booking_date: bookingDate,
-          status: 'confirmed'
-        })
-        .select()
-        .single();
-
-      if (bookingError) {
-        console.error('Booking error:', bookingError);
-        throw new Error('Failed to create booking');
-      }
-
-      // 2. Create the corresponding event
-      const slot = availabilities?.find(s => s.id === availabilityId);
-      if (!slot) throw new Error('Invalid slot');
-
-      const startTime = new Date(`${bookingDate}T${slot.start_time}`);
-      const endTime = new Date(`${bookingDate}T${slot.end_time}`);
-
-      const { error: eventError } = await supabase
-        .from('events')
-        .insert({
-          title: `${session?.name} Session`,
-          description: session?.description,
-          tech_stacks: session?.tech_stack_id ? [session.tech_stack_id] : [],
-          roles: ['mentor'],
-          start_time: startTime.toISOString(),
-          end_time: endTime.toISOString(),
-          status: 'published',
-          created_by: user.id
-        });
-
-      if (eventError) {
-        console.error('Event creation error:', eventError);
-        throw new Error('Failed to create event');
-      }
-
-      return booking;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Session booked successfully!",
-        description: "An event has been created in your calendar.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['session-bookings'] });
-      navigate('/mentor/sessions');
-    },
-    onError: (error) => {
-      console.error('Booking error:', error);
-      toast({
-        title: "Failed to book session",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
   // Calculate available dates based on session template and existing bookings
   const availableDates = useMemo(() => {
     if (!session || !availabilities) return [];
@@ -148,12 +78,16 @@ export default function MentorSessionBookingPage() {
     const today = startOfToday();
 
     // Get unique days of the week that have availabilities
+    // Note: day_of_week in database is 0-6 where 0 is Sunday
+    // We need to match this with the calendar's expectation
     const availableDays = new Set(availabilities.map(a => a.day_of_week));
 
     // Filter dates that have availabilities
     const dates = [];
     let currentDate = startDate;
     while (!isAfter(currentDate, endDate)) {
+      // Convert JS day (0 = Sunday) to match our database day (0 = Sunday)
+      // No conversion needed since they match
       if (!isBefore(currentDate, today) && availableDays.has(currentDate.getDay())) {
         dates.push(currentDate);
       }
@@ -166,7 +100,10 @@ export default function MentorSessionBookingPage() {
   // Get available slots for selected date
   const availableSlotsForDate = useMemo(() => {
     if (!selectedDate || !availabilities) return [];
-    return availabilities.filter(slot => slot.day_of_week === selectedDate.getDay());
+    // Convert JS day (0 = Sunday) to match our database day (0 = Sunday)
+    // No conversion needed since they match
+    const dayOfWeek = selectedDate.getDay();
+    return availabilities.filter(slot => slot.day_of_week === dayOfWeek);
   }, [selectedDate, availabilities]);
 
   const isSlotBooked = (slotId: string) => {
