@@ -30,8 +30,8 @@ export default function MentorSessionsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Get sessions that either match mentor's tech stacks or have no tech stack
-      const { data, error } = await supabase
+      // First get all sessions
+      const { data: allSessions, error: sessionsError } = await supabase
         .from('session_templates')
         .select(`
           *,
@@ -42,8 +42,26 @@ export default function MentorSessionsPage() {
         .or(`tech_stack_id.in.(${mentorTechStacks?.join(',')}),tech_stack_id.is.null`)
         .gte('end_date', new Date().toISOString());
 
-      if (error) throw error;
-      return data;
+      if (sessionsError) throw sessionsError;
+
+      // Get mentor's bookings for these sessions
+      const { data: bookings, error: bookingsError } = await supabase
+        .from('session_bookings')
+        .select('session_template_id, id')
+        .eq('mentor_id', user.id)
+        .eq('status', 'confirmed');
+
+      if (bookingsError) throw bookingsError;
+
+      // Filter out sessions where mentor has reached max slots
+      const bookingCounts = bookings?.reduce((acc: Record<string, number>, booking) => {
+        acc[booking.session_template_id] = (acc[booking.session_template_id] || 0) + 1;
+        return acc;
+      }, {});
+
+      return allSessions.filter(session => 
+        !bookingCounts[session.id] || bookingCounts[session.id] < session.max_slots_per_mentor
+      );
     },
     enabled: !!mentorTechStacks,
   });

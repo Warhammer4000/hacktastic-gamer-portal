@@ -9,7 +9,6 @@ interface SessionCardProps {
   session: {
     id: string;
     name: string;
-    description: string;
     duration: number;
     start_date: string;
     end_date: string;
@@ -33,7 +32,6 @@ export function SessionCard({ session }: SessionCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">{session.description}</p>
         <div className="flex items-center text-sm text-muted-foreground">
           <Clock className="mr-2 h-4 w-4" />
           {session.duration} minutes per session

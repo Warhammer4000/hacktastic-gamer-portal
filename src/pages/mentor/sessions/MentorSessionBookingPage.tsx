@@ -1,29 +1,31 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { format, isAfter, isBefore, parseISO, startOfToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Clock } from "lucide-react";
 
 export default function MentorSessionBookingPage() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = useState<Date>();
 
-  // Fetch session details
+  // Query for session details
   const { data: session } = useQuery({
-    queryKey: ['session-details', sessionId],
+    queryKey: ['session-template', sessionId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('session_templates')
         .select(`
           *,
-          technology_stacks (*),
-          session_availabilities (*)
+          technology_stacks (*)
         `)
         .eq('id', sessionId)
         .single();
@@ -33,9 +35,23 @@ export default function MentorSessionBookingPage() {
     },
   });
 
-  // Fetch existing bookings for this session
-  const { data: existingBookings } = useQuery({
-    queryKey: ['session-bookings', sessionId, selectedDate?.toISOString()],
+  // Query for session availabilities
+  const { data: availabilities } = useQuery({
+    queryKey: ['session-availabilities', sessionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('session_availabilities')
+        .select('*')
+        .eq('session_template_id', sessionId);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Query for existing bookings
+  const { data: bookings } = useQuery({
+    queryKey: ['session-bookings', sessionId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('session_bookings')
@@ -46,7 +62,6 @@ export default function MentorSessionBookingPage() {
       if (error) throw error;
       return data;
     },
-    enabled: !!sessionId,
   });
 
   // Mutation for booking a slot
@@ -61,7 +76,9 @@ export default function MentorSessionBookingPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
+      // Start a transaction by using single requests (Supabase doesn't support true transactions)
+      // 1. Create the booking
+      const { data: booking, error: bookingError } = await supabase
         .from('session_bookings')
         .insert({
           session_template_id: sessionId,
@@ -73,100 +90,165 @@ export default function MentorSessionBookingPage() {
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (bookingError) {
+        console.error('Booking error:', bookingError);
+        throw new Error('Failed to create booking');
+      }
+
+      // 2. Create the corresponding event
+      const slot = session?.session_availabilities?.find(s => s.id === availabilityId);
+      if (!slot) throw new Error('Invalid slot');
+
+      const startTime = new Date(`${bookingDate}T${slot.start_time}`);
+      const endTime = new Date(`${bookingDate}T${slot.end_time}`);
+
+      const { error: eventError } = await supabase
+        .from('events')
+        .insert({
+          title: `${session?.name} Session`,
+          description: session?.description,
+          tech_stacks: session?.tech_stack_id ? [session.tech_stack_id] : [],
+          roles: ['mentor'],
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          status: 'published',
+          created_by: user.id
+        });
+
+      if (eventError) {
+        console.error('Event creation error:', eventError);
+        // Don't throw here - we still want to keep the booking
+      }
+
+      return booking;
     },
     onSuccess: () => {
-      toast.success("Session booked successfully!");
+      toast({
+        title: "Session booked successfully!",
+        description: "An event has been created in your calendar.",
+      });
       queryClient.invalidateQueries({ queryKey: ['session-bookings'] });
       navigate('/mentor/sessions');
     },
     onError: (error) => {
-      toast.error("Failed to book session: " + error.message);
+      console.error('Booking error:', error);
+      toast({
+        title: "Failed to book session",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   });
 
-  const availableTimeSlots = session?.session_availabilities?.filter(slot => {
-    if (!selectedDate) return false;
-    
-    // Check if the slot is for the selected day of week
-    const dayOfWeek = selectedDate.getDay();
-    if (slot.day_of_week !== dayOfWeek) return false;
+  // Calculate available dates based on session template and existing bookings
+  const availableDates = useMemo(() => {
+    if (!session || !availabilities) return [];
 
-    // Check if this slot is already booked for this date
-    const isBooked = existingBookings?.some(
-      booking => 
-        booking.availability_id === slot.id && 
-        booking.booking_date === selectedDate.toISOString().split('T')[0]
-    );
+    const startDate = parseISO(session.start_date);
+    const endDate = parseISO(session.end_date);
+    const today = startOfToday();
 
-    return !isBooked;
-  }) || [];
+    // Filter out dates that are before today or after end date
+    const dates = [];
+    let currentDate = startDate;
+    while (!isAfter(currentDate, endDate)) {
+      if (!isBefore(currentDate, today)) {
+        dates.push(currentDate);
+      }
+      currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
+    }
 
-  const handleBookSlot = async (slotId: string) => {
+    return dates;
+  }, [session, availabilities]);
+
+  // Reset selected date when session changes
+  useEffect(() => {
+    setSelectedDate(undefined);
+  }, [sessionId]);
+
+  if (!session || !availabilities) {
+    return <div>Loading...</div>;
+  }
+
+  const handleBookSlot = (availabilityId: string) => {
     if (!selectedDate) return;
-
+    
     bookSlotMutation.mutate({
-      availabilityId: slotId,
-      bookingDate: selectedDate.toISOString().split('T')[0]
+      availabilityId,
+      bookingDate: format(selectedDate, 'yyyy-MM-dd')
     });
   };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <h1 className="text-2xl font-bold">{session?.name}</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Select Date</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              disabled={(date) => {
-                // Disable dates outside the session range
-                return (
-                  date < new Date(session?.start_date || '') ||
-                  date > new Date(session?.end_date || '') ||
-                  // Disable dates that don't have any available slots
-                  !session?.session_availabilities?.some(
-                    slot => slot.day_of_week === date.getDay()
-                  )
-                );
-              }}
-            />
-          </CardContent>
-        </Card>
-
-        {selectedDate && (
+      <div className="flex items-start gap-6">
+        <div className="flex-1">
           <Card>
             <CardHeader>
-              <CardTitle>Available Time Slots</CardTitle>
+              <CardTitle>{session.name}</CardTitle>
+              <CardDescription>{session.description}</CardDescription>
+              <div className="flex items-center gap-2 mt-2">
+                <Clock className="h-4 w-4" />
+                <span className="text-sm text-muted-foreground">
+                  {session.duration} minutes per session
+                </span>
+                {session.technology_stacks && (
+                  <Badge variant="outline">{session.technology_stacks.name}</Badge>
+                )}
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {availableTimeSlots.map((slot) => (
-                <Button
-                  key={slot.id}
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => handleBookSlot(slot.id)}
-                  disabled={bookSlotMutation.isPending}
-                >
-                  {format(new Date(`2000-01-01T${slot.start_time}`), 'h:mm a')} - 
-                  {format(new Date(`2000-01-01T${slot.end_time}`), 'h:mm a')}
-                </Button>
-              ))}
-              {availableTimeSlots.length === 0 && (
-                <p className="text-muted-foreground text-center">
-                  No available time slots for this date
+            <CardContent>
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                disabled={(date) => !availableDates.some(d => 
+                  d.getFullYear() === date.getFullYear() &&
+                  d.getMonth() === date.getMonth() &&
+                  d.getDate() === date.getDate()
+                )}
+                className="rounded-md border"
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="w-[300px]">
+          <Card>
+            <CardHeader>
+              <CardTitle>Available Slots</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {!selectedDate ? (
+                <p className="text-sm text-muted-foreground">
+                  Select a date to see available slots
                 </p>
+              ) : (
+                availabilities.map((slot) => {
+                  const isBooked = bookings?.some(
+                    booking =>
+                      booking.availability_id === slot.id &&
+                      booking.booking_date === format(selectedDate, 'yyyy-MM-dd')
+                  );
+
+                  return (
+                    <Button
+                      key={slot.id}
+                      variant="outline"
+                      className="w-full justify-start"
+                      disabled={isBooked || bookSlotMutation.isPending}
+                      onClick={() => handleBookSlot(slot.id)}
+                    >
+                      {format(parseISO(`2000-01-01T${slot.start_time}`), 'h:mm a')} -{' '}
+                      {format(parseISO(`2000-01-01T${slot.end_time}`), 'h:mm a')}
+                      {isBooked && <span className="ml-2 text-muted-foreground">(Booked)</span>}
+                    </Button>
+                  );
+                })
               )}
             </CardContent>
           </Card>
-        )}
+        </div>
       </div>
     </div>
   );
