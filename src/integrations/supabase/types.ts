@@ -1142,6 +1142,12 @@ export type Database = {
         }
         Returns: string
       }
+      delete_session_template_cascade: {
+        Args: {
+          template_id_input: string
+        }
+        Returns: boolean
+      }
       delete_team_cascade: {
         Args: {
           team_id_input: string

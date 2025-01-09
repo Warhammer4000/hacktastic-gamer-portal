@@ -36,19 +36,13 @@ export function SessionCardActions({ session, onEdit }: SessionCardActionsProps)
 
   const deleteSession = useMutation({
     mutationFn: async () => {
-      // First delete availabilities
-      await supabase
-        .from('session_availabilities')
-        .delete()
-        .eq('session_template_id', session.id);
-
-      // Then delete the session
-      const { error } = await supabase
-        .from('session_templates')
-        .delete()
-        .eq('id', session.id);
+      const { data, error } = await supabase
+        .rpc('delete_session_template_cascade', {
+          template_id_input: session.id
+        });
 
       if (error) throw error;
+      if (!data) throw new Error('Failed to delete session template');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session-templates'] });
