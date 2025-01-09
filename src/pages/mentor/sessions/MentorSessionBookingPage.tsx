@@ -69,6 +69,44 @@ export default function MentorSessionBookingPage() {
     enabled: !!session,
   });
 
+  // Mutation for booking a slot
+  const bookSlotMutation = useMutation({
+    mutationFn: async ({ availabilityId, bookingDate }: { availabilityId: string, bookingDate: string }) => {
+      const { data, error } = await supabase
+        .from('session_bookings')
+        .insert([
+          {
+            session_template_id: sessionId,
+            availability_id: availabilityId,
+            booking_date: bookingDate,
+            mentor_id: session?.mentor_id,
+            status: 'confirmed'
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Session booked successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ['session-bookings'] });
+      navigate('/mentor/sessions');
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to book session. Please try again.",
+        variant: "destructive",
+      });
+      console.error('Booking error:', error);
+    },
+  });
+
   // Calculate available dates based on session template and existing bookings
   const availableDates = useMemo(() => {
     if (!session || !availabilities) return [];
@@ -79,7 +117,6 @@ export default function MentorSessionBookingPage() {
 
     // Get unique days of the week that have availabilities
     // Note: day_of_week in database is 0-6 where 0 is Sunday
-    // We need to match this with the calendar's expectation
     const availableDays = new Set(availabilities.map(a => a.day_of_week));
 
     // Filter dates that have availabilities
