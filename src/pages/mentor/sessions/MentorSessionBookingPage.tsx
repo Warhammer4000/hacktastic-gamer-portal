@@ -39,7 +39,7 @@ export default function MentorSessionBookingPage() {
     let currentDate = startDate;
     while (!isAfter(currentDate, endDate)) {
       if (!isBefore(currentDate, today) && availableDays.has(currentDate.getDay())) {
-        dates.push(currentDate);
+        dates.push(new Date(currentDate));
       }
       currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
     }

@@ -28,6 +28,7 @@ export function useSessionBooking(sessionId: string | undefined) {
       if (!data) throw new Error('Session not found');
       return data as SessionTemplate;
     },
+    retry: false
   });
 
   const { data: availabilities } = useQuery({

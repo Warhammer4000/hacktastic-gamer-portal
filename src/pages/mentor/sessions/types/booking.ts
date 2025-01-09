@@ -3,7 +3,7 @@ export interface SessionTemplate {
   name: string;
   description: string;
   duration: number;
-  tech_stack_id: string;
+  tech_stack_id: string | null;
   start_date: string;
   end_date: string;
   max_slots_per_mentor: number;
@@ -30,5 +30,6 @@ export interface SessionBooking {
   session_template_id: string;
   availability_id: string;
   booking_date: string;
+  mentor_id: string;
   status: 'confirmed';
 }
