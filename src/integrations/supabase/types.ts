@@ -742,6 +742,61 @@ export type Database = {
           },
         ]
       }
+      session_bookings: {
+        Row: {
+          availability_id: string
+          booking_date: string
+          created_at: string
+          id: string
+          mentor_id: string
+          session_template_id: string
+          status: Database["public"]["Enums"]["session_booking_status"]
+          updated_at: string
+        }
+        Insert: {
+          availability_id: string
+          booking_date: string
+          created_at?: string
+          id?: string
+          mentor_id: string
+          session_template_id: string
+          status?: Database["public"]["Enums"]["session_booking_status"]
+          updated_at?: string
+        }
+        Update: {
+          availability_id?: string
+          booking_date?: string
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          session_template_id?: string
+          status?: Database["public"]["Enums"]["session_booking_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_bookings_availability_id_fkey"
+            columns: ["availability_id"]
+            isOneToOne: false
+            referencedRelation: "session_availabilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_bookings_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_bookings_session_template_id_fkey"
+            columns: ["session_template_id"]
+            isOneToOne: false
+            referencedRelation: "session_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_templates: {
         Row: {
           created_at: string
@@ -1110,6 +1165,7 @@ export type Database = {
       partner_status: "active" | "inactive"
       privacy_policy_status: "draft" | "published"
       profile_status: "incomplete" | "pending_approval" | "approved" | "flagged"
+      session_booking_status: "pending" | "confirmed" | "cancelled"
       session_status: "active" | "inactive"
       social_media_platform:
         | "facebook"

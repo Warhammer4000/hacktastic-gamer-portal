@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +10,11 @@ import { toast } from "sonner";
 
 export default function MentorSessionBookingPage() {
   const { sessionId } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
+  // Fetch session details
   const { data: session } = useQuery({
     queryKey: ['session-details', sessionId],
     queryFn: async () => {
@@ -30,13 +33,57 @@ export default function MentorSessionBookingPage() {
     },
   });
 
-  const { data: bookedSlots } = useQuery({
-    queryKey: ['booked-slots', sessionId],
+  // Fetch existing bookings for this session
+  const { data: existingBookings } = useQuery({
+    queryKey: ['session-bookings', sessionId, selectedDate?.toISOString()],
     queryFn: async () => {
-      // Here you would fetch already booked slots from your bookings table
-      // This is a placeholder - implement according to your booking system
-      return [];
+      const { data, error } = await supabase
+        .from('session_bookings')
+        .select('*')
+        .eq('session_template_id', sessionId)
+        .eq('status', 'confirmed');
+
+      if (error) throw error;
+      return data;
     },
+    enabled: !!sessionId,
+  });
+
+  // Mutation for booking a slot
+  const bookSlotMutation = useMutation({
+    mutationFn: async ({ 
+      availabilityId, 
+      bookingDate 
+    }: { 
+      availabilityId: string, 
+      bookingDate: string 
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('session_bookings')
+        .insert({
+          session_template_id: sessionId,
+          mentor_id: user.id,
+          availability_id: availabilityId,
+          booking_date: bookingDate,
+          status: 'confirmed'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Session booked successfully!");
+      queryClient.invalidateQueries({ queryKey: ['session-bookings'] });
+      navigate('/mentor/sessions');
+    },
+    onError: (error) => {
+      toast.error("Failed to book session: " + error.message);
+    }
   });
 
   const availableTimeSlots = session?.session_availabilities?.filter(slot => {
@@ -44,13 +91,25 @@ export default function MentorSessionBookingPage() {
     
     // Check if the slot is for the selected day of week
     const dayOfWeek = selectedDate.getDay();
-    return slot.day_of_week === dayOfWeek;
+    if (slot.day_of_week !== dayOfWeek) return false;
+
+    // Check if this slot is already booked for this date
+    const isBooked = existingBookings?.some(
+      booking => 
+        booking.availability_id === slot.id && 
+        booking.booking_date === selectedDate.toISOString().split('T')[0]
+    );
+
+    return !isBooked;
   }) || [];
 
   const handleBookSlot = async (slotId: string) => {
-    // Here you would implement the booking logic
-    // This is a placeholder - implement according to your booking system
-    toast.success("Session booked successfully!");
+    if (!selectedDate) return;
+
+    bookSlotMutation.mutate({
+      availabilityId: slotId,
+      bookingDate: selectedDate.toISOString().split('T')[0]
+    });
   };
 
   return (
@@ -94,6 +153,7 @@ export default function MentorSessionBookingPage() {
                   variant="outline"
                   className="w-full justify-start"
                   onClick={() => handleBookSlot(slot.id)}
+                  disabled={bookSlotMutation.isPending}
                 >
                   {format(new Date(`2000-01-01T${slot.start_time}`), 'h:mm a')} - 
                   {format(new Date(`2000-01-01T${slot.end_time}`), 'h:mm a')}
