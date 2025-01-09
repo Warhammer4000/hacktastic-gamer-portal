@@ -66,7 +66,11 @@ export function useSessionBooking(sessionId: string | undefined) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Start a transaction using the REST API
+      // Get the availability details for the event timing
+      const availability = availabilities?.find(a => a.id === availabilityId);
+      if (!availability) throw new Error('Availability not found');
+
+      // Create booking
       const { data: booking, error: bookingError } = await supabase
         .from('session_bookings')
         .insert([
@@ -82,10 +86,6 @@ export function useSessionBooking(sessionId: string | undefined) {
         .single();
 
       if (bookingError) throw bookingError;
-
-      // Get the availability details for the event timing
-      const availability = availabilities?.find(a => a.id === availabilityId);
-      if (!availability) throw new Error('Availability not found');
 
       // Create corresponding event
       const { error: eventError } = await supabase
@@ -103,14 +103,21 @@ export function useSessionBooking(sessionId: string | undefined) {
           }
         ]);
 
-      if (eventError) throw eventError;
+      if (eventError) {
+        // If event creation fails, we should delete the booking
+        await supabase
+          .from('session_bookings')
+          .delete()
+          .eq('id', booking.id);
+        throw eventError;
+      }
 
       return booking;
     },
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Session booked successfully!",
+        description: "Session booked successfully and event created!",
       });
       queryClient.invalidateQueries({ queryKey: ['session-bookings'] });
       navigate('/mentor/sessions');
