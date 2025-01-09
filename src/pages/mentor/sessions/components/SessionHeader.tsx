@@ -1,7 +1,25 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock } from "lucide-react";
-import { Session } from "../../admin/sessions/types/session-form";
+
+interface Session {
+  id: string;
+  name: string;
+  description: string;
+  duration: number;
+  tech_stack_id?: string;
+  start_date: string;
+  end_date: string;
+  max_slots_per_mentor: number;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+  technology_stacks?: {
+    id: string;
+    name: string;
+    icon_url: string;
+  };
+}
 
 interface SessionHeaderProps {
   session: Session;

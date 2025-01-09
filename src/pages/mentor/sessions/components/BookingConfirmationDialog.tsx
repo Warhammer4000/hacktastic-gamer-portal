@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 interface BookingConfirmationDialogProps {
   isOpen: boolean;
