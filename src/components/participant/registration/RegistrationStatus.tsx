@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRegistrationSettings } from "@/hooks/useRegistrationSettings";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Home } from "lucide-react";
 
 export function RegistrationStatus({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -70,7 +71,10 @@ export function RegistrationStatus({ children }: { children: React.ReactNode }) 
         <p className="text-muted-foreground mb-6">
           Participant registration is currently not available.
         </p>
-        <Button onClick={() => navigate("/")}>Back to Home</Button>
+        <Button onClick={() => navigate("/")} variant="default">
+          <Home className="mr-2 h-4 w-4" />
+          Back to Home
+        </Button>
       </div>
     );
   }
@@ -83,7 +87,10 @@ export function RegistrationStatus({ children }: { children: React.ReactNode }) 
         <p className="text-muted-foreground mb-6">
           Please check back when registration opens.
         </p>
-        <Button onClick={() => navigate("/")}>Back to Home</Button>
+        <Button onClick={() => navigate("/")} variant="default">
+          <Home className="mr-2 h-4 w-4" />
+          Back to Home
+        </Button>
       </div>
     );
   }
@@ -99,6 +106,12 @@ export function RegistrationStatus({ children }: { children: React.ReactNode }) 
           </div>
         )}
         {children}
+        <div className="text-center mt-6">
+          <Button onClick={() => navigate("/")} variant="outline">
+            <Home className="mr-2 h-4 w-4" />
+            Back to Home
+          </Button>
+        </div>
       </div>
     );
   }
