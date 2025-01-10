@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import RegistrationForm, { formSchema } from "@/components/auth/registration/RegistrationForm";
+import RegistrationForm, { formSchema, RegistrationFormData } from "@/components/auth/registration/RegistrationForm";
 import { RegistrationStatus } from "@/components/participant/registration/RegistrationStatus";
 
 export default function Register() {
   const navigate = useNavigate();
-  const form = useForm({
+  const form = useForm<RegistrationFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
@@ -20,7 +20,7 @@ export default function Register() {
     },
   });
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: RegistrationFormData) => {
     try {
       const { error } = await supabase.auth.signUp({
         email: values.email,

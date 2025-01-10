@@ -13,8 +13,10 @@ const formSchema = z.object({
   path: ["confirmPassword"],
 });
 
+export type RegistrationFormData = z.infer<typeof formSchema>;
+
 type RegistrationFormProps = {
-  form: UseFormReturn<z.infer<typeof formSchema>>;
+  form: UseFormReturn<RegistrationFormData>;
 };
 
 export default function RegistrationForm({ form }: RegistrationFormProps) {
