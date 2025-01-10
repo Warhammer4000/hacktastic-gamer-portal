@@ -1,10 +1,14 @@
-import { Github, Linkedin, Pencil, Trash2, Users } from "lucide-react";
+import { Github, Linkedin, Pencil, Trash2, Users, Key } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 interface UserCardProps {
   user: {
@@ -21,6 +25,10 @@ interface UserCardProps {
 }
 
 export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   // Query to fetch team information for the user
   const { data: teamInfo } = useQuery({
     queryKey: ['user-team', user.id],
@@ -40,6 +48,30 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
       return teamMember?.team;
     },
   });
+
+  const handlePasswordChange = async () => {
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords don't match");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('update_user_password', {
+        user_id: user.id,
+        new_password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast.success("Password updated successfully");
+      setIsPasswordDialogOpen(false);
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error('Error updating password:', error);
+      toast.error("Failed to update password");
+    }
+  };
 
   return (
     <Card>
@@ -95,6 +127,9 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
               <Button variant="outline" size="icon" onClick={() => onEdit(user.id)}>
                 <Pencil className="h-4 w-4" />
               </Button>
+              <Button variant="outline" size="icon" onClick={() => setIsPasswordDialogOpen(true)}>
+                <Key className="h-4 w-4" />
+              </Button>
               <Button variant="destructive" size="icon" onClick={() => onDelete(user.id)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -102,6 +137,45 @@ export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
           </div>
         </div>
       </CardContent>
+
+      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>
+              Enter a new password for {user.full_name || user.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="new-password">New Password</label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="confirm-password">Confirm Password</label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handlePasswordChange}>
+                Update Password
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

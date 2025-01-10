@@ -1160,6 +1160,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_user_password: {
+        Args: {
+          user_id: string
+          new_password: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       coupon_state: "unassigned" | "assigned" | "revealed"
