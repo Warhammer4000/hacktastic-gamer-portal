@@ -6,13 +6,14 @@ import AddParticipantDialog from "./AddParticipantDialog";
 import BulkParticipantUploadDialog from "./BulkParticipantUploadDialog";
 import { ParticipantActionsBar } from "./participant/ParticipantActionsBar";
 import { ParticipantSearchBar } from "./participant/ParticipantSearchBar";
-import { UserCard } from "@/components/admin/users/UserCard";
+import { ParticipantList } from "./participant/ParticipantList";
 import { useParticipantActions } from "./participant/useParticipantActions";
 
 export default function ParticipantUsers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
+  const [view, setView] = useState<"table" | "card">("card");
   const navigate = useNavigate();
   const { handleDelete } = useParticipantActions();
 
@@ -56,6 +57,8 @@ export default function ParticipantUsers() {
         <ParticipantActionsBar
           onAddParticipant={() => setShowAddDialog(true)}
           onBulkUpload={() => setShowBulkUploadDialog(true)}
+          view={view}
+          onViewChange={setView}
         />
         <ParticipantSearchBar
           searchQuery={searchQuery}
@@ -63,16 +66,13 @@ export default function ParticipantUsers() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {participants?.map((participant) => (
-          <UserCard
-            key={participant.id}
-            user={participant}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
+      <ParticipantList
+        view={view}
+        participants={participants || []}
+        isLoading={isLoading}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
 
       <AddParticipantDialog
         open={showAddDialog}
