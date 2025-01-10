@@ -3,6 +3,7 @@ import AdminLayout from "@/pages/admin/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 import Profile from "@/pages/admin/Profile";
 import GalleryPage from "@/pages/admin/gallery/GalleryPage";
+import NewsPage from "@/pages/admin/platform/components/news/NewsTab";
 import EventsPage from "@/pages/admin/events/EventsPage";
 import TeamsPage from "@/pages/admin/teams/TeamsPage";
 import MentorApproval from "@/pages/admin/mentors/MentorApproval";
@@ -19,13 +20,14 @@ export const adminRoutes = (
     <Route path="dashboard" element={<Dashboard />} />
     <Route path="profile" element={<Profile />} />
     <Route path="gallery" element={<GalleryPage />} />
+    <Route path="news" element={<NewsPage />} />
     <Route path="events" element={<EventsPage />} />
     <Route path="teams" element={<TeamsPage />} />
     <Route path="mentors" element={<MentorApproval />} />
     <Route path="mentors/edit/:mentorId" element={<EditMentorPage />} />
     <Route path="platform" element={<Platform />} />
     <Route path="users" element={<UsersPage />} />
-    <Route path="users/participants/edit/:participantId" element={<EditParticipantPage />} />
+    <Route path="participants/edit/:participantId" element={<EditParticipantPage />} />
     <Route path="coupons" element={<CouponsPage />} />
     <Route path="settings" element={<Settings />} />
     <Route path="sessions" element={<SessionsPage />} />

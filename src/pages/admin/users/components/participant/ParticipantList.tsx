@@ -1,5 +1,4 @@
 import { UserCard } from "@/components/admin/users/UserCard";
-import ParticipantTable from "../ParticipantTable";
 import { Database } from "@/integrations/supabase/types/database";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"] & {
@@ -7,7 +6,6 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"] & {
 };
 
 interface ParticipantListProps {
-  view: "table" | "card";
   participants: Profile[];
   isLoading: boolean;
   onEdit: (userId: string) => void;
@@ -15,21 +13,13 @@ interface ParticipantListProps {
 }
 
 export function ParticipantList({
-  view,
   participants,
   isLoading,
   onEdit,
   onDelete,
 }: ParticipantListProps) {
-  if (view === "table") {
-    return (
-      <ParticipantTable 
-        participants={participants} 
-        isLoading={isLoading}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
-    );
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   return (

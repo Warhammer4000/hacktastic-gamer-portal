@@ -13,7 +13,6 @@ export default function ParticipantUsers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
-  const [view, setView] = useState<"table" | "card">("card");
   const navigate = useNavigate();
   const { handleDelete } = useParticipantActions();
 
@@ -57,8 +56,6 @@ export default function ParticipantUsers() {
         <ParticipantActionsBar
           onAddParticipant={() => setShowAddDialog(true)}
           onBulkUpload={() => setShowBulkUploadDialog(true)}
-          view={view}
-          onViewChange={setView}
         />
         <ParticipantSearchBar
           searchQuery={searchQuery}
@@ -67,7 +64,6 @@ export default function ParticipantUsers() {
       </div>
 
       <ParticipantList
-        view={view}
         participants={participants || []}
         isLoading={isLoading}
         onEdit={handleEdit}
