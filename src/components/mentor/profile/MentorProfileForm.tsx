@@ -1,13 +1,13 @@
-import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { profileSchema, type ProfileFormValues } from "@/hooks/useMentorProfile";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { Form } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { profileSchema, type ProfileFormValues } from "@/hooks/useMentorProfile";
-import { BasicInfoFields } from "./fields/BasicInfoFields";
-import { AvatarField } from "./fields/AvatarField";
-import { SocialProfileFields } from "./fields/SocialProfileFields";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { AvatarField } from "./fields/AvatarField";
+import { BasicInfoFields } from "./fields/BasicInfoFields";
+import { SocialProfileFields } from "./fields/SocialProfileFields";
 
 interface MentorProfileFormProps {
   defaultValues: Partial<ProfileFormValues>;
@@ -40,7 +40,7 @@ export function MentorProfileForm({ defaultValues, onSubmit, isSubmitting }: Men
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="relative -mt-16 px-6">
+        <div className="relative px-6">
           <AvatarField form={form} />
         </div>
         

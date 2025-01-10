@@ -1,16 +1,16 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Loader2, User, Github, Save } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card } from "@/components/ui/card";
+import { Form } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Github, Loader2, Save, User } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { BasicInfoFields } from "./fields/BasicInfoFields";
 import { AvatarUrlField } from "./fields/AvatarUrlField";
+import { BasicInfoFields } from "./fields/BasicInfoFields";
 import { GitHubUsernameField } from "./fields/GitHubUsernameField";
 import { profileSchema, type ProfileFormValues } from "./schema";
-import { Card } from "@/components/ui/card";
 
 interface ParticipantProfileFormProps {
   profile: ProfileFormValues;
@@ -54,7 +54,7 @@ export function ParticipantProfileForm({ profile, onSuccess }: ParticipantProfil
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit((values) => updateProfile.mutate(values))} className="space-y-8">
-        <div className="relative -mt-16 px-6">
+        <div className="relative px-6">
           <AvatarUrlField form={form} />
         </div>
 

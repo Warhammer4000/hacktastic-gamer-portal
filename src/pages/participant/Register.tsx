@@ -1,12 +1,12 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import RegistrationForm, { formSchema, RegistrationFormData } from "@/components/auth/registration/RegistrationForm";
 import { RegistrationStatus } from "@/components/participant/registration/RegistrationStatus";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { supabase } from "@/integrations/supabase/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -43,7 +43,7 @@ export default function Register() {
 
   return (
     <RegistrationStatus>
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center">
         <div className="w-full max-w-md space-y-8 p-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold">Create Participant Account</h1>
