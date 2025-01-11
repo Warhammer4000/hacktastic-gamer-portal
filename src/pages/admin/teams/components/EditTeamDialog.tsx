@@ -23,6 +23,8 @@ import { TeamStateSelect } from "./TeamStateSelect";
 import { TeamMemberSelect } from "./TeamMemberSelect";
 import { Separator } from "@/components/ui/separator";
 
+type TeamStatus = "draft" | "open" | "locked" | "active" | "pending_mentor";
+
 interface EditTeamDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -36,7 +38,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
   const [techStackId, setTechStackId] = useState("");
   const [leaderId, setLeaderId] = useState("");
   const [repositoryUrl, setRepositoryUrl] = useState("");
-  const [status, setStatus] = useState<string>("draft");
+  const [status, setStatus] = useState<TeamStatus>("draft");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: team, isLoading: isTeamLoading } = useQuery({
@@ -82,7 +84,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
       setTechStackId(team.tech_stack_id || "");
       setLeaderId(team.leader_id);
       setRepositoryUrl(team.repository_url || "");
-      setStatus(team.status);
+      setStatus(team.status as TeamStatus);
     }
   }, [team]);
 
@@ -212,7 +214,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
               <Label>Team Status</Label>
               <TeamStateSelect
                 currentState={status}
-                onStateChange={setStatus}
+                onStateChange={(newState) => setStatus(newState as TeamStatus)}
               />
             </div>
           </div>
