@@ -49,11 +49,13 @@ export function CreateTeamDialog({ maxMembers, onTeamCreated }: CreateTeamDialog
 
       if (teamError) throw teamError;
 
+      // Add the team leader as a team member
       const { error: memberError } = await supabase
         .from('team_members')
         .insert({
           team_id: team.id,
           user_id: user.id,
+          is_ready: true, // Leader is automatically ready
         });
 
       if (memberError) throw memberError;
