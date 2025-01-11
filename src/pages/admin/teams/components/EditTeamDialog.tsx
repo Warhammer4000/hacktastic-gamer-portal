@@ -12,7 +12,9 @@ import { Button } from "@/components/ui/button";
 import { TeamBasicInfoFields } from "./edit-team/TeamBasicInfoFields";
 import { TeamMembersSection } from "./edit-team/TeamMembersSection";
 import { TeamStatusSection } from "./edit-team/TeamStatusSection";
-import type { TeamFormValues } from "./forms/TeamForm";
+
+// Define the allowed team status values
+type TeamStatus = "draft" | "open" | "locked" | "active" | "pending_mentor";
 
 interface EditTeamDialogProps {
   isOpen: boolean;
@@ -26,7 +28,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
   const [description, setDescription] = useState("");
   const [techStackId, setTechStackId] = useState("");
   const [repositoryUrl, setRepositoryUrl] = useState("");
-  const [status, setStatus] = useState<string>("draft");
+  const [status, setStatus] = useState<TeamStatus>("draft");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const queryClient = useQueryClient();
@@ -97,7 +99,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
       setDescription(team.description || "");
       setTechStackId(team.tech_stack_id || "");
       setRepositoryUrl(team.repository_url || "");
-      setStatus(team.status);
+      setStatus(team.status as TeamStatus);
     }
   }, [team]);
 
@@ -201,12 +203,12 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
 
           <TeamStatusSection 
             status={status} 
-            onStatusChange={(newState) => setStatus(newState)} 
+            onStatusChange={(newState) => setStatus(newState as TeamStatus)} 
           />
 
           <TeamMembersSection
             teamMembers={team.team_members}
-            participants={participants}
+            participants={participants || []}
             isLoadingParticipants={isLoadingParticipants}
             selectedMemberId={selectedMemberId}
             onMemberSelect={(value) => {
