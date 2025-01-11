@@ -25,8 +25,8 @@ interface TeamMemberSelectProps {
 export function TeamMemberSelect({ 
   value, 
   onValueChange, 
-  participants = [], // Provide default empty array
-  isLoading 
+  participants = [], 
+  isLoading = false 
 }: TeamMemberSelectProps) {
   const [open, setOpen] = useState(false);
 
@@ -42,6 +42,11 @@ export function TeamMemberSelect({
     );
   }
 
+  const getParticipantLabel = (participantId: string) => {
+    const participant = participants.find(p => p.id === participantId);
+    return participant?.full_name || participant?.email || "Unknown participant";
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -51,13 +56,7 @@ export function TeamMemberSelect({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value ? (
-            participants.find((participant) => participant.id === value)?.full_name || 
-            participants.find((participant) => participant.id === value)?.email ||
-            "Select participant..."
-          ) : (
-            "Select participant..."
-          )}
+          {value ? getParticipantLabel(value) : "Select participant..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
