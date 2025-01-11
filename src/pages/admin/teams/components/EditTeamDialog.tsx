@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -9,21 +9,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { TeamStateSelect } from "./TeamStateSelect";
-import { TeamMemberSelect } from "./TeamMemberSelect";
-import { Separator } from "@/components/ui/separator";
-
-type TeamStatus = "draft" | "open" | "locked" | "active" | "pending_mentor";
+import { TeamBasicInfoFields } from "./edit-team/TeamBasicInfoFields";
+import { TeamMembersSection } from "./edit-team/TeamMembersSection";
+import { TeamStatusSection } from "./edit-team/TeamStatusSection";
+import type { TeamFormValues } from "./forms/TeamForm";
 
 interface EditTeamDialogProps {
   isOpen: boolean;
@@ -36,11 +25,11 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [techStackId, setTechStackId] = useState("");
-  const [leaderId, setLeaderId] = useState("");
   const [repositoryUrl, setRepositoryUrl] = useState("");
-  const [status, setStatus] = useState<TeamStatus>("draft");
+  const [status, setStatus] = useState<string>("draft");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState("");
+  const queryClient = useQueryClient();
 
   const { data: team, isLoading: isTeamLoading } = useQuery({
     queryKey: ["team", teamId],
@@ -81,6 +70,9 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
   const { data: participants, isLoading: isLoadingParticipants } = useQuery({
     queryKey: ['participants'],
     queryFn: async () => {
+      if (!team?.team_members) return [];
+      
+      const memberIds = team.team_members.map(m => m.user_id).join(',');
       const { data, error } = await supabase
         .from('profiles')
         .select(`
@@ -90,7 +82,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
           user_roles!inner (role)
         `)
         .eq('user_roles.role', 'participant')
-        .not('id', 'in', `(${team?.team_members?.map(m => m.user_id).join(',') || ''})`)
+        .not('id', 'in', `(${memberIds})`)
         .order('full_name');
 
       if (error) throw error;
@@ -104,9 +96,8 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
       setName(team.name);
       setDescription(team.description || "");
       setTechStackId(team.tech_stack_id || "");
-      setLeaderId(team.leader_id);
       setRepositoryUrl(team.repository_url || "");
-      setStatus(team.status as TeamStatus);
+      setStatus(team.status);
     }
   }, [team]);
 
@@ -121,7 +112,6 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
           name,
           description,
           tech_stack_id: techStackId,
-          leader_id: leaderId,
           repository_url: repositoryUrl,
           status,
         })
@@ -177,6 +167,19 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
     }
   };
 
+  if (!team) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Error</DialogTitle>
+            <p>Team details are not available.</p>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
@@ -184,96 +187,35 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
           <DialogTitle>Edit Team</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Team Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
+          <TeamBasicInfoFields
+            name={name}
+            description={description}
+            techStackId={techStackId}
+            repositoryUrl={repositoryUrl}
+            onNameChange={setName}
+            onDescriptionChange={setDescription}
+            onTechStackChange={setTechStackId}
+            onRepositoryUrlChange={setRepositoryUrl}
+            techStacks={techStacks}
+          />
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
+          <TeamStatusSection 
+            status={status} 
+            onStatusChange={(newState) => setStatus(newState)} 
+          />
 
-            <div className="space-y-2">
-              <Label htmlFor="tech-stack">Technology Stack</Label>
-              <Select value={techStackId} onValueChange={setTechStackId} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select tech stack" />
-                </SelectTrigger>
-                <SelectContent>
-                  {techStacks?.map((stack) => (
-                    <SelectItem key={stack.id} value={stack.id}>
-                      {stack.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="repository">Repository URL</Label>
-              <Input
-                id="repository"
-                value={repositoryUrl}
-                onChange={(e) => setRepositoryUrl(e.target.value)}
-                placeholder="https://github.com/org/repo"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Team Status</Label>
-              <TeamStateSelect
-                currentState={status}
-                onStateChange={(newState) => setStatus(newState as TeamStatus)}
-              />
-            </div>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-4">
-            <Label>Team Members</Label>
-            <div className="space-y-4">
-              {team?.team_members?.map((member) => (
-                <div key={member.user_id} className="flex items-center justify-between">
-                  <span>{member.profile.full_name || member.profile.email}</span>
-                  {member.user_id !== team.leader_id && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleRemoveMember(member.user_id)}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              <Label>Add Team Member</Label>
-              <TeamMemberSelect
-                value={selectedMemberId}
-                onValueChange={(value) => {
-                  setSelectedMemberId(value);
-                  if (value) handleAddMember(value);
-                }}
-                participants={participants || []}
-                isLoading={isLoadingParticipants}
-              />
-            </div>
-          </div>
+          <TeamMembersSection
+            teamMembers={team.team_members}
+            participants={participants}
+            isLoadingParticipants={isLoadingParticipants}
+            selectedMemberId={selectedMemberId}
+            onMemberSelect={(value) => {
+              setSelectedMemberId(value);
+              if (value) handleAddMember(value);
+            }}
+            onRemoveMember={handleRemoveMember}
+            leaderId={team.leader_id}
+          />
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
