@@ -25,7 +25,7 @@ interface TeamMemberSelectProps {
 export function TeamMemberSelect({ 
   value, 
   onValueChange, 
-  participants = [], // Default to empty array to prevent undefined
+  participants = [], 
   isLoading = false 
 }: TeamMemberSelectProps) {
   const [open, setOpen] = useState(false);
@@ -48,11 +48,11 @@ export function TeamMemberSelect({
     return participant?.full_name || participant?.email || "Unknown participant";
   };
 
-  // Only filter if we have participants
   const filteredParticipants = participants?.filter(participant => {
+    if (!participant) return false;
     const searchLower = searchQuery.toLowerCase();
     return (
-      participant.full_name?.toLowerCase().includes(searchLower) ||
+      (participant.full_name?.toLowerCase() || "").includes(searchLower) ||
       participant.email.toLowerCase().includes(searchLower)
     );
   }) || [];
@@ -83,33 +83,35 @@ export function TeamMemberSelect({
             onValueChange={setSearchQuery}
           />
           <CommandEmpty>No participant found.</CommandEmpty>
-          <CommandGroup className="max-h-[300px] overflow-y-auto">
-            {filteredParticipants.map((participant) => (
-              <CommandItem
-                key={participant.id}
-                value={participant.id}
-                onSelect={(currentValue) => {
-                  onValueChange(currentValue === value ? "" : currentValue);
-                  setOpen(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === participant.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                <div className="flex flex-col">
-                  {participant.full_name && (
-                    <span className="font-medium">{participant.full_name}</span>
-                  )}
-                  <span className="text-sm text-muted-foreground">
-                    {participant.email}
-                  </span>
-                </div>
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          {filteredParticipants.length > 0 && (
+            <CommandGroup className="max-h-[300px] overflow-y-auto">
+              {filteredParticipants.map((participant) => (
+                <CommandItem
+                  key={participant.id}
+                  value={participant.id}
+                  onSelect={(currentValue) => {
+                    onValueChange(currentValue === value ? "" : currentValue);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === participant.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <div className="flex flex-col">
+                    {participant.full_name && (
+                      <span className="font-medium">{participant.full_name}</span>
+                    )}
+                    <span className="text-sm text-muted-foreground">
+                      {participant.email}
+                    </span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
         </Command>
       </PopoverContent>
     </Popover>
