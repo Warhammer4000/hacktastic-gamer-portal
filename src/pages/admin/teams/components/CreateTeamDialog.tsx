@@ -69,7 +69,8 @@ export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamD
     try {
       const joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-      const { error: teamError } = await supabase
+      // First create the team
+      const { data: team, error: teamError } = await supabase
         .from("teams")
         .insert({
           name,
@@ -78,9 +79,22 @@ export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamD
           leader_id: leaderId,
           join_code: joinCode,
           status: "draft",
-        });
+        })
+        .select()
+        .single();
 
       if (teamError) throw teamError;
+
+      // Then add the team leader as a team member
+      const { error: memberError } = await supabase
+        .from("team_members")
+        .insert({
+          team_id: team.id,
+          user_id: leaderId,
+          is_ready: true, // Leader is automatically ready
+        });
+
+      if (memberError) throw memberError;
 
       toast.success("Team created successfully!");
       onTeamCreated();
