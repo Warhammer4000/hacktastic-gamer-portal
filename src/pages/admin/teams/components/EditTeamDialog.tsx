@@ -19,6 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { TeamStateSelect } from "./TeamStateSelect";
+import { TeamMemberSelect } from "./TeamMemberSelect";
+import { Separator } from "@/components/ui/separator";
 
 interface EditTeamDialogProps {
   isOpen: boolean;
@@ -33,14 +36,25 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
   const [techStackId, setTechStackId] = useState("");
   const [leaderId, setLeaderId] = useState("");
   const [repositoryUrl, setRepositoryUrl] = useState("");
+  const [status, setStatus] = useState<string>("draft");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: team } = useQuery({
+  const { data: team, isLoading: isTeamLoading } = useQuery({
     queryKey: ["team", teamId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("teams")
-        .select("*")
+        .select(`
+          *,
+          team_members (
+            user_id,
+            profile:profiles (
+              id,
+              full_name,
+              email
+            )
+          )
+        `)
         .eq("id", teamId)
         .single();
       if (error) throw error;
@@ -48,16 +62,6 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
     },
     enabled: !!teamId,
   });
-
-  useEffect(() => {
-    if (team) {
-      setName(team.name);
-      setDescription(team.description || "");
-      setTechStackId(team.tech_stack_id || "");
-      setLeaderId(team.leader_id);
-      setRepositoryUrl(team.repository_url || "");
-    }
-  }, [team]);
 
   const { data: techStacks } = useQuery({
     queryKey: ["tech-stacks"],
@@ -71,22 +75,16 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
     },
   });
 
-  const { data: participants } = useQuery({
-    queryKey: ["participants"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(`
-          id,
-          full_name,
-          email,
-          user_roles!inner (role)
-        `)
-        .eq("user_roles.role", "participant");
-      if (error) throw error;
-      return data;
-    },
-  });
+  useEffect(() => {
+    if (team) {
+      setName(team.name);
+      setDescription(team.description || "");
+      setTechStackId(team.tech_stack_id || "");
+      setLeaderId(team.leader_id);
+      setRepositoryUrl(team.repository_url || "");
+      setStatus(team.status);
+    }
+  }, [team]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +99,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
           tech_stack_id: techStackId,
           leader_id: leaderId,
           repository_url: repositoryUrl,
+          status,
         })
         .eq("id", teamId);
 
@@ -117,72 +116,136 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
     }
   };
 
+  const handleAddMember = async (memberId: string) => {
+    try {
+      const { error } = await supabase
+        .from("team_members")
+        .insert({
+          team_id: teamId,
+          user_id: memberId,
+        });
+
+      if (error) throw error;
+
+      toast.success("Team member added successfully!");
+      onTeamUpdated();
+    } catch (error) {
+      console.error("Error adding team member:", error);
+      toast.error("Failed to add team member");
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    try {
+      const { error } = await supabase
+        .from("team_members")
+        .delete()
+        .eq("team_id", teamId)
+        .eq("user_id", memberId);
+
+      if (error) throw error;
+
+      toast.success("Team member removed successfully!");
+      onTeamUpdated();
+    } catch (error) {
+      console.error("Error removing team member:", error);
+      toast.error("Failed to remove team member");
+    }
+  };
+
+  const existingMemberIds = team?.team_members?.map(member => member.user_id) || [];
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Edit Team</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Team Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Team Name</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tech-stack">Technology Stack</Label>
+              <Select value={techStackId} onValueChange={setTechStackId} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select tech stack" />
+                </SelectTrigger>
+                <SelectContent>
+                  {techStacks?.map((stack) => (
+                    <SelectItem key={stack.id} value={stack.id}>
+                      {stack.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="repository">Repository URL</Label>
+              <Input
+                id="repository"
+                value={repositoryUrl}
+                onChange={(e) => setRepositoryUrl(e.target.value)}
+                placeholder="https://github.com/org/repo"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Team Status</Label>
+              <TeamStateSelect
+                currentState={status}
+                onStateChange={setStatus}
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
+          <Separator />
 
-          <div className="space-y-2">
-            <Label htmlFor="tech-stack">Technology Stack</Label>
-            <Select value={techStackId} onValueChange={setTechStackId} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select tech stack" />
-              </SelectTrigger>
-              <SelectContent>
-                {techStacks?.map((stack) => (
-                  <SelectItem key={stack.id} value={stack.id}>
-                    {stack.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <div className="space-y-4">
+            <Label>Team Members</Label>
+            <div className="space-y-4">
+              {team?.team_members?.map((member) => (
+                <div key={member.user_id} className="flex items-center justify-between">
+                  <span>{member.profile.full_name || member.profile.email}</span>
+                  {member.user_id !== team.leader_id && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleRemoveMember(member.user_id)}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="leader">Team Leader</Label>
-            <Select value={leaderId} onValueChange={setLeaderId} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select team leader" />
-              </SelectTrigger>
-              <SelectContent>
-                {participants?.map((participant) => (
-                  <SelectItem key={participant.id} value={participant.id}>
-                    {participant.full_name || participant.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="repository">Repository URL</Label>
-            <Input
-              id="repository"
-              value={repositoryUrl}
-              onChange={(e) => setRepositoryUrl(e.target.value)}
-              placeholder="https://github.com/org/repo"
-            />
+            <div className="space-y-2">
+              <Label>Add Team Member</Label>
+              <TeamMemberSelect
+                onMemberSelect={handleAddMember}
+                excludeUserIds={existingMemberIds}
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2">
