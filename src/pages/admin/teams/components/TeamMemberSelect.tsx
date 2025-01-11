@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,7 @@ export function TeamMemberSelect({
   isLoading = false 
 }: TeamMemberSelectProps) {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   if (isLoading) {
     return (
@@ -47,6 +48,14 @@ export function TeamMemberSelect({
     return participant?.full_name || participant?.email || "Unknown participant";
   };
 
+  const filteredParticipants = participants.filter(participant => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      participant.full_name?.toLowerCase().includes(searchLower) ||
+      participant.email.toLowerCase().includes(searchLower)
+    );
+  });
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -56,16 +65,25 @@ export function TeamMemberSelect({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value ? getParticipantLabel(value) : "Select participant..."}
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4 shrink-0 opacity-50" />
+            <span className="truncate">
+              {value ? getParticipantLabel(value) : "Search participants..."}
+            </span>
+          </div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput placeholder="Search participants..." />
+      <PopoverContent className="w-[400px] p-0">
+        <Command shouldFilter={false}>
+          <CommandInput 
+            placeholder="Search by name or email..." 
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+          />
           <CommandEmpty>No participant found.</CommandEmpty>
-          <CommandGroup>
-            {participants.map((participant) => (
+          <CommandGroup className="max-h-[300px] overflow-y-auto">
+            {filteredParticipants.map((participant) => (
               <CommandItem
                 key={participant.id}
                 value={participant.id}
@@ -80,7 +98,14 @@ export function TeamMemberSelect({
                     value === participant.id ? "opacity-100" : "opacity-0"
                   )}
                 />
-                {participant.full_name || participant.email}
+                <div className="flex flex-col">
+                  {participant.full_name && (
+                    <span className="font-medium">{participant.full_name}</span>
+                  )}
+                  <span className="text-sm text-muted-foreground">
+                    {participant.email}
+                  </span>
+                </div>
               </CommandItem>
             ))}
           </CommandGroup>
