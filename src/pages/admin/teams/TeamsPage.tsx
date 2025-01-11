@@ -1,17 +1,25 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TeamFilters } from "@/components/participant/teams/components/TeamFilters";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, User, Github, Linkedin, Blocks } from "lucide-react";
+import { Users, User, Github, Linkedin, Blocks, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { AdminTeamActions } from "./components/AdminTeamActions";
+import { CreateTeamDialog } from "./components/CreateTeamDialog";
+import { EditTeamDialog } from "./components/EditTeamDialog";
+import { AssignMentorDialog } from "./components/AssignMentorDialog";
+import { toast } from "sonner";
 
 export default function TeamsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTechStack, setSelectedTechStack] = useState("all");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAssignMentorDialogOpen, setIsAssignMentorDialogOpen] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: teams, isLoading: isTeamsLoading } = useQuery({
     queryKey: ["admin-teams"],
@@ -64,6 +72,36 @@ export default function TeamsPage() {
     },
   });
 
+  const handleCreateTeam = () => {
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleEditTeam = (teamId: string) => {
+    setSelectedTeamId(teamId);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleAssignMentor = (teamId: string) => {
+    setSelectedTeamId(teamId);
+    setIsAssignMentorDialogOpen(true);
+  };
+
+  const handleDeleteTeam = async (teamId: string) => {
+    try {
+      const { error } = await supabase.rpc("delete_team_cascade", {
+        team_id_input: teamId,
+      });
+
+      if (error) throw error;
+
+      toast.success("Team deleted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
+    } catch (error) {
+      console.error("Error deleting team:", error);
+      toast.error("Failed to delete team");
+    }
+  };
+
   const filteredTeams = teams?.filter((team) => {
     const matchesSearch = team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       team.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -90,9 +128,17 @@ export default function TeamsPage() {
     }
   };
 
+  const selectedTeam = teams?.find(team => team.id === selectedTeamId);
+
   return (
     <div className="container py-6">
-      <h1 className="text-2xl font-bold mb-6">Team Explorer</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Team Explorer</h1>
+        <Button onClick={handleCreateTeam}>
+          <Plus className="h-4 w-4 mr-2" />
+          Create Team
+        </Button>
+      </div>
       
       <div className="mb-6">
         <TeamFilters
@@ -134,11 +180,29 @@ export default function TeamsPage() {
                     <Badge className={getStatusColor(team.status)}>
                       {team.status.replace('_', ' ').toUpperCase()}
                     </Badge>
-                    <AdminTeamActions
-                      teamId={team.id}
-                      teamName={team.name}
-                      currentMentorId={team.mentor_id}
-                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditTeam(team.id)}
+                    >
+                      Edit
+                    </Button>
+                    {!team.mentor_id && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAssignMentor(team.id)}
+                      >
+                        Assign Mentor
+                      </Button>
+                    )}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteTeam(team.id)}
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </div>
               </CardHeader>
@@ -268,6 +332,43 @@ export default function TeamsPage() {
           ))
         )}
       </div>
+
+      <CreateTeamDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        onTeamCreated={() => {
+          queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
+        }}
+      />
+
+      {selectedTeamId && (
+        <>
+          <EditTeamDialog
+            isOpen={isEditDialogOpen}
+            onClose={() => {
+              setIsEditDialogOpen(false);
+              setSelectedTeamId(null);
+            }}
+            onTeamUpdated={() => {
+              queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
+            }}
+            teamId={selectedTeamId}
+          />
+
+          <AssignMentorDialog
+            isOpen={isAssignMentorDialogOpen}
+            onClose={() => {
+              setIsAssignMentorDialogOpen(false);
+              setSelectedTeamId(null);
+            }}
+            onMentorAssigned={() => {
+              queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
+            }}
+            teamId={selectedTeamId}
+            teamTechStackId={selectedTeam?.tech_stack_id || null}
+          />
+        </>
+      )}
     </div>
   );
 }
