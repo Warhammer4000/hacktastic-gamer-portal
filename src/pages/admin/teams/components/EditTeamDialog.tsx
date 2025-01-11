@@ -69,12 +69,14 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
     },
   });
 
-  const { data: participants, isLoading: isLoadingParticipants } = useQuery({
+  const { data: participants = [], isLoading: isLoadingParticipants } = useQuery({
     queryKey: ['participants'],
     queryFn: async () => {
       if (!team?.team_members) return [];
       
       const memberIds = team.team_members.map(m => m.user_id).join(',');
+      if (!memberIds) return [];
+
       const { data, error } = await supabase
         .from('profiles')
         .select(`
@@ -88,7 +90,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
         .order('full_name');
 
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!team,
   });
@@ -208,7 +210,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
 
           <TeamMembersSection
             teamMembers={team.team_members}
-            participants={participants || []}
+            participants={participants}
             isLoadingParticipants={isLoadingParticipants}
             selectedMemberId={selectedMemberId}
             onMemberSelect={(value) => {

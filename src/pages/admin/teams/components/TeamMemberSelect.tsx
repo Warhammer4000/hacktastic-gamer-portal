@@ -44,18 +44,17 @@ export function TeamMemberSelect({
   }
 
   const getParticipantLabel = (participantId: string) => {
-    const participant = participants?.find(p => p.id === participantId);
+    const participant = participants.find(p => p.id === participantId);
     return participant?.full_name || participant?.email || "Unknown participant";
   };
 
-  const filteredParticipants = participants?.filter(participant => {
-    if (!participant) return false;
+  const filteredParticipants = participants.filter(participant => {
     const searchLower = searchQuery.toLowerCase();
     return (
-      (participant.full_name?.toLowerCase() || "").includes(searchLower) ||
-      participant.email.toLowerCase().includes(searchLower)
+      (participant?.full_name?.toLowerCase() || "").includes(searchLower) ||
+      (participant?.email?.toLowerCase() || "").includes(searchLower)
     );
-  }) || [];
+  });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -76,14 +75,15 @@ export function TeamMemberSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
-        <Command shouldFilter={false}>
+        <Command>
           <CommandInput 
             placeholder="Search by name or email..." 
             value={searchQuery}
             onValueChange={setSearchQuery}
           />
-          <CommandEmpty>No participant found.</CommandEmpty>
-          {filteredParticipants.length > 0 && (
+          {filteredParticipants.length === 0 ? (
+            <CommandEmpty>No participant found.</CommandEmpty>
+          ) : (
             <CommandGroup className="max-h-[300px] overflow-y-auto">
               {filteredParticipants.map((participant) => (
                 <CommandItem
