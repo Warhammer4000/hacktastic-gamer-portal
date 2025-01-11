@@ -25,7 +25,7 @@ interface TeamMemberSelectProps {
 export function TeamMemberSelect({ 
   value, 
   onValueChange, 
-  participants = [], 
+  participants = [], // Default to empty array to prevent undefined
   isLoading = false 
 }: TeamMemberSelectProps) {
   const [open, setOpen] = useState(false);
@@ -44,17 +44,18 @@ export function TeamMemberSelect({
   }
 
   const getParticipantLabel = (participantId: string) => {
-    const participant = participants.find(p => p.id === participantId);
+    const participant = participants?.find(p => p.id === participantId);
     return participant?.full_name || participant?.email || "Unknown participant";
   };
 
-  const filteredParticipants = participants.filter(participant => {
+  // Only filter if we have participants
+  const filteredParticipants = participants?.filter(participant => {
     const searchLower = searchQuery.toLowerCase();
     return (
       participant.full_name?.toLowerCase().includes(searchLower) ||
       participant.email.toLowerCase().includes(searchLower)
     );
-  });
+  }) || [];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
