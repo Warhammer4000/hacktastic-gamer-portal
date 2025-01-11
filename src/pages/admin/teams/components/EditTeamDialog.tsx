@@ -40,6 +40,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
   const [repositoryUrl, setRepositoryUrl] = useState("");
   const [status, setStatus] = useState<TeamStatus>("draft");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState("");
 
   const { data: team, isLoading: isTeamLoading } = useQuery({
     queryKey: ["team", teamId],
@@ -75,6 +76,27 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
       if (error) throw error;
       return data;
     },
+  });
+
+  const { data: participants, isLoading: isLoadingParticipants } = useQuery({
+    queryKey: ['participants'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          full_name,
+          email,
+          user_roles!inner (role)
+        `)
+        .eq('user_roles.role', 'participant')
+        .not('id', 'in', `(${team?.team_members?.map(m => m.user_id).join(',') || ''})`)
+        .order('full_name');
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!team,
   });
 
   useEffect(() => {
@@ -154,8 +176,6 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
       toast.error("Failed to remove team member");
     }
   };
-
-  const existingMemberIds = team?.team_members?.map(member => member.user_id) || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -244,8 +264,13 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
             <div className="space-y-2">
               <Label>Add Team Member</Label>
               <TeamMemberSelect
-                onMemberSelect={handleAddMember}
-                excludeUserIds={existingMemberIds}
+                value={selectedMemberId}
+                onValueChange={(value) => {
+                  setSelectedMemberId(value);
+                  if (value) handleAddMember(value);
+                }}
+                participants={participants || []}
+                isLoading={isLoadingParticipants}
               />
             </div>
           </div>
