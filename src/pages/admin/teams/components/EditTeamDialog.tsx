@@ -66,41 +66,49 @@ export function EditTeamDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[900px] h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Edit Team</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          <TeamBasicInfoFields
-            name={team.name}
-            description={team.description || ""}
-            techStackId={team.tech_stack_id}
-            onUpdate={handleBasicInfoUpdate}
-          />
+        <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+          <div className="grid grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-6">
+              <TeamBasicInfoFields
+                name={team.name}
+                description={team.description || ""}
+                techStackId={team.tech_stack_id}
+                onUpdate={handleBasicInfoUpdate}
+              />
+              
+              <TeamStatusSection
+                status={team.status as TeamStatus}
+                onStatusChange={handleStatusChange}
+              />
+            </div>
 
-          <TeamMemberManagement
-            teamMembers={team.team_members}
-            availableParticipants={participants}
-            leaderId={team.leader_id}
-            onMemberAdd={handleMemberAdd}
-            onMemberRemove={handleMemberRemove}
-            onLeaderChange={handleLeaderChange}
-            maxMembers={team.max_members}
-            isLocked={team.status === "locked"}
-          />
-
-          <TeamStatusSection
-            status={team.status as TeamStatus}
-            onStatusChange={handleStatusChange}
-          />
-
-          <DialogFooter
-            onClose={onClose}
-            onSave={onTeamUpdated}
-            isSubmitting={isSubmitting}
-          />
+            {/* Right Column */}
+            <div>
+              <TeamMemberManagement
+                teamMembers={team.team_members}
+                availableParticipants={participants}
+                leaderId={team.leader_id}
+                onMemberAdd={handleMemberAdd}
+                onMemberRemove={handleMemberRemove}
+                onLeaderChange={handleLeaderChange}
+                maxMembers={team.max_members}
+                isLocked={team.status === "locked"}
+              />
+            </div>
+          </div>
         </div>
+
+        <DialogFooter
+          onClose={onClose}
+          onSave={onTeamUpdated}
+          isSubmitting={isSubmitting}
+        />
       </DialogContent>
     </Dialog>
   );

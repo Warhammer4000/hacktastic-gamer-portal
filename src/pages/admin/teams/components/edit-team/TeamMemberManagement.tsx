@@ -42,11 +42,11 @@ export function TeamMemberManagement({
   });
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">Team Members</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 max-h-[calc(80vh-200px)] overflow-y-auto">
         {/* Current Members */}
         <div className="space-y-4">
           <RadioGroup
