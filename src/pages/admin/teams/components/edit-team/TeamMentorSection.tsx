@@ -81,7 +81,7 @@ export function TeamMentorSection({
 
         <AssignMentorDialog
           isOpen={isAssignDialogOpen}
-          onClose={() => setIsAssignDialogOpen(false)}
+          onOpenChange={setIsAssignDialogOpen}
           onMentorAssigned={onMentorUpdated}
           teamId={teamId}
         />
