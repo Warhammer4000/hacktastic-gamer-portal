@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -9,12 +9,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { TeamMemberManagement } from "./edit-team/TeamMemberManagement";
 import { TeamBasicInfoFields } from "./edit-team/TeamBasicInfoFields";
-import { TeamMembersSection } from "./edit-team/TeamMembersSection";
 import { TeamStatusSection } from "./edit-team/TeamStatusSection";
-
-// Define the allowed team status values
-type TeamStatus = "draft" | "open" | "locked" | "active" | "pending_mentor";
+import type { TeamStatus } from "./edit-team/types";
 
 interface EditTeamDialogProps {
   isOpen: boolean;
@@ -24,16 +22,10 @@ interface EditTeamDialogProps {
 }
 
 export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditTeamDialogProps) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [techStackId, setTechStackId] = useState("");
-  const [repositoryUrl, setRepositoryUrl] = useState("");
-  const [status, setStatus] = useState<TeamStatus>("draft");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedMemberId, setSelectedMemberId] = useState("");
   const queryClient = useQueryClient();
 
-  const { data: team, isLoading: isTeamLoading } = useQuery({
+  const { data: team, isLoading: isLoadingTeam } = useQuery({
     queryKey: ["team", teamId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,6 +33,7 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
         .select(`
           *,
           team_members (
+            id,
             user_id,
             profile:profiles (
               id,
@@ -54,40 +47,25 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
       if (error) throw error;
       return data;
     },
-    enabled: !!teamId,
-  });
-
-  const { data: techStacks } = useQuery({
-    queryKey: ["tech-stacks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("technology_stacks")
-        .select("*")
-        .eq("status", "active");
-      if (error) throw error;
-      return data;
-    },
   });
 
   const { data: participants = [], isLoading: isLoadingParticipants } = useQuery({
-    queryKey: ['participants'],
+    queryKey: ["available-participants", teamId],
     queryFn: async () => {
       if (!team?.team_members) return [];
       
-      const memberIds = team.team_members.map(m => m.user_id).join(',');
-      if (!memberIds) return [];
-
+      const memberIds = team.team_members.map(m => m.user_id);
       const { data, error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .select(`
           id,
           full_name,
           email,
           user_roles!inner (role)
         `)
-        .eq('user_roles.role', 'participant')
-        .not('id', 'in', `(${memberIds})`)
-        .order('full_name');
+        .eq("user_roles.role", "participant")
+        .not("id", "in", `(${memberIds.join(",")})`)
+        .order("full_name");
 
       if (error) throw error;
       return data || [];
@@ -95,65 +73,24 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
     enabled: !!team,
   });
 
-  useEffect(() => {
-    if (team) {
-      setName(team.name);
-      setDescription(team.description || "");
-      setTechStackId(team.tech_stack_id || "");
-      setRepositoryUrl(team.repository_url || "");
-      setStatus(team.status as TeamStatus);
-    }
-  }, [team]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const { error: teamError } = await supabase
-        .from("teams")
-        .update({
-          name,
-          description,
-          tech_stack_id: techStackId,
-          repository_url: repositoryUrl,
-          status,
-        })
-        .eq("id", teamId);
-
-      if (teamError) throw teamError;
-
-      toast.success("Team updated successfully!");
-      onTeamUpdated();
-      onClose();
-    } catch (error) {
-      console.error("Error updating team:", error);
-      toast.error("Failed to update team");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleAddMember = async (memberId: string) => {
+  const handleMemberAdd = async (memberId: string) => {
     try {
       const { error } = await supabase
         .from("team_members")
-        .insert({
-          team_id: teamId,
-          user_id: memberId,
-        });
+        .insert({ team_id: teamId, user_id: memberId });
 
       if (error) throw error;
-
-      toast.success("Team member added successfully!");
-      onTeamUpdated();
+      
+      queryClient.invalidateQueries({ queryKey: ["team", teamId] });
+      queryClient.invalidateQueries({ queryKey: ["available-participants", teamId] });
+      toast.success("Team member added successfully");
     } catch (error) {
       console.error("Error adding team member:", error);
       toast.error("Failed to add team member");
     }
   };
 
-  const handleRemoveMember = async (memberId: string) => {
+  const handleMemberRemove = async (memberId: string) => {
     try {
       const { error } = await supabase
         .from("team_members")
@@ -162,26 +99,35 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
         .eq("user_id", memberId);
 
       if (error) throw error;
-
-      toast.success("Team member removed successfully!");
-      onTeamUpdated();
+      
+      queryClient.invalidateQueries({ queryKey: ["team", teamId] });
+      queryClient.invalidateQueries({ queryKey: ["available-participants", teamId] });
+      toast.success("Team member removed successfully");
     } catch (error) {
       console.error("Error removing team member:", error);
       toast.error("Failed to remove team member");
     }
   };
 
-  if (!team) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Error</DialogTitle>
-            <p>Team details are not available.</p>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-    );
+  const handleLeaderChange = async (newLeaderId: string) => {
+    try {
+      const { error } = await supabase
+        .from("teams")
+        .update({ leader_id: newLeaderId })
+        .eq("id", teamId);
+
+      if (error) throw error;
+      
+      queryClient.invalidateQueries({ queryKey: ["team", teamId] });
+      toast.success("Team leader updated successfully");
+    } catch (error) {
+      console.error("Error updating team leader:", error);
+      toast.error("Failed to update team leader");
+    }
+  };
+
+  if (!team || isLoadingTeam) {
+    return null;
   }
 
   return (
@@ -190,46 +136,71 @@ export function EditTeamDialog({ isOpen, onClose, onTeamUpdated, teamId }: EditT
         <DialogHeader>
           <DialogTitle>Edit Team</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
+
+        <div className="space-y-6">
           <TeamBasicInfoFields
-            name={name}
-            description={description}
-            techStackId={techStackId}
-            repositoryUrl={repositoryUrl}
-            onNameChange={setName}
-            onDescriptionChange={setDescription}
-            onTechStackChange={setTechStackId}
-            onRepositoryUrlChange={setRepositoryUrl}
-            techStacks={techStacks}
-          />
+            name={team.name}
+            description={team.description || ""}
+            techStackId={team.tech_stack_id}
+            onUpdate={async (data) => {
+              try {
+                const { error } = await supabase
+                  .from("teams")
+                  .update(data)
+                  .eq("id", teamId);
 
-          <TeamStatusSection 
-            status={status} 
-            onStatusChange={(newState) => setStatus(newState as TeamStatus)} 
-          />
-
-          <TeamMembersSection
-            teamMembers={team.team_members}
-            participants={participants}
-            isLoadingParticipants={isLoadingParticipants}
-            selectedMemberId={selectedMemberId}
-            onMemberSelect={(value) => {
-              setSelectedMemberId(value);
-              if (value) handleAddMember(value);
+                if (error) throw error;
+                queryClient.invalidateQueries({ queryKey: ["team", teamId] });
+                toast.success("Team updated successfully");
+              } catch (error) {
+                console.error("Error updating team:", error);
+                toast.error("Failed to update team");
+              }
             }}
-            onRemoveMember={handleRemoveMember}
-            leaderId={team.leader_id}
           />
 
-          <div className="flex justify-end gap-2">
+          <TeamMemberManagement
+            teamMembers={team.team_members}
+            availableParticipants={participants}
+            leaderId={team.leader_id}
+            onMemberAdd={handleMemberAdd}
+            onMemberRemove={handleMemberRemove}
+            onLeaderChange={handleLeaderChange}
+            maxMembers={team.max_members}
+            isLocked={team.status === "locked"}
+          />
+
+          <TeamStatusSection
+            status={team.status as TeamStatus}
+            onStatusChange={async (newStatus) => {
+              try {
+                const { error } = await supabase
+                  .from("teams")
+                  .update({ status: newStatus })
+                  .eq("id", teamId);
+
+                if (error) throw error;
+                queryClient.invalidateQueries({ queryKey: ["team", teamId] });
+                toast.success("Team status updated successfully");
+              } catch (error) {
+                console.error("Error updating team status:", error);
+                toast.error("Failed to update team status");
+              }
+            }}
+          />
+
+          <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              Update Team
+            <Button 
+              onClick={onTeamUpdated}
+              disabled={isSubmitting}
+            >
+              Save Changes
             </Button>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
