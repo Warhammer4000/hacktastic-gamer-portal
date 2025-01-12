@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Search, UserMinus, UserPlus } from "lucide-react";
+import { Search, UserMinus, UserPlus } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,8 +23,8 @@ interface TeamMemberManagementProps {
 }
 
 export function TeamMemberManagement({
-  teamMembers,
-  availableParticipants,
+  teamMembers = [],
+  availableParticipants = [],
   leaderId,
   onMemberAdd,
   onMemberRemove,
@@ -36,10 +36,9 @@ export function TeamMemberManagement({
 
   const filteredParticipants = availableParticipants.filter(participant => {
     const searchLower = searchQuery.toLowerCase();
-    return (
-      (participant.full_name?.toLowerCase() || "").includes(searchLower) ||
-      participant.email.toLowerCase().includes(searchLower)
-    );
+    const fullName = participant?.full_name?.toLowerCase() || "";
+    const email = participant?.email?.toLowerCase() || "";
+    return fullName.includes(searchLower) || email.includes(searchLower);
   });
 
   return (
@@ -87,21 +86,24 @@ export function TeamMemberManagement({
                 value={searchQuery}
                 onValueChange={setSearchQuery}
               />
-              <CommandEmpty>No participants found.</CommandEmpty>
-              <CommandGroup className="max-h-[200px] overflow-y-auto">
-                {filteredParticipants.map((participant) => (
-                  <CommandItem
-                    key={participant.id}
-                    onSelect={() => onMemberAdd(participant.id)}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center">
-                      <span>{participant.full_name || participant.email}</span>
-                    </div>
-                    <UserPlus className="h-4 w-4 shrink-0 opacity-50" />
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+              {filteredParticipants.length === 0 ? (
+                <CommandEmpty>No participants found.</CommandEmpty>
+              ) : (
+                <CommandGroup className="max-h-[200px] overflow-y-auto">
+                  {filteredParticipants.map((participant) => (
+                    <CommandItem
+                      key={participant.id}
+                      onSelect={() => onMemberAdd(participant.id)}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center">
+                        <span>{participant.full_name || participant.email}</span>
+                      </div>
+                      <UserPlus className="h-4 w-4 shrink-0 opacity-50" />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
             </Command>
           </div>
         )}
