@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Search, UserMinus, UserPlus } from "lucide-react";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { Button } from "@/components/ui/button";
+import { UserMinus, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { SearchInput } from "../components/SearchInput";
 import type { TeamMember } from "./types";
 
 interface TeamMemberManagementProps {
@@ -79,32 +79,36 @@ export function TeamMemberManagement({
 
         {/* Add Members */}
         {!isLocked && teamMembers.length < maxMembers && (
-          <div className="border rounded-lg p-4">
-            <Command className="rounded-lg border shadow-md">
-              <CommandInput
-                placeholder="Search participants..."
-                value={searchQuery}
-                onValueChange={setSearchQuery}
-              />
+          <div className="border rounded-lg p-4 space-y-4">
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search participants..."
+            />
+            
+            <div className="max-h-[200px] overflow-y-auto space-y-2">
               {filteredParticipants.length === 0 ? (
-                <CommandEmpty>No participants found.</CommandEmpty>
+                <p className="text-sm text-muted-foreground p-2">No participants found.</p>
               ) : (
-                <CommandGroup className="max-h-[200px] overflow-y-auto">
-                  {filteredParticipants.map((participant) => (
-                    <CommandItem
-                      key={participant.id}
-                      onSelect={() => onMemberAdd(participant.id)}
-                      className="flex items-center justify-between"
+                filteredParticipants.map((participant) => (
+                  <div
+                    key={participant.id}
+                    className="flex items-center justify-between p-2 rounded-lg border"
+                  >
+                    <span className="text-sm">
+                      {participant.full_name || participant.email}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onMemberAdd(participant.id)}
                     >
-                      <div className="flex items-center">
-                        <span>{participant.full_name || participant.email}</span>
-                      </div>
-                      <UserPlus className="h-4 w-4 shrink-0 opacity-50" />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                      <UserPlus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))
               )}
-            </Command>
+            </div>
           </div>
         )}
       </CardContent>
