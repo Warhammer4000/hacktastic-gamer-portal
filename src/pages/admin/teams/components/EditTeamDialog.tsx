@@ -9,7 +9,6 @@ import {
 import { TeamMemberManagement } from "./edit-team/TeamMemberManagement";
 import { TeamBasicInfoFields } from "./edit-team/TeamBasicInfoFields";
 import { TeamStatusSection } from "./edit-team/TeamStatusSection";
-import { TeamMentorSection } from "./edit-team/TeamMentorSection";
 import { DialogFooter } from "./edit-team/DialogFooter";
 import { useTeamData } from "../hooks/useTeamData";
 import { useAvailableParticipants } from "../hooks/useAvailableParticipants";
@@ -86,13 +85,6 @@ export function EditTeamDialog({
               <TeamStatusSection
                 status={team.status as TeamStatus}
                 onStatusChange={handleStatusChange}
-              />
-
-              <TeamMentorSection
-                teamId={teamId}
-                mentorId={team.mentor_id}
-                teamName={team.name}
-                onMentorUpdated={onTeamUpdated}
               />
             </div>
 
