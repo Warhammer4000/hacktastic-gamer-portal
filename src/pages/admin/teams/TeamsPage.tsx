@@ -365,6 +365,7 @@ export default function TeamsPage() {
               queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
             }}
             teamId={selectedTeamId}
+            teamName={selectedTeam?.name || ''}
             teamTechStackId={selectedTeam?.tech_stack?.id || null}
             currentMentorId={selectedTeam?.mentor_id || null}
           />

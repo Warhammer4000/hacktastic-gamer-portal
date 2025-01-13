@@ -43,12 +43,12 @@ export function useMentorAssignment(teamId: string, teamTechStackId: string | nu
             .from("mentor_preferences")
             .select("team_count")
             .eq("mentor_id", mentor.id)
-            .single();
+            .maybeSingle();
 
           return {
             ...mentor,
             team_count: teams?.length || 0,
-            max_teams: preferences?.team_count || 2,
+            max_teams: preferences?.team_count || 2, // Default to 2 if no preferences set
           };
         })
       );
