@@ -1,5 +1,7 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { MentorWithTeams } from "../types";
 
 interface MentorCardProps {
@@ -9,50 +11,45 @@ interface MentorCardProps {
 }
 
 export function MentorCard({ mentor, isSelected, onSelect }: MentorCardProps) {
-  const initials = mentor.full_name
-    ? mentor.full_name.charAt(0).toUpperCase()
-    : mentor.email.charAt(0).toUpperCase();
-
   return (
-    <div
+    <Button
+      variant="outline"
       className={cn(
-        "p-4 border rounded-lg mb-2 cursor-pointer transition-colors",
-        isSelected ? "border-primary bg-primary/5" : "hover:bg-accent"
+        "w-full justify-start text-left h-auto p-4 space-y-2",
+        isSelected && "border-primary"
       )}
       onClick={() => onSelect(mentor.id)}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-start gap-3">
         <Avatar className="h-10 w-10">
-          {mentor.avatar_url ? (
-            <img
-              src={mentor.avatar_url}
-              alt={mentor.full_name || ""}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <AvatarFallback>{initials}</AvatarFallback>
-          )}
+          <AvatarImage src={mentor.avatar_url || undefined} alt={mentor.full_name || ''} />
+          <AvatarFallback>
+            {mentor.full_name?.[0] || mentor.email[0].toUpperCase()}
+          </AvatarFallback>
         </Avatar>
-        <div className="flex-1">
-          <h4 className="font-medium">
+        
+        <div className="flex-1 space-y-1">
+          <div className="font-medium">
             {mentor.full_name || mentor.email}
-          </h4>
-          <p className="text-sm text-muted-foreground">{mentor.email}</p>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {mentor.mentor_tech_stacks.map((ts, index) => (
-              <span
-                key={index}
-                className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded"
+          </div>
+          
+          <div className="text-sm text-muted-foreground">
+            {mentor.team_count} / {mentor.max_teams} teams assigned
+          </div>
+
+          <div className="flex flex-wrap gap-1">
+            {mentor.mentor_tech_stacks?.map((stack) => (
+              <Badge 
+                key={stack.technology_stacks.name} 
+                variant="secondary"
+                className="text-xs"
               >
-                {ts.technology_stacks.name}
-              </span>
+                {stack.technology_stacks.name}
+              </Badge>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Teams: {mentor.team_count} / {mentor.max_teams}
-          </p>
         </div>
       </div>
-    </div>
+    </Button>
   );
 }

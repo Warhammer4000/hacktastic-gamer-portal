@@ -29,7 +29,6 @@ export function AdminTeamActions({
 }: AdminTeamActionsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAssignMentorDialogOpen, setIsAssignMentorDialogOpen] = useState(false);
-  const [isReassignMentorDialogOpen, setIsReassignMentorDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
 
@@ -119,40 +118,8 @@ export function AdminTeamActions({
     }
   };
 
-  const handleReassignMentor = async () => {
-    try {
-      // First, remove current mentor
-      const { error: updateError } = await supabase
-        .from('teams')
-        .update({ mentor_id: null, status: 'locked' })
-        .eq('id', teamId);
-
-      if (updateError) throw updateError;
-
-      // Then, assign new mentor
-      const { data: mentorId, error: mentorError } = await supabase
-        .rpc('assign_mentor_to_team', { team_id: teamId });
-
-      if (mentorError) throw mentorError;
-
-      if (!mentorId) {
-        toast.error(
-          "No eligible mentors available. This could be because:" +
-          "\n- No mentors match the team's tech stack" +
-          "\n- Available mentors have reached their team limit"
-        );
-        return;
-      }
-
-      toast.success("Mentor reassigned successfully!");
-      queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
-    } catch (error) {
-      console.error('Error reassigning mentor:', error);
-      toast.error("Failed to reassign mentor");
-    } finally {
-      setIsReassignMentorDialogOpen(false);
-    }
-  };
+  const mentorActionText = currentMentorId ? "Reassign Mentor" : "Assign Mentor";
+  const mentorActionIcon = currentMentorId ? RefreshCw : UserPlus2;
 
   return (
     <>
@@ -170,18 +137,10 @@ export function AdminTeamActions({
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Team
           </DropdownMenuItem>
-          {!currentMentorId && (
-            <DropdownMenuItem onClick={() => setIsAssignMentorDialogOpen(true)}>
-              <UserPlus2 className="mr-2 h-4 w-4" />
-              Assign Mentor
-            </DropdownMenuItem>
-          )}
-          {currentMentorId && (
-            <DropdownMenuItem onClick={() => setIsReassignMentorDialogOpen(true)}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Reassign Mentor
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem onClick={() => setIsAssignMentorDialogOpen(true)}>
+            <mentorActionIcon className="mr-2 h-4 w-4" />
+            {mentorActionText}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -199,14 +158,10 @@ export function AdminTeamActions({
         teamName={teamName}
         teamId={teamId}
         teamTechStackId={teamTechStackId}
-        onConfirm={handleAssignMentor}
-      />
-
-      <ReassignMentorDialog
-        isOpen={isReassignMentorDialogOpen}
-        onOpenChange={setIsReassignMentorDialogOpen}
-        teamName={teamName}
-        onConfirm={handleReassignMentor}
+        currentMentorId={currentMentorId}
+        onConfirm={() => {
+          queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
+        }}
       />
     </>
   );

@@ -19,7 +19,7 @@ export function MentorList({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-6 h-6 animate-spin" />
+        <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
   }
@@ -27,21 +27,23 @@ export function MentorList({
   if (!mentors?.length) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        No mentors found matching the search criteria
+        No eligible mentors found matching the search criteria
       </div>
     );
   }
 
   return (
-    <ScrollArea className="flex-1 h-[400px] pr-4">
-      {mentors.map((mentor) => (
-        <MentorCard
-          key={mentor.id}
-          mentor={mentor}
-          isSelected={selectedMentorId === mentor.id}
-          onSelect={onMentorSelect}
-        />
-      ))}
+    <ScrollArea className="h-[400px] pr-4">
+      <div className="space-y-2">
+        {mentors.map((mentor) => (
+          <MentorCard
+            key={mentor.id}
+            mentor={mentor}
+            isSelected={selectedMentorId === mentor.id}
+            onSelect={onMentorSelect}
+          />
+        ))}
+      </div>
     </ScrollArea>
   );
 }

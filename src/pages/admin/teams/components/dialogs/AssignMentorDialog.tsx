@@ -1,9 +1,9 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { SearchInput } from "@/components/participant/teams/components/SearchInput";
 import { MentorList } from "./mentor-assignment/MentorList";
@@ -16,6 +16,7 @@ interface AssignMentorDialogProps {
   teamName: string;
   teamId: string;
   teamTechStackId: string | null;
+  currentMentorId?: string | null;
   onConfirm: () => void;
 }
 
@@ -25,6 +26,7 @@ export function AssignMentorDialog({
   teamName,
   teamId,
   teamTechStackId,
+  currentMentorId,
   onConfirm,
 }: AssignMentorDialogProps) {
   const {
@@ -47,15 +49,17 @@ export function AssignMentorDialog({
     }
   };
 
+  const title = currentMentorId ? "Reassign Mentor" : "Assign Mentor";
+  const description = currentMentorId 
+    ? `Choose a new mentor for team "${teamName}" or let the system auto-assign one based on tech stack and availability.`
+    : `Choose a mentor for team "${teamName}" or let the system auto-assign one based on tech stack and availability.`;
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Assign Mentor to {teamName}</DialogTitle>
-          <DialogDescription>
-            Choose a mentor manually or let the system auto-assign one based on
-            tech stack and availability.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 min-h-0 space-y-4">
