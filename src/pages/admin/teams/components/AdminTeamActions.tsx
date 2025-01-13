@@ -18,9 +18,15 @@ interface AdminTeamActionsProps {
   teamId: string;
   teamName: string;
   currentMentorId: string | null;
+  teamTechStackId: string | null;
 }
 
-export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTeamActionsProps) {
+export function AdminTeamActions({ 
+  teamId, 
+  teamName, 
+  currentMentorId,
+  teamTechStackId 
+}: AdminTeamActionsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAssignMentorDialogOpen, setIsAssignMentorDialogOpen] = useState(false);
   const [isReassignMentorDialogOpen, setIsReassignMentorDialogOpen] = useState(false);
@@ -191,6 +197,8 @@ export function AdminTeamActions({ teamId, teamName, currentMentorId }: AdminTea
         isOpen={isAssignMentorDialogOpen}
         onOpenChange={setIsAssignMentorDialogOpen}
         teamName={teamName}
+        teamId={teamId}
+        teamTechStackId={teamTechStackId}
         onConfirm={handleAssignMentor}
       />
 
