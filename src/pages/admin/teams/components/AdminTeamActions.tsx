@@ -119,7 +119,7 @@ export function AdminTeamActions({
   };
 
   const mentorActionText = currentMentorId ? "Reassign Mentor" : "Assign Mentor";
-  const mentorActionIcon = currentMentorId ? RefreshCw : UserPlus2;
+  const MentorActionIcon = currentMentorId ? RefreshCw : UserPlus2;
 
   return (
     <>
@@ -138,7 +138,7 @@ export function AdminTeamActions({
             Delete Team
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsAssignMentorDialogOpen(true)}>
-            <mentorActionIcon className="mr-2 h-4 w-4" />
+            <MentorActionIcon className="mr-2 h-4 w-4" />
             {mentorActionText}
           </DropdownMenuItem>
         </DropdownMenuContent>
