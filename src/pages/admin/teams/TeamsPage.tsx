@@ -9,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CreateTeamDialog } from "./components/CreateTeamDialog";
 import { EditTeamDialog } from "./components/EditTeamDialog";
-import { AssignMentorDialog } from "./components/AssignMentorDialog";
+import { AssignMentorDialog } from "./components/dialogs/AssignMentorDialog";
 import { toast } from "sonner";
 
 export default function TeamsPage() {
