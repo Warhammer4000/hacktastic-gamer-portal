@@ -357,15 +357,16 @@ export default function TeamsPage() {
 
           <AssignMentorDialog
             isOpen={isAssignMentorDialogOpen}
-            onClose={() => {
-              setIsAssignMentorDialogOpen(false);
-              setSelectedTeamId(null);
+            onOpenChange={(open) => {
+              setIsAssignMentorDialogOpen(open);
+              if (!open) setSelectedTeamId(null);
             }}
-            onMentorAssigned={() => {
+            onConfirm={() => {
               queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
             }}
             teamId={selectedTeamId}
-            teamTechStackId={selectedTeam?.tech_stack_id || null}
+            teamTechStackId={selectedTeam?.tech_stack?.id || null}
+            currentMentorId={selectedTeam?.mentor_id || null}
           />
         </>
       )}
