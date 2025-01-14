@@ -62,15 +62,13 @@ export function TeamList({
                 >
                   Edit
                 </Button>
-                {!team.mentor_id && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onAssignMentor(team.id)}
-                  >
-                    Assign Mentor
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onAssignMentor(team.id)}
+                >
+                  {team.mentor_id ? "Reassign Mentor" : "Assign Mentor"}
+                </Button>
                 <Button
                   variant="destructive"
                   size="sm"
