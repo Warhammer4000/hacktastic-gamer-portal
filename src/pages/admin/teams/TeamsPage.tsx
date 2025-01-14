@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CreateTeamDialog } from "./components/CreateTeamDialog";
 import { EditTeamDialog } from "./components/EditTeamDialog";
-import { AssignMentorDialog } from "./components/dialogs/AssignMentorDialog";
+import { AssignMentorDialog } from "./components/dialogs/mentor-assignment/AssignMentorDialog";
 import { TeamHeader } from "./components/TeamHeader";
 import { TeamList } from "./components/TeamList";
 

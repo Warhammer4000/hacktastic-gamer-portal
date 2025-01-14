@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeleteTeamDialog } from "./dialogs/DeleteTeamDialog";
-import { AssignMentorDialog } from "./dialogs/AssignMentorDialog";
+import { AssignMentorDialog } from "./dialogs/mentor-assignment/AssignMentorDialog";
 
 interface AdminTeamActionsProps {
   teamId: string;
