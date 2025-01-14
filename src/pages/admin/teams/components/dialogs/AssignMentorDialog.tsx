@@ -9,6 +9,7 @@ import { SearchInput } from "@/components/participant/teams/components/SearchInp
 import { MentorList } from "./mentor-assignment/MentorList";
 import { DialogFooter } from "./mentor-assignment/DialogFooter";
 import { useMentorAssignment } from "./mentor-assignment/useMentorAssignment";
+import { Badge } from "@/components/ui/badge";
 
 interface AssignMentorDialogProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export function AssignMentorDialog({
 }: AssignMentorDialogProps) {
   const {
     mentors,
+    currentMentor,
     isLoading,
     search,
     setSearch,
@@ -39,7 +41,7 @@ export function AssignMentorDialog({
     isAssigning,
     handleAutoAssign,
     handleManualAssign,
-  } = useMentorAssignment(teamId, teamTechStackId);
+  } = useMentorAssignment(teamId, teamTechStackId, currentMentorId);
 
   const handleConfirm = async (assignFn: () => Promise<boolean>) => {
     const success = await assignFn();
@@ -59,7 +61,19 @@ export function AssignMentorDialog({
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogDescription className="space-y-2">
+            {description}
+            {currentMentor && (
+              <div className="mt-2">
+                <p className="text-sm font-medium">Current Mentor:</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary">
+                    {currentMentor.full_name || currentMentor.email}
+                  </Badge>
+                </div>
+              </div>
+            )}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 min-h-0 space-y-4">

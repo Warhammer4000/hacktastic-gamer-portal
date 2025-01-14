@@ -1,13 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { MentorWithTeams } from "../types";
 
-export function useMentorAssignment(teamId: string, teamTechStackId: string | null) {
+export function useMentorAssignment(
+  teamId: string, 
+  teamTechStackId: string | null,
+  currentMentorId: string | null = null
+) {
   const [search, setSearch] = useState("");
   const [selectedMentorId, setSelectedMentorId] = useState<string | null>(null);
   const [isAssigning, setIsAssigning] = useState(false);
+
+  const { data: currentMentor } = useQuery({
+    queryKey: ["mentor-profile", currentMentorId],
+    queryFn: async () => {
+      if (!currentMentorId) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, avatar_url")
+        .eq("id", currentMentorId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentMentorId,
+  });
 
   const { data: mentors, isLoading } = useQuery({
     queryKey: ["eligible-mentors", teamTechStackId],
@@ -122,6 +142,7 @@ export function useMentorAssignment(teamId: string, teamTechStackId: string | nu
 
   return {
     mentors: filteredMentors,
+    currentMentor,
     isLoading,
     search,
     setSearch,

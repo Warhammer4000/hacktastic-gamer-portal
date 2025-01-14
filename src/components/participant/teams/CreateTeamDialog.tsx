@@ -5,11 +5,10 @@ import { toast } from "sonner";
 import { TeamForm, type TeamFormValues } from "./forms/TeamForm";
 
 interface CreateTeamDialogProps {
-  maxMembers: number;
   onTeamCreated?: () => Promise<void>;
 }
 
-export function CreateTeamDialog({ maxMembers, onTeamCreated }: CreateTeamDialogProps) {
+export function CreateTeamDialog({ onTeamCreated }: CreateTeamDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: techStacks, isLoading: isLoadingTechStacks } = useQuery({
@@ -26,6 +25,20 @@ export function CreateTeamDialog({ maxMembers, onTeamCreated }: CreateTeamDialog
     },
   });
 
+  const { data: teamSettings } = useQuery({
+    queryKey: ['team-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('team_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const handleSubmit = async (data: TeamFormValues) => {
     try {
       setIsSubmitting(true);
@@ -33,6 +46,7 @@ export function CreateTeamDialog({ maxMembers, onTeamCreated }: CreateTeamDialog
       if (!user) throw new Error("Not authenticated");
 
       const joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const maxMembers = teamSettings?.max_team_size || 3; // Default to 3 if no settings found
 
       const { data: team, error: teamError } = await supabase
         .from('teams')
