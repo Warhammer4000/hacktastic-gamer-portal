@@ -7,6 +7,7 @@ interface MentorListProps {
   mentors: MentorWithTeams[] | undefined;
   isLoading: boolean;
   selectedMentorId: string | null;
+  currentMentorId: string | null;
   onMentorSelect: (mentorId: string) => void;
 }
 
@@ -14,6 +15,7 @@ export function MentorList({
   mentors, 
   isLoading, 
   selectedMentorId,
+  currentMentorId,
   onMentorSelect 
 }: MentorListProps) {
   if (isLoading) {
@@ -40,6 +42,7 @@ export function MentorList({
             key={mentor.id}
             mentor={mentor}
             isSelected={selectedMentorId === mentor.id}
+            isCurrentMentor={currentMentorId === mentor.id}
             onSelect={onMentorSelect}
           />
         ))}

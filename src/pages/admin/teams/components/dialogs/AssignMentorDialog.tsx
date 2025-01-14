@@ -17,7 +17,7 @@ interface AssignMentorDialogProps {
   teamName: string;
   teamId: string;
   teamTechStackId: string | null;
-  currentMentorId?: string | null;
+  currentMentorId: string | null;
   onConfirm: () => void;
 }
 
@@ -88,6 +88,7 @@ export function AssignMentorDialog({
             mentors={mentors}
             isLoading={isLoading}
             selectedMentorId={selectedMentorId}
+            currentMentorId={currentMentorId}
             onMentorSelect={setSelectedMentorId}
           />
         </div>

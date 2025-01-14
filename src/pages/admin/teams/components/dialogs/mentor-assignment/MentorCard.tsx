@@ -8,15 +8,17 @@ interface MentorCardProps {
   mentor: MentorWithTeams;
   isSelected: boolean;
   onSelect: (mentorId: string) => void;
+  isCurrentMentor?: boolean;
 }
 
-export function MentorCard({ mentor, isSelected, onSelect }: MentorCardProps) {
+export function MentorCard({ mentor, isSelected, onSelect, isCurrentMentor }: MentorCardProps) {
   return (
     <Button
       variant="outline"
       className={cn(
         "w-full justify-start text-left h-auto p-4 space-y-2",
-        isSelected && "border-primary"
+        isSelected && "border-primary",
+        isCurrentMentor && "bg-muted"
       )}
       onClick={() => onSelect(mentor.id)}
     >
@@ -29,8 +31,13 @@ export function MentorCard({ mentor, isSelected, onSelect }: MentorCardProps) {
         </Avatar>
         
         <div className="flex-1 space-y-1">
-          <div className="font-medium">
-            {mentor.full_name || mentor.email}
+          <div className="flex items-center gap-2">
+            <span className="font-medium">
+              {mentor.full_name || mentor.email}
+            </span>
+            {isCurrentMentor && (
+              <Badge variant="secondary" className="text-xs">Current Mentor</Badge>
+            )}
           </div>
           
           <div className="text-sm text-muted-foreground">

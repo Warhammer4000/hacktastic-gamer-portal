@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DeleteTeamDialog } from "./dialogs/DeleteTeamDialog";
 import { AssignMentorDialog } from "./dialogs/AssignMentorDialog";
-import { ReassignMentorDialog } from "./dialogs/ReassignMentorDialog";
 
 interface AdminTeamActionsProps {
   teamId: string;
@@ -89,32 +88,6 @@ export function AdminTeamActions({
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
-    }
-  };
-
-  const handleAssignMentor = async () => {
-    try {
-      const { data: mentorId, error: mentorError } = await supabase
-        .rpc('assign_mentor_to_team', { team_id: teamId });
-
-      if (mentorError) throw mentorError;
-
-      if (!mentorId) {
-        toast.error(
-          "No eligible mentors available. This could be because:" +
-          "\n- No mentors match the team's tech stack" +
-          "\n- Available mentors have reached their team limit"
-        );
-        return;
-      }
-
-      toast.success("Mentor assigned successfully!");
-      queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
-    } catch (error) {
-      console.error('Error assigning mentor:', error);
-      toast.error("Failed to assign mentor");
-    } finally {
-      setIsAssignMentorDialogOpen(false);
     }
   };
 
