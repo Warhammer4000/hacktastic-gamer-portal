@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { SearchInput } from "@/components/participant/teams/components/SearchInput";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import type { TeamMember } from "./types";
 
 interface TeamMemberManagementProps {
@@ -29,10 +31,26 @@ export function TeamMemberManagement({
   onMemberAdd,
   onMemberRemove,
   onLeaderChange,
-  maxMembers = 4,
+  maxMembers,
   isLocked = false,
 }: TeamMemberManagementProps) {
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: teamSettings } = useQuery({
+    queryKey: ['team-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('team_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const effectiveMaxMembers = maxMembers || teamSettings?.max_team_size || 3;
 
   const filteredParticipants = availableParticipants.filter(participant => {
     const searchLower = searchQuery.toLowerCase();
@@ -78,7 +96,7 @@ export function TeamMemberManagement({
         </div>
 
         {/* Add Members */}
-        {!isLocked && teamMembers.length < maxMembers && (
+        {!isLocked && teamMembers.length < effectiveMaxMembers && (
           <div className="border rounded-lg p-4 space-y-4">
             <SearchInput
               value={searchQuery}

@@ -62,6 +62,20 @@ export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamD
     },
   });
 
+  const { data: teamSettings } = useQuery({
+    queryKey: ['team-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('team_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -79,6 +93,7 @@ export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamD
           leader_id: leaderId,
           join_code: joinCode,
           status: "draft",
+          max_members: teamSettings?.max_team_size,
         })
         .select()
         .single();
