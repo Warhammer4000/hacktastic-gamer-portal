@@ -3,11 +3,10 @@ import { CreateTeamDialog } from "../CreateTeamDialog";
 import { JoinTeamSection } from "../JoinTeamSection";
 
 interface CreateTeamSectionProps {
-  maxMembers: number;
   onTeamJoined: () => Promise<void>;
 }
 
-export function CreateTeamSection({ maxMembers, onTeamJoined }: CreateTeamSectionProps) {
+export function CreateTeamSection({ onTeamJoined }: CreateTeamSectionProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2 h-[calc(100vh-12rem)]">
       <Card className="h-full">
@@ -19,7 +18,7 @@ export function CreateTeamSection({ maxMembers, onTeamJoined }: CreateTeamSectio
             </p>
           </div>
           <div className="flex-1">
-            <CreateTeamDialog maxMembers={maxMembers} onTeamCreated={onTeamJoined} />
+            <CreateTeamDialog onTeamCreated={onTeamJoined} />
           </div>
         </div>
       </Card>
