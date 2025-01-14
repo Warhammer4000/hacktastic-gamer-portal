@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegistrationSettings } from "./sections/RegistrationSettings";
 import { GitHubSettings } from "./sections/GitHubSettings";
+import { TeamSettings } from "./sections/TeamSettings";
 
 const AdminSettings = () => {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ const AdminSettings = () => {
       <Tabs defaultValue="registration" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="registration">Registration</TabsTrigger>
+          <TabsTrigger value="teams">Teams</TabsTrigger>
           <TabsTrigger value="github">GitHub</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -50,6 +52,10 @@ const AdminSettings = () => {
 
         <TabsContent value="registration">
           <RegistrationSettings />
+        </TabsContent>
+
+        <TabsContent value="teams">
+          <TeamSettings />
         </TabsContent>
         
         <TabsContent value="github">

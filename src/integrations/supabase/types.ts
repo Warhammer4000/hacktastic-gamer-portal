@@ -958,6 +958,27 @@ export type Database = {
           },
         ]
       }
+      team_settings: {
+        Row: {
+          created_at: string
+          id: string
+          max_team_size: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_team_size?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_team_size?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       teams: {
         Row: {
           created_at: string
