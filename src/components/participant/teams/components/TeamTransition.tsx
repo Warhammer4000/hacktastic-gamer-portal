@@ -28,10 +28,7 @@ export function TeamTransition({
           exit={{ opacity: 0, x: -100 }}
           transition={{ duration: 0.3 }}
         >
-          <CreateTeamSection 
-            maxMembers={3} 
-            onTeamJoined={onTeamJoined}
-          />
+          <CreateTeamSection onTeamJoined={onTeamJoined} />
         </motion.div>
       ) : (
         <motion.div
