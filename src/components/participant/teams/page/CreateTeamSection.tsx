@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { CreateTeamDialog } from "../CreateTeamDialog";
 import { JoinTeamSection } from "../JoinTeamSection";
+import { Button } from "@/components/ui/button";
 
 interface CreateTeamSectionProps {
   onTeamJoined: () => Promise<void>;
 }
 
 export function CreateTeamSection({ onTeamJoined }: CreateTeamSectionProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <div className="grid gap-6 md:grid-cols-2 h-[calc(100vh-12rem)]">
       <Card className="h-full">
@@ -18,7 +22,14 @@ export function CreateTeamSection({ onTeamJoined }: CreateTeamSectionProps) {
             </p>
           </div>
           <div className="flex-1">
-            <CreateTeamDialog onTeamCreated={onTeamJoined} />
+            <Button onClick={() => setIsDialogOpen(true)}>
+              Create New Team
+            </Button>
+            <CreateTeamDialog 
+              isOpen={isDialogOpen}
+              onClose={() => setIsDialogOpen(false)}
+              onTeamCreated={onTeamJoined}
+            />
           </div>
         </div>
       </Card>
