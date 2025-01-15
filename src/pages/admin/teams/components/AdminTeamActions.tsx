@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MoreVertical, Trash2, UserPlus2, RefreshCw } from "lucide-react";
+import { MoreVertical, Trash2, UserPlus2, RefreshCw, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,22 +12,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DeleteTeamDialog } from "./dialogs/DeleteTeamDialog";
 import { AssignMentorDialog } from "./dialogs/mentor-assignment/AssignMentorDialog";
+import { TeamRepositoryDialog } from "./dialogs/repository/TeamRepositoryDialog";
 
 interface AdminTeamActionsProps {
   teamId: string;
   teamName: string;
   currentMentorId: string | null;
   teamTechStackId: string | null;
+  repositoryUrl: string | null;
 }
 
 export function AdminTeamActions({ 
   teamId, 
   teamName, 
   currentMentorId,
-  teamTechStackId 
+  teamTechStackId,
+  repositoryUrl
 }: AdminTeamActionsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAssignMentorDialogOpen, setIsAssignMentorDialogOpen] = useState(false);
+  const [isRepositoryDialogOpen, setIsRepositoryDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
 
@@ -114,6 +118,10 @@ export function AdminTeamActions({
             <MentorActionIcon className="mr-2 h-4 w-4" />
             {mentorActionText}
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsRepositoryDialogOpen(true)}>
+            <Github className="mr-2 h-4 w-4" />
+            Manage Repository
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -135,6 +143,14 @@ export function AdminTeamActions({
         onConfirm={() => {
           queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
         }}
+      />
+
+      <TeamRepositoryDialog
+        isOpen={isRepositoryDialogOpen}
+        onOpenChange={setIsRepositoryDialogOpen}
+        teamId={teamId}
+        teamName={teamName}
+        currentRepositoryUrl={repositoryUrl}
       />
     </>
   );
