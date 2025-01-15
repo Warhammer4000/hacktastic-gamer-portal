@@ -14,7 +14,6 @@ export function useAvailableParticipants(teamId: string, teamMembers: any[] = []
           id,
           full_name,
           email,
-          avatar_url,
           user_roles!inner (role)
         `)
         .eq("user_roles.role", "participant")

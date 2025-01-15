@@ -3,37 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TeamForm, type TeamFormValues } from "./forms/TeamForm";
-import { ParticipantSelect } from "@/pages/admin/teams/components/ParticipantSelect";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface CreateTeamDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
   onTeamCreated?: () => Promise<void>;
 }
 
-export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamDialogProps) {
+export function CreateTeamDialog({ onTeamCreated }: CreateTeamDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [techStackId, setTechStackId] = useState("");
-  const [leaderId, setLeaderId] = useState("");
 
   const { data: techStacks, isLoading: isLoadingTechStacks } = useQuery({
     queryKey: ['technology-stacks'],
@@ -63,25 +39,22 @@ export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamD
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!leaderId) {
-      toast.error("Please select a team leader");
-      return;
-    }
-
+  const handleSubmit = async (data: TeamFormValues) => {
     try {
       setIsSubmitting(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      const maxMembers = teamSettings?.max_team_size || 3;
+      const maxMembers = teamSettings?.max_team_size || 3; // Default to 3 if no settings found
 
       const { data: team, error: teamError } = await supabase
         .from('teams')
         .insert({
-          name,
-          description,
-          tech_stack_id: techStackId,
-          leader_id: leaderId,
+          name: data.name,
+          description: data.description,
+          tech_stack_id: data.techStackId,
+          leader_id: user.id,
           join_code: joinCode,
           max_members: maxMembers,
         })
@@ -95,7 +68,7 @@ export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamD
         .from('team_members')
         .insert({
           team_id: team.id,
-          user_id: leaderId,
+          user_id: user.id,
           is_ready: true, // Leader is automatically ready
         });
 
@@ -105,7 +78,6 @@ export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamD
       if (onTeamCreated) {
         await onTeamCreated();
       }
-      onClose();
     } catch (error) {
       toast.error("Failed to create team. Please try again.");
       console.error("Error creating team:", error);
@@ -115,67 +87,12 @@ export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamD
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create New Team</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Team Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="tech-stack">Technology Stack</Label>
-            <Select value={techStackId} onValueChange={setTechStackId} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select tech stack" />
-              </SelectTrigger>
-              <SelectContent>
-                {techStacks?.map((stack) => (
-                  <SelectItem key={stack.id} value={stack.id}>
-                    {stack.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Team Leader</Label>
-            <ParticipantSelect
-              value={leaderId}
-              onValueChange={setLeaderId}
-              teamId=""
-              teamMembers={[]}
-            />
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose} type="button">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              Create Team
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <TeamForm
+      onSubmit={handleSubmit}
+      techStacks={techStacks}
+      isLoadingTechStacks={isLoadingTechStacks}
+      submitLabel="Create Team"
+      isSubmitting={isSubmitting}
+    />
   );
 }

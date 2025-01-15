@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAvailableParticipants } from "../hooks/useAvailableParticipants";
+import { useAvailableParticipants } from "../../hooks/useAvailableParticipants";
 
 interface ParticipantSelectProps {
   value?: string;
