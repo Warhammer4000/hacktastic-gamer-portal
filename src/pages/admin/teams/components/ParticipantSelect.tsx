@@ -1,19 +1,8 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, Search } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAvailableParticipants } from "../hooks/useAvailableParticipants";
 
@@ -22,37 +11,16 @@ interface ParticipantSelectProps {
   onValueChange: (value: string) => void;
   teamId: string;
   teamMembers?: any[];
-  className?: string;
 }
 
 export function ParticipantSelect({ 
   value, 
   onValueChange, 
   teamId,
-  teamMembers = [],
-  className 
+  teamMembers = [] 
 }: ParticipantSelectProps) {
-  const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  
   const { data: participants, isLoading } = useAvailableParticipants(teamId, teamMembers);
-
-  if (isLoading) {
-    return (
-      <Button
-        variant="outline"
-        className={cn("w-full justify-start text-left font-normal", className)}
-        disabled
-      >
-        <span>Loading participants...</span>
-      </Button>
-    );
-  }
-
-  const getParticipantLabel = (participantId: string) => {
-    const participant = participants?.find(p => p.id === participantId);
-    return participant?.full_name || participant?.email || "Unknown participant";
-  };
 
   const filteredParticipants = participants?.filter(participant => {
     const searchLower = searchQuery.toLowerCase();
@@ -63,71 +31,57 @@ export function ParticipantSelect({
   });
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn("w-full justify-between", className)}
-        >
-          <div className="flex items-center gap-2">
-            <Search className="h-4 w-4 shrink-0 opacity-50" />
-            <span className="truncate">
-              {value ? getParticipantLabel(value) : "Search participants..."}
-            </span>
-          </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0">
-        <Command>
-          <CommandInput 
-            placeholder="Search by name or email..." 
-            value={searchQuery}
-            onValueChange={setSearchQuery}
-          />
-          {filteredParticipants?.length === 0 ? (
-            <CommandEmpty>No participant found.</CommandEmpty>
+    <div className="space-y-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Search participants..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
+      <Card className="relative">
+        <ScrollArea className="h-[300px]">
+          {isLoading ? (
+            <div className="p-4 text-center text-muted-foreground">
+              Loading participants...
+            </div>
+          ) : filteredParticipants?.length === 0 ? (
+            <div className="p-4 text-center text-muted-foreground">
+              No participants found
+            </div>
           ) : (
-            <CommandGroup className="max-h-[300px] overflow-y-auto">
+            <div className="p-2 space-y-2">
               {filteredParticipants?.map((participant) => (
-                <CommandItem
+                <button
                   key={participant.id}
-                  value={participant.id}
-                  onSelect={(currentValue) => {
-                    onValueChange(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
+                  type="button"
+                  onClick={() => onValueChange(participant.id)}
+                  className={`w-full p-3 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors
+                    ${value === participant.id ? 'bg-primary/10 text-primary' : ''}`}
                 >
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={participant.avatar_url || undefined} alt={participant.full_name || ''} />
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={participant.avatar_url || ''} alt={participant.full_name || ''} />
                       <AvatarFallback>
                         {participant.full_name?.[0] || participant.email[0].toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col">
-                      {participant.full_name && (
-                        <span className="font-medium">{participant.full_name}</span>
-                      )}
+                    <div className="flex flex-col items-start text-left">
+                      <span className="font-medium">{participant.full_name || 'Unnamed'}</span>
                       <span className="text-sm text-muted-foreground">
-                        {participant.email}
+                        {participant.institution?.name || 'No institution'}
                       </span>
                     </div>
-                    <Check
-                      className={cn(
-                        "ml-auto h-4 w-4",
-                        value === participant.id ? "opacity-100" : "opacity-0"
-                      )}
-                    />
                   </div>
-                </CommandItem>
+                </button>
               ))}
-            </CommandGroup>
+            </div>
           )}
-        </Command>
-      </PopoverContent>
-    </Popover>
+        </ScrollArea>
+      </Card>
+    </div>
   );
 }
