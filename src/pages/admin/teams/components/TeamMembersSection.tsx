@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { TeamMemberSelect } from "../TeamMemberSelect";
+import { TeamMemberSelect } from "./TeamMemberSelect";
 import { Button } from "@/components/ui/button";
 
 interface TeamMembersSectionProps {
