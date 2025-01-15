@@ -20,13 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ParticipantSelect } from "@/pages/admin/teams/components/forms/fields/ParticipantSelect";
 
 export const teamFormSchema = z.object({
   name: z.string().min(3, "Team name must be at least 3 characters"),
   description: z.string().optional(),
   techStackId: z.string().uuid("Please select a technology stack"),
-  leaderId: z.string().uuid("Please select a team leader"),
 });
 
 export type TeamFormValues = z.infer<typeof teamFormSchema>;
@@ -122,24 +120,6 @@ export function TeamForm({
                     )}
                   </SelectContent>
                 </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="leaderId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-base">Team Leader</FormLabel>
-                <FormControl>
-                  <ParticipantSelect
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    error={!!form.formState.errors.leaderId}
-                  />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
