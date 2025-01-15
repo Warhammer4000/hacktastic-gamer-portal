@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, User, Github, Linkedin, Blocks } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { AdminTeamActions } from "./AdminTeamActions";
 
 interface TeamListProps {
   teams: any[];
