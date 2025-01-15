@@ -55,27 +55,13 @@ export function TeamList({
                 <Badge className={getStatusColor(team.status)}>
                   {team.status.replace('_', ' ').toUpperCase()}
                 </Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEditTeam(team.id)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onAssignMentor(team.id)}
-                >
-                  {team.mentor_id ? "Reassign Mentor" : "Assign Mentor"}
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => onDeleteTeam(team.id)}
-                >
-                  Delete
-                </Button>
+                <AdminTeamActions
+                  teamId={team.id}
+                  teamName={team.name}
+                  currentMentorId={team.mentor_id}
+                  teamTechStackId={team.tech_stack_id}
+                  repositoryUrl={team.repository_url}
+                />
               </div>
             </div>
           </CardHeader>
