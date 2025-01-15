@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { ParticipantSelect } from "./ParticipantSelect";
 
 interface CreateTeamDialogProps {
   isOpen: boolean;
@@ -40,23 +41,6 @@ export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamD
         .from("technology_stacks")
         .select("*")
         .eq("status", "active");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: participants } = useQuery({
-    queryKey: ["participants"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(`
-          id,
-          full_name,
-          email,
-          user_roles!inner (role)
-        `)
-        .eq("user_roles.role", "participant");
       if (error) throw error;
       return data;
     },
@@ -166,18 +150,12 @@ export function CreateTeamDialog({ isOpen, onClose, onTeamCreated }: CreateTeamD
 
           <div className="space-y-2">
             <Label htmlFor="leader">Team Leader</Label>
-            <Select value={leaderId} onValueChange={setLeaderId} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select team leader" />
-              </SelectTrigger>
-              <SelectContent>
-                {participants?.map((participant) => (
-                  <SelectItem key={participant.id} value={participant.id}>
-                    {participant.full_name || participant.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <ParticipantSelect 
+              value={leaderId}
+              onValueChange={setLeaderId}
+              teamId=""
+              teamMembers={[]}
+            />
           </div>
 
           <div className="flex justify-end gap-2">
