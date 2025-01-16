@@ -12,7 +12,7 @@ import { useMentorAssignment } from "./useMentorAssignment";
 import { Badge } from "@/components/ui/badge";
 
 interface AssignMentorDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
   teamName: string;
   teamId: string;
@@ -22,7 +22,7 @@ interface AssignMentorDialogProps {
 }
 
 export function AssignMentorDialog({
-  isOpen,
+  open,
   onOpenChange,
   teamName,
   teamId,
@@ -57,7 +57,7 @@ export function AssignMentorDialog({
     : `Choose a mentor for team "${teamName}" or let the system auto-assign one based on tech stack and availability.`;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

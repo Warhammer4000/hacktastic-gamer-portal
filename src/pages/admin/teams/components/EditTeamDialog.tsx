@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { TeamMemberManagement } from "./edit-team/TeamMemberManagement";
 import { TeamBasicInfoFields } from "./edit-team/TeamBasicInfoFields";
