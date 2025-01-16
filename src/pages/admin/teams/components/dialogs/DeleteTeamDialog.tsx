@@ -8,40 +8,55 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface DeleteTeamDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
   teamName: string;
-  isDeleting: boolean;
-  onConfirm: () => void;
+  teamId: string;
 }
 
 export function DeleteTeamDialog({
-  isOpen,
+  open,
   onOpenChange,
   teamName,
-  isDeleting,
-  onConfirm,
+  teamId,
 }: DeleteTeamDialogProps) {
+  const queryClient = useQueryClient();
+
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase.rpc('delete_team_cascade', {
+        team_id_input: teamId
+      });
+
+      if (error) throw error;
+
+      toast.success("Team deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error deleting team:', error);
+      toast.error("Failed to delete team");
+    }
+  };
+
   return (
-    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Team</AlertDialogTitle>
           <AlertDialogDescription>
             Are you sure you want to delete the team "{teamName}"? This action cannot be undone.
-            All team members will be removed, the GitHub repository will be deleted, and any associated data will be permanently deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Deleting..." : "Delete Team"}
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete}>
+            Delete Team
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

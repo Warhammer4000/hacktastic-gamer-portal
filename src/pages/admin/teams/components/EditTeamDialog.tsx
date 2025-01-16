@@ -1,11 +1,4 @@
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { TeamMemberManagement } from "./edit-team/TeamMemberManagement";
 import { TeamBasicInfoFields } from "./edit-team/TeamBasicInfoFields";
 import { TeamStatusSection } from "./edit-team/TeamStatusSection";
@@ -16,16 +9,14 @@ import { teamMutations } from "../services/teamMutations";
 import type { TeamStatus } from "./edit-team/types";
 
 interface EditTeamDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onTeamUpdated: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   teamId: string;
 }
 
 export function EditTeamDialog({ 
-  isOpen, 
-  onClose, 
-  onTeamUpdated, 
+  open, 
+  onOpenChange, 
   teamId 
 }: EditTeamDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,12 +56,8 @@ export function EditTeamDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[900px] h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Edit Team</DialogTitle>
-        </DialogHeader>
-
         <div className="flex-1 overflow-y-auto space-y-6 pr-2">
           <div className="grid grid-cols-2 gap-6">
             {/* Left Column */}
@@ -105,8 +92,11 @@ export function EditTeamDialog({
         </div>
 
         <DialogFooter
-          onClose={onClose}
-          onSave={onTeamUpdated}
+          onClose={() => onOpenChange(false)}
+          onSave={() => {
+            queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
+            onOpenChange(false);
+          }}
           isSubmitting={isSubmitting}
         />
       </DialogContent>

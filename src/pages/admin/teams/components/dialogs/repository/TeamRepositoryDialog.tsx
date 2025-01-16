@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface TeamRepositoryDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
   teamId: string;
   teamName: string;
@@ -22,7 +22,7 @@ interface TeamRepositoryDialogProps {
 }
 
 export function TeamRepositoryDialog({
-  isOpen,
+  open,
   onOpenChange,
   teamId,
   teamName,
@@ -38,7 +38,6 @@ export function TeamRepositoryDialog({
       return;
     }
 
-    // Basic GitHub URL validation
     const githubUrlPattern = /^https:\/\/github\.com\/[\w-]+\/[\w-]+$/;
     if (!githubUrlPattern.test(manualUrl)) {
       toast.error("Please enter a valid GitHub repository URL");
@@ -55,7 +54,7 @@ export function TeamRepositoryDialog({
       if (error) throw error;
 
       toast.success("Repository URL updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
+      queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating repository URL:", error);
@@ -82,7 +81,7 @@ export function TeamRepositoryDialog({
       }
 
       toast.success("Repository created successfully!");
-      queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
+      queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
       onOpenChange(false);
     } catch (error) {
       console.error("Error creating repository:", error);
@@ -93,7 +92,7 @@ export function TeamRepositoryDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Manage Team Repository</DialogTitle>

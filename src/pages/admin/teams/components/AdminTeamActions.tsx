@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { MoreVertical, Trash2, UserPlus2, RefreshCw, Github, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,71 +27,30 @@ export function AdminTeamActions({
   teamTechStackId,
   repositoryUrl
 }: AdminTeamActionsProps) {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isAssignMentorDialogOpen, setIsAssignMentorDialogOpen] = useState(false);
-  const [isRepositoryDialogOpen, setIsRepositoryDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const queryClient = useQueryClient();
+  const [dialogState, setDialogState] = useState<{
+    delete: boolean;
+    mentor: boolean;
+    repository: boolean;
+    edit: boolean;
+  }>({
+    delete: false,
+    mentor: false,
+    repository: false,
+    edit: false,
+  });
 
-  const handleDeleteTeam = async () => {
-    try {
-      setIsDeleting(true);
-      console.log('Starting team deletion process for team:', teamId);
+  const closeAllDialogs = () => {
+    setDialogState({
+      delete: false,
+      mentor: false,
+      repository: false,
+      edit: false,
+    });
+  };
 
-      // Get the repository URL before deleting the team
-      const { data: team, error: teamError } = await supabase
-        .from('teams')
-        .select('repository_url')
-        .eq('id', teamId)
-        .single();
-
-      if (teamError) {
-        console.error('Error fetching team:', teamError);
-        throw new Error('Failed to fetch team details');
-      }
-
-      // First try to delete the team and its related records from the database
-      const { data: success, error: dbError } = await supabase
-        .rpc('delete_team_cascade', { team_id_input: teamId });
-
-      if (dbError || !success) {
-        console.error('Error deleting team from database:', dbError);
-        throw new Error(dbError?.message || 'Failed to delete team from database');
-      }
-
-      console.log('Successfully deleted team from database');
-
-      // Only try to delete the GitHub repository if database deletion was successful
-      // and if the team had a repository URL
-      if (team?.repository_url) {
-        try {
-          const { error: repoError } = await supabase.functions.invoke('delete-team-repository', {
-            body: { 
-              teamId,
-              repositoryUrl: team.repository_url
-            }
-          });
-
-          if (repoError) {
-            console.error('Error deleting repository:', repoError);
-            toast.error("Team deleted but failed to delete GitHub repository");
-          }
-        } catch (repoError) {
-          console.error('Repository deletion error:', repoError);
-          toast.error("Team deleted but failed to delete GitHub repository");
-        }
-      }
-
-      toast.success("Team deleted successfully");
-      queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
-    } catch (error) {
-      console.error('Error in delete operation:', error);
-      toast.error(error instanceof Error ? error.message : "Failed to delete team");
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-    }
+  const openDialog = (dialog: keyof typeof dialogState) => {
+    closeAllDialogs();
+    setDialogState(prev => ({ ...prev, [dialog]: true }));
   };
 
   const mentorActionText = currentMentorId ? "Reassign Mentor" : "Assign Mentor";
@@ -109,22 +65,22 @@ export function AdminTeamActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+          <DropdownMenuItem onClick={() => openDialog('edit')}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Team
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => setIsDeleteDialogOpen(true)}
+            onClick={() => openDialog('delete')}
             className="text-destructive"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Team
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsAssignMentorDialogOpen(true)}>
+          <DropdownMenuItem onClick={() => openDialog('mentor')}>
             <MentorActionIcon className="mr-2 h-4 w-4" />
             {mentorActionText}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsRepositoryDialogOpen(true)}>
+          <DropdownMenuItem onClick={() => openDialog('repository')}>
             <Github className="mr-2 h-4 w-4" />
             Manage Repository
           </DropdownMenuItem>
@@ -132,39 +88,32 @@ export function AdminTeamActions({
       </DropdownMenu>
 
       <DeleteTeamDialog
-        isOpen={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
+        open={dialogState.delete}
+        onOpenChange={(open) => setDialogState(prev => ({ ...prev, delete: open }))}
         teamName={teamName}
-        isDeleting={isDeleting}
-        onConfirm={handleDeleteTeam}
+        teamId={teamId}
       />
 
       <AssignMentorDialog
-        isOpen={isAssignMentorDialogOpen}
-        onOpenChange={setIsAssignMentorDialogOpen}
+        open={dialogState.mentor}
+        onOpenChange={(open) => setDialogState(prev => ({ ...prev, mentor: open }))}
         teamName={teamName}
         teamId={teamId}
         teamTechStackId={teamTechStackId}
         currentMentorId={currentMentorId}
-        onConfirm={() => {
-          queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
-        }}
       />
 
       <TeamRepositoryDialog
-        isOpen={isRepositoryDialogOpen}
-        onOpenChange={setIsRepositoryDialogOpen}
+        open={dialogState.repository}
+        onOpenChange={(open) => setDialogState(prev => ({ ...prev, repository: open }))}
         teamId={teamId}
         teamName={teamName}
         currentRepositoryUrl={repositoryUrl}
       />
 
       <EditTeamDialog
-        isOpen={isEditDialogOpen}
-        onClose={() => setIsEditDialogOpen(false)}
-        onTeamUpdated={() => {
-          queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
-        }}
+        open={dialogState.edit}
+        onOpenChange={(open) => setDialogState(prev => ({ ...prev, edit: open }))}
         teamId={teamId}
       />
     </>
