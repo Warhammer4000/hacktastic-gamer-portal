@@ -28,33 +28,12 @@ export function AdminTeamActions({
   teamTechStackId,
   repositoryUrl
 }: AdminTeamActionsProps) {
-  const [dialogState, setDialogState] = useState<{
-    delete: boolean;
-    mentor: boolean;
-    repository: boolean;
-    edit: boolean;
-  }>({
-    delete: false,
-    mentor: false,
-    repository: false,
-    edit: false,
-  });
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isMentorOpen, setIsMentorOpen] = useState(false);
+  const [isRepositoryOpen, setIsRepositoryOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const queryClient = useQueryClient();
-
-  const closeAllDialogs = () => {
-    setDialogState({
-      delete: false,
-      mentor: false,
-      repository: false,
-      edit: false,
-    });
-  };
-
-  const openDialog = (dialog: keyof typeof dialogState) => {
-    closeAllDialogs();
-    setDialogState(prev => ({ ...prev, [dialog]: true }));
-  };
 
   const mentorActionText = currentMentorId ? "Reassign Mentor" : "Assign Mentor";
   const MentorActionIcon = currentMentorId ? RefreshCw : UserPlus2;
@@ -68,22 +47,22 @@ export function AdminTeamActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => openDialog('edit')}>
+          <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Team
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => openDialog('delete')}
+            onClick={() => setIsDeleteOpen(true)}
             className="text-destructive"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Team
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openDialog('mentor')}>
+          <DropdownMenuItem onClick={() => setIsMentorOpen(true)}>
             <MentorActionIcon className="mr-2 h-4 w-4" />
             {mentorActionText}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openDialog('repository')}>
+          <DropdownMenuItem onClick={() => setIsRepositoryOpen(true)}>
             <Github className="mr-2 h-4 w-4" />
             Manage Repository
           </DropdownMenuItem>
@@ -91,15 +70,15 @@ export function AdminTeamActions({
       </DropdownMenu>
 
       <DeleteTeamDialog
-        open={dialogState.delete}
-        onOpenChange={(open) => setDialogState(prev => ({ ...prev, delete: open }))}
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
         teamName={teamName}
         teamId={teamId}
       />
 
       <AssignMentorDialog
-        open={dialogState.mentor}
-        onOpenChange={(open) => setDialogState(prev => ({ ...prev, mentor: open }))}
+        open={isMentorOpen}
+        onOpenChange={setIsMentorOpen}
         onConfirm={() => {
           queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
         }}
@@ -110,16 +89,16 @@ export function AdminTeamActions({
       />
 
       <TeamRepositoryDialog
-        open={dialogState.repository}
-        onOpenChange={(open) => setDialogState(prev => ({ ...prev, repository: open }))}
+        open={isRepositoryOpen}
+        onOpenChange={setIsRepositoryOpen}
         teamId={teamId}
         teamName={teamName}
         currentRepositoryUrl={repositoryUrl}
       />
 
       <EditTeamDialog
-        open={dialogState.edit}
-        onOpenChange={(open) => setDialogState(prev => ({ ...prev, edit: open }))}
+        open={isEditOpen}
+        onOpenChange={setIsEditOpen}
         teamId={teamId}
       />
     </>
