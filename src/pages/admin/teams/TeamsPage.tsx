@@ -131,7 +131,7 @@ export default function TeamsPage() {
 
       {selectedTeamId && (
         <AssignMentorDialog
-          isOpen={isAssignMentorDialogOpen}
+          open={isAssignMentorDialogOpen}
           onOpenChange={(open) => {
             setIsAssignMentorDialogOpen(open);
             if (!open) setSelectedTeamId(null);

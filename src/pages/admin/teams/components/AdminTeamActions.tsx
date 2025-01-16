@@ -11,6 +11,7 @@ import { DeleteTeamDialog } from "./dialogs/DeleteTeamDialog";
 import { AssignMentorDialog } from "./dialogs/mentor-assignment/AssignMentorDialog";
 import { TeamRepositoryDialog } from "./dialogs/repository/TeamRepositoryDialog";
 import { EditTeamDialog } from "./EditTeamDialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AdminTeamActionsProps {
   teamId: string;
@@ -38,6 +39,8 @@ export function AdminTeamActions({
     repository: false,
     edit: false,
   });
+
+  const queryClient = useQueryClient();
 
   const closeAllDialogs = () => {
     setDialogState({
@@ -97,6 +100,9 @@ export function AdminTeamActions({
       <AssignMentorDialog
         open={dialogState.mentor}
         onOpenChange={(open) => setDialogState(prev => ({ ...prev, mentor: open }))}
+        onConfirm={() => {
+          queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
+        }}
         teamName={teamName}
         teamId={teamId}
         teamTechStackId={teamTechStackId}
