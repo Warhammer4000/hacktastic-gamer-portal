@@ -30,7 +30,8 @@ export default function BulkMentorUploadDialog({ open, onOpenChange }: BulkMento
   };
 
   const downloadTemplate = () => {
-    const csvContent = "email,full_name,github_username,linkedin_profile_id,institution_name,team_count\nexample@email.com,John Doe,johndoe,john-doe-123,Example University,2";
+    const csvContent = "email,full_name,github_username,linkedin_profile_id,institution_name,bio,avatar_url,team_count,tech_stacks\n" +
+                      "example@email.com,John Doe,johndoe,john-doe-123,Example University,Experienced developer,https://example.com/avatar.jpg,2,React;Node.js;TypeScript";
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');

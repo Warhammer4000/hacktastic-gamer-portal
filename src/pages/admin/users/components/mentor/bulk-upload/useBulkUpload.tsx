@@ -19,7 +19,18 @@ export function useBulkUpload(onSuccess: () => void) {
       const results: UploadResult[] = [];
 
       for (const row of rows) {
-        const [email, fullName, githubUsername, linkedinProfileId, institutionName, teamCount] = row.split(',').map(field => field.trim());
+        const [
+          email, 
+          fullName, 
+          githubUsername, 
+          linkedinProfileId, 
+          institutionName, 
+          bio, 
+          avatarUrl, 
+          teamCount, 
+          techStacks
+        ] = row.split(',').map(field => field.trim());
+
         if (!email || !fullName) continue;
 
         const password = Math.random().toString(36).slice(-8); // Generate random password
@@ -76,7 +87,10 @@ export function useBulkUpload(onSuccess: () => void) {
             .update({
               github_username: githubUsername,
               linkedin_profile_id: linkedinProfileId,
-              institution_id: institutionId
+              institution_id: institutionId,
+              bio: bio || null,
+              avatar_url: avatarUrl || null,
+              status: 'pending_approval'
             })
             .eq('id', authData.user.id);
 
@@ -97,6 +111,31 @@ export function useBulkUpload(onSuccess: () => void) {
             if (prefError) {
               results.push({ email, success: false, error: prefError.message });
               continue;
+            }
+          }
+
+          // Add tech stacks if provided
+          if (techStacks) {
+            const techStackNames = techStacks.split(';').map(s => s.trim());
+            const { data: existingStacks } = await supabase
+              .from('technology_stacks')
+              .select('id, name')
+              .in('name', techStackNames);
+
+            if (existingStacks) {
+              const techStackInserts = existingStacks.map(stack => ({
+                mentor_id: authData.user.id,
+                tech_stack_id: stack.id
+              }));
+
+              const { error: techStackError } = await supabase
+                .from('mentor_tech_stacks')
+                .insert(techStackInserts);
+
+              if (techStackError) {
+                results.push({ email, success: false, error: techStackError.message });
+                continue;
+              }
             }
           }
 

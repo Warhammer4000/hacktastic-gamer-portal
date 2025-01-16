@@ -18,7 +18,7 @@ export function FileUploadSection({ file, onFileChange, downloadTemplate }: File
         required
       />
       <p className="text-sm text-muted-foreground">
-        Upload a CSV file with columns: email, full_name, github_username, linkedin_profile_id, institution_name, team_count
+        Upload a CSV file with columns: email, full_name, github_username, linkedin_profile_id, institution_name, bio, avatar_url, team_count, tech_stacks
       </p>
       <Button
         type="button"
