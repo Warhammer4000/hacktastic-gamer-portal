@@ -13,7 +13,6 @@ export default function MentorUsers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddMentorOpen, setIsAddMentorOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
-  const [view, setView] = useState<"table" | "card">("table");
   const [selectedTechStacks, setSelectedTechStacks] = useState<string[]>([]);
   
   const navigate = useNavigate();
@@ -50,8 +49,6 @@ export default function MentorUsers() {
         onExport={() => exportMentors(mentors || [])}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        view={view}
-        onViewChange={setView}
       />
 
       <MentorFilters
@@ -60,7 +57,6 @@ export default function MentorUsers() {
       />
 
       <MentorContent
-        view={view}
         mentors={mentors || []}
         onEdit={handleEdit}
         onDelete={handleDelete}

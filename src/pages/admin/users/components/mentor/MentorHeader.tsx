@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ViewToggle } from "@/components/ui/view-toggle";
 import { Download, Search, Upload, UserPlus } from "lucide-react";
 
 interface MentorHeaderProps {
@@ -9,8 +8,6 @@ interface MentorHeaderProps {
   onExport: () => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
-  view: "table" | "card";
-  onViewChange: (view: "table" | "card") => void;
 }
 
 export function MentorHeader({
@@ -19,8 +16,6 @@ export function MentorHeader({
   onExport,
   searchQuery,
   onSearchChange,
-  view,
-  onViewChange,
 }: MentorHeaderProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -39,7 +34,6 @@ export function MentorHeader({
             Export
           </Button>
         </div>
-        <ViewToggle view={view} onViewChange={onViewChange} />
       </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
         <div className="relative w-64">
