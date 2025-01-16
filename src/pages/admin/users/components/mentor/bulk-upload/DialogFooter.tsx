@@ -5,20 +5,23 @@ interface DialogFooterProps {
   onClose: () => void;
   isUploading: boolean;
   file: File | null;
+  onUpload: () => void;
 }
 
-export function DialogFooter({ onClose, isUploading, file }: DialogFooterProps) {
+export function DialogFooter({ onClose, isUploading, file, onUpload }: DialogFooterProps) {
   return (
     <div className="flex justify-between">
       <Button
         type="button"
         variant="outline"
         onClick={onClose}
+        disabled={isUploading}
       >
         Cancel
       </Button>
       <Button
-        type="submit"
+        type="button"
+        onClick={onUpload}
         disabled={!file || isUploading}
       >
         {isUploading ? (
