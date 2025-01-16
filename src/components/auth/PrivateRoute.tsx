@@ -11,16 +11,43 @@ export default function PrivateRoute({ children }: { children: React.ReactNode }
   const { data: session, isLoading, error } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Auth error:", error);
-        if (error.message.includes("refresh_token_not_found")) {
-          toast.error("Your session has expired. Please login again.");
-          navigate("/login");
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Auth error:", error);
+          if (error.message.includes("JWT")) {
+            toast.error("Your session has expired. Please login again.");
+            // Clear any existing session
+            await supabase.auth.signOut();
+            navigate("/login");
+            return null;
+          }
+          throw error;
         }
+
+        if (!session) {
+          return null;
+        }
+
+        // Verify the user still exists
+        const { data: user, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          console.error("User verification error:", userError);
+          toast.error("Session invalid. Please login again.");
+          await supabase.auth.signOut();
+          navigate("/login");
+          return null;
+        }
+
+        return session;
+      } catch (error) {
+        console.error("Session error:", error);
+        toast.error("An error occurred. Please login again.");
+        await supabase.auth.signOut();
+        navigate("/login");
         return null;
       }
-      return session;
     },
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -28,8 +55,8 @@ export default function PrivateRoute({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event) => {
-        if (event === "SIGNED_OUT") {
+      async (event, session) => {
+        if (event === "SIGNED_OUT" || event === "USER_DELETED") {
           navigate("/login");
         }
       }
