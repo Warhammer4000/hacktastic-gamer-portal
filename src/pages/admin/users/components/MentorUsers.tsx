@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddMentorDialog from "./AddMentorDialog";
-import BulkMentorUploadDialog from "./BulkMentorUploadDialog";
+import BulkMentorUploadDialog from "./mentor/bulk-upload/BulkMentorUploadDialog";
 import { useMentorActions } from "./mentor/useMentorActions";
 import { MentorHeader } from "./mentor/MentorHeader";
 import { MentorFilters } from "./mentor/MentorFilters";
