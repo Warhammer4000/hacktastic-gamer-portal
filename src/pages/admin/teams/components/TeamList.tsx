@@ -8,18 +8,14 @@ import { AdminTeamActions } from "./AdminTeamActions";
 interface TeamListProps {
   teams: any[];
   isLoading: boolean;
-  onEditTeam: (teamId: string) => void;
   onAssignMentor: (teamId: string) => void;
-  onDeleteTeam: (teamId: string) => void;
   getStatusColor: (status: string) => string;
 }
 
 export function TeamList({
   teams,
   isLoading,
-  onEditTeam,
   onAssignMentor,
-  onDeleteTeam,
   getStatusColor
 }: TeamListProps) {
   if (isLoading) {
