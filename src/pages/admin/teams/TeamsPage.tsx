@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CreateTeamDialog } from "./components/CreateTeamDialog";
-import { EditTeamDialog } from "./components/EditTeamDialog";
 import { AssignMentorDialog } from "./components/dialogs/mentor-assignment/AssignMentorDialog";
 import { TeamHeader } from "./components/TeamHeader";
 import { TeamList } from "./components/TeamList";
@@ -12,7 +11,6 @@ export default function TeamsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTechStack, setSelectedTechStack] = useState("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAssignMentorDialogOpen, setIsAssignMentorDialogOpen] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -72,30 +70,9 @@ export default function TeamsPage() {
     setIsCreateDialogOpen(true);
   };
 
-  const handleEditTeam = (teamId: string) => {
-    setSelectedTeamId(teamId);
-    setIsEditDialogOpen(true);
-  };
-
   const handleAssignMentor = (teamId: string) => {
     setSelectedTeamId(teamId);
     setIsAssignMentorDialogOpen(true);
-  };
-
-  const handleDeleteTeam = async (teamId: string) => {
-    try {
-      const { error } = await supabase.rpc("delete_team_cascade", {
-        team_id_input: teamId,
-      });
-
-      if (error) throw error;
-
-      toast.success("Team deleted successfully!");
-      queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
-    } catch (error) {
-      console.error("Error deleting team:", error);
-      toast.error("Failed to delete team");
-    }
   };
 
   const filteredTeams = teams?.filter((team) => {
@@ -140,9 +117,7 @@ export default function TeamsPage() {
       <TeamList
         teams={filteredTeams || []}
         isLoading={isTeamsLoading}
-        onEditTeam={handleEditTeam}
         onAssignMentor={handleAssignMentor}
-        onDeleteTeam={handleDeleteTeam}
         getStatusColor={getStatusColor}
       />
 
@@ -155,34 +130,20 @@ export default function TeamsPage() {
       />
 
       {selectedTeamId && (
-        <>
-          <EditTeamDialog
-            isOpen={isEditDialogOpen}
-            onClose={() => {
-              setIsEditDialogOpen(false);
-              setSelectedTeamId(null);
-            }}
-            onTeamUpdated={() => {
-              queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
-            }}
-            teamId={selectedTeamId}
-          />
-
-          <AssignMentorDialog
-            isOpen={isAssignMentorDialogOpen}
-            onOpenChange={(open) => {
-              setIsAssignMentorDialogOpen(open);
-              if (!open) setSelectedTeamId(null);
-            }}
-            onConfirm={() => {
-              queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
-            }}
-            teamId={selectedTeamId}
-            teamName={selectedTeam?.name || ''}
-            teamTechStackId={selectedTeam?.tech_stack?.id || null}
-            currentMentorId={selectedTeam?.mentor_id || null}
-          />
-        </>
+        <AssignMentorDialog
+          isOpen={isAssignMentorDialogOpen}
+          onOpenChange={(open) => {
+            setIsAssignMentorDialogOpen(open);
+            if (!open) setSelectedTeamId(null);
+          }}
+          onConfirm={() => {
+            queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
+          }}
+          teamId={selectedTeamId}
+          teamName={selectedTeam?.name || ''}
+          teamTechStackId={selectedTeam?.tech_stack?.id || null}
+          currentMentorId={selectedTeam?.mentor_id || null}
+        />
       )}
     </div>
   );

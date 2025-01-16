@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MoreVertical, Trash2, UserPlus2, RefreshCw, Github } from "lucide-react";
+import { MoreVertical, Trash2, UserPlus2, RefreshCw, Github, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import {
 import { DeleteTeamDialog } from "./dialogs/DeleteTeamDialog";
 import { AssignMentorDialog } from "./dialogs/mentor-assignment/AssignMentorDialog";
 import { TeamRepositoryDialog } from "./dialogs/repository/TeamRepositoryDialog";
+import { EditTeamDialog } from "./EditTeamDialog";
 
 interface AdminTeamActionsProps {
   teamId: string;
@@ -32,6 +33,7 @@ export function AdminTeamActions({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAssignMentorDialogOpen, setIsAssignMentorDialogOpen] = useState(false);
   const [isRepositoryDialogOpen, setIsRepositoryDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
 
@@ -107,6 +109,10 @@ export function AdminTeamActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit Team
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setIsDeleteDialogOpen(true)}
             className="text-destructive"
@@ -151,6 +157,15 @@ export function AdminTeamActions({
         teamId={teamId}
         teamName={teamName}
         currentRepositoryUrl={repositoryUrl}
+      />
+
+      <EditTeamDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        onTeamUpdated={() => {
+          queryClient.invalidateQueries({ queryKey: ['admin-teams'] });
+        }}
+        teamId={teamId}
       />
     </>
   );
