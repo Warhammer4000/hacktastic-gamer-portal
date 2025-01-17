@@ -22,6 +22,10 @@ interface MentorData {
   tech_stacks?: string;
 }
 
+const generateRandomPassword = () => {
+  return Math.random().toString(36).slice(-12);
+};
+
 export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete }: UseBulkUploadProps) {
   const uploadMentors = useMutation({
     mutationFn: async (csvData: string) => {
@@ -61,6 +65,28 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                       status: 'processing'
                     });
 
+                    // Step 1: Create auth user via signUp
+                    const password = generateRandomPassword();
+                    const { data: authData, error: authError } = await supabase.auth.signUp({
+                      email,
+                      password,
+                      options: {
+                        data: {
+                          full_name
+                        },
+                        emailRedirectTo: `${window.location.origin}/login`
+                      }
+                    });
+
+                    if (authError || !authData.user) {
+                      onEntryProgress({
+                        email,
+                        status: 'failed',
+                        error: authError?.message || 'Failed to create user'
+                      });
+                      return;
+                    }
+
                     // Find institution if provided
                     let institutionId = null;
                     if (institution_name) {
@@ -72,11 +98,10 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                       institutionId = institutions?.id;
                     }
 
-                    // Call the create_mentor function
-                    const { data, error } = await supabase
-                      .rpc('create_mentor', {
-                        mentor_email: email,
-                        mentor_full_name: full_name,
+                    // Step 2: Call setup_mentor_data function
+                    const { data: setupData, error: setupError } = await supabase
+                      .rpc('setup_mentor_data', {
+                        mentor_id: authData.user.id,
                         mentor_github_username: github_username || null,
                         mentor_linkedin_profile_id: linkedin_profile_id || null,
                         mentor_institution_id: institutionId,
@@ -86,23 +111,11 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                         mentor_tech_stacks: tech_stacks ? tech_stacks.split(';').map(s => s.trim()) : []
                       });
 
-                    if (error) {
+                    if (setupError) {
                       onEntryProgress({
                         email,
                         status: 'failed',
-                        error: error.message
-                      });
-                      return;
-                    }
-
-                    // Properly type cast the response
-                    const response = data as unknown as CreateMentorResponse;
-                    
-                    if (!response.success) {
-                      onEntryProgress({
-                        email,
-                        status: 'failed',
-                        error: response.error || 'Unknown error occurred'
+                        error: setupError.message
                       });
                       return;
                     }
@@ -111,7 +124,7 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                       email,
                       status: 'success',
                       details: {
-                        mentorId: response.user_id!,
+                        mentorId: authData.user.id,
                         techStacksAdded: tech_stacks ? tech_stacks.split(';').length : 0,
                         institutionFound: !!institutionId
                       }

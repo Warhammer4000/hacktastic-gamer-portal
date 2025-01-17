@@ -1195,6 +1195,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      setup_mentor_data: {
+        Args: {
+          mentor_id: string
+          mentor_github_username?: string
+          mentor_linkedin_profile_id?: string
+          mentor_institution_id?: string
+          mentor_bio?: string
+          mentor_avatar_url?: string
+          mentor_team_count?: number
+          mentor_tech_stacks?: string[]
+        }
+        Returns: Json
+      }
       update_user_password: {
         Args: {
           user_id: string
