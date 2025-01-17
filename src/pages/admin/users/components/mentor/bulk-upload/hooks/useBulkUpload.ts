@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Papa from 'papaparse';
+import { UploadStatus, UploadProgress, UploadSummary } from '../types/upload';
 
 interface UseBulkUploadProps {
   onUploadStart: (total: number) => void;

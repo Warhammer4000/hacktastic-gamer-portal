@@ -22,9 +22,3 @@ export interface UploadSummary {
   failed: number;
   processingTime: number;
 }
-
-export interface CreateMentorResponse {
-  success: boolean;
-  user_id?: string;
-  error?: string;
-}
