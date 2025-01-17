@@ -1,10 +1,10 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -34,14 +34,32 @@ serve(async (req) => {
 
       for (const mentor of batch) {
         try {
+          // First, look up the institution ID if an institution name is provided
+          let institutionId = null;
+          if (mentor.institution_name) {
+            const { data: institution, error: institutionError } = await supabase
+              .from('institutions')
+              .select('id')
+              .eq('name', mentor.institution_name)
+              .eq('status', 'active')
+              .single();
+
+            if (institutionError) {
+              console.error(`Error finding institution "${mentor.institution_name}":`, institutionError);
+            } else {
+              institutionId = institution?.id;
+            }
+          }
+
+          // Call create_mentor with the correct parameters
           const { data: result, error: createError } = await supabase.rpc(
             'create_mentor',
             {
               mentor_email: mentor.email,
               mentor_full_name: mentor.full_name,
-              mentor_github_username: mentor.github_username,
-              mentor_linkedin_profile_id: mentor.linkedin_profile_id,
-              mentor_institution_name: mentor.institution_name,
+              mentor_github_username: mentor.github_username || null,
+              mentor_linkedin_profile_id: mentor.linkedin_profile_id || null,
+              mentor_institution_id: institutionId,
               mentor_bio: mentor.bio || null,
               mentor_avatar_url: mentor.avatar_url || null,
               mentor_team_count: mentor.team_count || 2,
