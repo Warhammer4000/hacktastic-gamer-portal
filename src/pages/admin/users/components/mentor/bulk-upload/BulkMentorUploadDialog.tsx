@@ -1,10 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Download, Upload, AlertCircle, CheckCircle } from "lucide-react";
+import { Download, Upload } from "lucide-react";
 import { useBulkUpload } from "./hooks/useBulkUpload";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface BulkMentorUploadDialogProps {
   open: boolean;
@@ -15,13 +13,7 @@ export default function BulkMentorUploadDialog({
   open, 
   onOpenChange 
 }: BulkMentorUploadDialogProps) {
-  const { 
-    uploadMutation, 
-    jobStatus, 
-    isLoadingStatus, 
-    resetUpload, 
-    isUploading 
-  } = useBulkUpload();
+  const { uploadMutation, isUploading } = useBulkUpload();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -43,13 +35,7 @@ export default function BulkMentorUploadDialog({
   };
 
   const handleClose = () => {
-    resetUpload();
     onOpenChange(false);
-  };
-
-  const getProgressPercentage = () => {
-    if (!jobStatus?.total_records) return 0;
-    return (jobStatus.processed_records / jobStatus.total_records) * 100;
   };
 
   return (
@@ -68,7 +54,7 @@ export default function BulkMentorUploadDialog({
               type="file"
               accept=".csv"
               onChange={handleFileChange}
-              disabled={isUploading || !!jobStatus}
+              disabled={isUploading}
             />
             <p className="text-sm text-muted-foreground">
               Upload a CSV file with columns: email, full_name, github_username, linkedin_profile_id, 
@@ -87,53 +73,6 @@ export default function BulkMentorUploadDialog({
             Download Template
           </Button>
 
-          {jobStatus && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Progress value={getProgressPercentage()} />
-                <p className="text-sm text-muted-foreground">
-                  Processing {jobStatus.processed_records} of {jobStatus.total_records} mentors
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-muted p-4">
-                <h4 className="font-medium mb-2">Upload Status</h4>
-                <div className="space-y-1">
-                  <p className="text-sm">Total: {jobStatus.total_records}</p>
-                  <p className="text-sm text-green-600">
-                    Successful: {jobStatus.successful_records}
-                  </p>
-                  <p className="text-sm text-red-600">
-                    Failed: {jobStatus.failed_records}
-                  </p>
-                </div>
-              </div>
-
-              {jobStatus.error_log.length > 0 && (
-                <ScrollArea className="h-[200px] rounded-md border p-4">
-                  <div className="space-y-2">
-                    {jobStatus.error_log.map((error, index) => (
-                      <div key={index} className="flex items-start space-x-2 text-sm">
-                        <AlertCircle className="h-4 w-4 text-red-500 mt-0.5" />
-                        <div>
-                          <p className="font-medium">{error.email}</p>
-                          <p className="text-red-500">{error.error}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              )}
-
-              {jobStatus.status === 'completed' && (
-                <div className="flex items-center justify-center space-x-2 text-green-600">
-                  <CheckCircle className="h-5 w-5" />
-                  <span>Upload completed successfully</span>
-                </div>
-              )}
-            </div>
-          )}
-
           <div className="flex justify-end space-x-2">
             <Button
               type="button"
@@ -142,20 +81,13 @@ export default function BulkMentorUploadDialog({
             >
               Close
             </Button>
-            {!jobStatus && (
+            {!isUploading && (
               <Button
                 type="submit"
-                disabled={isUploading}
                 onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
               >
-                {isUploading ? (
-                  "Uploading..."
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload
-                  </>
-                )}
+                <Upload className="mr-2 h-4 w-4" />
+                Upload
               </Button>
             )}
           </div>
