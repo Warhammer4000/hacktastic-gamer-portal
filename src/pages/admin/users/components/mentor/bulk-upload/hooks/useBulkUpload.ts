@@ -29,14 +29,14 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
         Papa.parse<MentorData>(csvData, {
           header: true,
           skipEmptyLines: true,
-          complete: async (results) => {
+          complete: async (parseResults) => {
             try {
-              const rows = results.data;
+              const rows = parseResults.data;
               onUploadStart(rows.length);
               
               // Process in batches of 5
               const batchSize = 5;
-              const results = [];
+              const uploadResults = [];
               
               for (let i = 0; i < rows.length; i += batchSize) {
                 const batch = rows.slice(i, i + batchSize);
@@ -134,7 +134,7 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
               }
 
               onUploadComplete();
-              resolve(results);
+              resolve(uploadResults);
             } catch (error) {
               reject(error);
             }
