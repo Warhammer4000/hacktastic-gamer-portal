@@ -65,7 +65,7 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                       status: 'processing'
                     });
 
-                    // Step 1: Create auth user via signUp with email_confirm: true
+                    // Step 1: Create auth user via signUp with emailConfirm: true
                     const password = generateRandomPassword();
                     const { data: authData, error: authError } = await supabase.auth.signUp({
                       email,
@@ -75,7 +75,7 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                           full_name
                         },
                         emailRedirectTo: undefined,
-                        email_confirm: true
+                        emailConfirm: true
                       }
                     });
 
