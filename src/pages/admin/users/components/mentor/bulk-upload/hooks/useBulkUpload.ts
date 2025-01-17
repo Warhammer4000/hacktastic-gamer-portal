@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { UploadStatus, CreateMentorResponse } from "../types/upload";
 import { toast } from "sonner";
 import Papa from 'papaparse';
 
@@ -65,17 +65,15 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                       status: 'processing'
                     });
 
-                    // Step 1: Create auth user via signUp with emailConfirm: true
                     const password = generateRandomPassword();
                     const { data: authData, error: authError } = await supabase.auth.signUp({
                       email,
                       password,
                       options: {
                         data: {
-                          full_name
-                        },
-                        emailRedirectTo: undefined,
-                        emailConfirm: true
+                          full_name,
+                          email_verified: true
+                        }
                       }
                     });
 
@@ -99,7 +97,7 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                       institutionId = institutions?.id;
                     }
 
-                    // Step 2: Call setup_mentor_data function
+                    // Setup mentor data
                     const { data: setupData, error: setupError } = await supabase
                       .rpc('setup_mentor_data', {
                         mentor_id: authData.user.id,
