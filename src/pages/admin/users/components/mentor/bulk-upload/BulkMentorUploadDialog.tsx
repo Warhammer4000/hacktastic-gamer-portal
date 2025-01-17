@@ -13,10 +13,15 @@ export default function BulkMentorUploadDialog({
   open, 
   onOpenChange 
 }: BulkMentorUploadDialogProps) {
-  const { uploadMutation, isUploading } = useBulkUpload();
+  const { file, setFile, uploadMutation, isUploading } = useBulkUpload(() => onOpenChange(false));
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (file) setFile(file);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!file) return;
     uploadMutation.mutate(file);
   };
@@ -34,12 +39,8 @@ export default function BulkMentorUploadDialog({
     window.URL.revokeObjectURL(url);
   };
 
-  const handleClose = () => {
-    onOpenChange(false);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Bulk Upload Mentors</DialogTitle>
@@ -48,7 +49,7 @@ export default function BulkMentorUploadDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Input
               type="file"
@@ -77,21 +78,26 @@ export default function BulkMentorUploadDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={handleClose}
+              onClick={() => onOpenChange(false)}
+              disabled={isUploading}
             >
-              Close
+              Cancel
             </Button>
-            {!isUploading && (
-              <Button
-                type="submit"
-                onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Upload
-              </Button>
-            )}
+            <Button
+              type="submit"
+              disabled={!file || isUploading}
+            >
+              {isUploading ? (
+                "Uploading..."
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload
+                </>
+              )}
+            </Button>
           </div>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
