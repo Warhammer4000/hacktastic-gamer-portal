@@ -76,7 +76,9 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
               return;
             }
 
-            const response = data as CreateMentorResponse;
+            // Properly type cast the response
+            const response = data as unknown as CreateMentorResponse;
+            
             if (!response.success) {
               onEntryProgress({
                 email,
