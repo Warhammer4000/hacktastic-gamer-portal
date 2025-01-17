@@ -21,12 +21,11 @@ export function useBulkUpload() {
 
       if (error) throw error;
       
-      // Cast the data to ensure type safety
       return data as BulkUploadJob;
     },
     enabled: !!currentJobId,
     refetchInterval: (data) => 
-      data?.status === 'completed' || data?.status === 'failed' ? false : 1000,
+      data && data.status !== 'completed' && data.status !== 'failed' ? 1000 : false,
   });
 
   const uploadMutation = useMutation({
