@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { UploadSummary as UploadSummaryType } from "../types/upload";
@@ -9,33 +8,37 @@ interface UploadSummaryProps {
 }
 
 export function UploadSummary({ summary, onExportFailed }: UploadSummaryProps) {
+  const formatTime = (ms: number) => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}m ${seconds % 60}s`;
+  };
+
   return (
-    <Card className="p-4">
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        <div>
-          <p className="text-sm font-medium">Total</p>
-          <p className="text-2xl">{summary.total}</p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-green-600">Successful</p>
-          <p className="text-2xl">{summary.successful}</p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-destructive">Failed</p>
-          <p className="text-2xl">{summary.failed}</p>
+    <div className="space-y-4">
+      <div className="rounded-lg bg-muted p-4">
+        <h4 className="font-medium">Upload Summary</h4>
+        <div className="mt-2 space-y-1">
+          <p className="text-sm">Total processed: {summary.total}</p>
+          <p className="text-sm text-green-600">Successful: {summary.successful}</p>
+          <p className="text-sm text-red-600">Failed: {summary.failed}</p>
+          <p className="text-sm text-muted-foreground">
+            Processing time: {formatTime(summary.processingTime)}
+          </p>
         </div>
       </div>
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">
-          Processed in {(summary.processingTime / 1000).toFixed(1)}s
-        </p>
-        {summary.failed > 0 && (
-          <Button variant="outline" size="sm" onClick={onExportFailed}>
-            <Download className="h-4 w-4 mr-2" />
-            Export Failed
-          </Button>
-        )}
-      </div>
-    </Card>
+      
+      {summary.failed > 0 && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onExportFailed}
+          className="w-full"
+        >
+          <Download className="mr-2 h-4 w-4" />
+          Export Failed Entries
+        </Button>
+      )}
+    </div>
   );
 }

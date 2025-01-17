@@ -111,7 +111,7 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                       email,
                       status: 'success',
                       details: {
-                        mentorId: response.user_id,
+                        mentorId: response.user_id!,
                         techStacksAdded: tech_stacks ? tech_stacks.split(';').length : 0,
                         institutionFound: !!institutionId
                       }

@@ -1,5 +1,4 @@
-import { Check, X, AlertCircle, Clock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { UploadStatus } from "../types/upload";
 
 interface StatusItemProps {
@@ -7,33 +6,26 @@ interface StatusItemProps {
 }
 
 export function StatusItem({ status }: StatusItemProps) {
-  const getStatusIcon = () => {
-    switch (status.status) {
-      case 'success':
-        return <Check className="h-4 w-4 text-green-500" />;
-      case 'failed':
-        return <X className="h-4 w-4 text-destructive" />;
-      case 'processing':
-        return <Clock className="h-4 w-4 text-blue-500 animate-spin" />;
-      default:
-        return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
-
   return (
-    <div className={cn(
-      "flex items-start gap-3 p-2 rounded-lg",
-      status.status === 'failed' && "bg-destructive/10"
-    )}>
-      <div className="mt-1">{getStatusIcon()}</div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium">{status.email}</p>
+    <div className="flex items-start space-x-2 text-sm">
+      {status.status === 'processing' && (
+        <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+      )}
+      {status.status === 'success' && (
+        <CheckCircle2 className="h-4 w-4 text-green-500" />
+      )}
+      {status.status === 'failed' && (
+        <XCircle className="h-4 w-4 text-red-500" />
+      )}
+      <div className="flex-1">
+        <p className="font-medium">{status.email}</p>
         {status.error && (
-          <p className="text-sm text-destructive mt-1">{status.error}</p>
+          <p className="text-red-500">{status.error}</p>
         )}
-        {status.details && status.status === 'success' && (
-          <p className="text-sm text-muted-foreground mt-1">
-            Added {status.details.techStacksAdded} tech stack(s)
+        {status.details && (
+          <p className="text-muted-foreground">
+            Added {status.details.techStacksAdded} tech stacks
+            {status.details.institutionFound && " • Institution found"}
           </p>
         )}
       </div>

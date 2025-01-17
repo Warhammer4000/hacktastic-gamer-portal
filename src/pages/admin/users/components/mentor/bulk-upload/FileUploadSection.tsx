@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
-import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 interface FileUploadSectionProps {
   file: File | null;

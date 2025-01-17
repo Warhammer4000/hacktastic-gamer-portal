@@ -1,19 +1,19 @@
 export interface UploadStatus {
   email: string;
-  status: 'pending' | 'processing' | 'success' | 'failed';
+  status: 'processing' | 'success' | 'failed';
   error?: string;
   details?: {
-    mentorId?: string;
-    techStacksAdded?: number;
-    institutionFound?: boolean;
-  }
+    mentorId: string;
+    techStacksAdded: number;
+    institutionFound: boolean;
+  };
 }
 
 export interface UploadProgress {
   processed: number;
   total: number;
-  currentEmail?: string;
   startTime?: Date;
+  currentEmail?: string;
 }
 
 export interface UploadSummary {
@@ -26,7 +26,5 @@ export interface UploadSummary {
 export interface CreateMentorResponse {
   success: boolean;
   user_id?: string;
-  message?: string;
   error?: string;
-  email?: string;
 }

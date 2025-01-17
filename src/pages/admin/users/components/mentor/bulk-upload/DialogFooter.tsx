@@ -20,9 +20,9 @@ export function DialogFooter({ onClose, isUploading, file, onUpload }: DialogFoo
         Cancel
       </Button>
       <Button
-        type="button"
-        onClick={onUpload}
+        type="submit"
         disabled={!file || isUploading}
+        onClick={onUpload}
       >
         {isUploading ? (
           "Uploading..."
