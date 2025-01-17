@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import Papa from 'papaparse';
-import { BulkUploadJob } from "../types/upload";
+import { BulkUploadJob, UploadResponse } from "../types/upload";
 
 export function useBulkUpload() {
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
@@ -21,6 +20,8 @@ export function useBulkUpload() {
         .single();
 
       if (error) throw error;
+      
+      // Cast the data to ensure type safety
       return data as BulkUploadJob;
     },
     enabled: !!currentJobId,
