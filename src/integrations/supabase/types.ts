@@ -1163,6 +1163,20 @@ export type Database = {
         }
         Returns: string
       }
+      create_mentor: {
+        Args: {
+          mentor_email: string
+          mentor_full_name: string
+          mentor_github_username?: string
+          mentor_linkedin_profile_id?: string
+          mentor_institution_id?: string
+          mentor_bio?: string
+          mentor_avatar_url?: string
+          mentor_team_count?: number
+          mentor_tech_stacks?: string[]
+        }
+        Returns: Json
+      }
       delete_session_template_cascade: {
         Args: {
           template_id_input: string
