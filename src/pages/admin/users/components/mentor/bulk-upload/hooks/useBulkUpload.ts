@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { UploadStatus } from "../types/upload";
+import { UploadStatus, CreateMentorResponse } from "../types/upload";
 import { toast } from "sonner";
 
 interface UseBulkUploadProps {
