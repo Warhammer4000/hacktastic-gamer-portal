@@ -1,61 +1,32 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { FileUploadSection } from "./FileUploadSection";
-import { DialogFooter } from "./DialogFooter";
-import { UploadProgress } from "./components/UploadProgress";
-import { StatusList } from "./components/StatusList";
-import { UploadSummary } from "./components/UploadSummary";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Download, Upload, AlertCircle, CheckCircle } from "lucide-react";
 import { useBulkUpload } from "./hooks/useBulkUpload";
-import { useUploadStatus } from "./hooks/useUploadStatus";
-import { useState } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface BulkMentorUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function BulkMentorUploadDialog({ open, onOpenChange }: BulkMentorUploadDialogProps) {
-  const [file, setFile] = useState<File | null>(null);
-  const { statuses, progress, summary, initializeUpload, updateStatus, finishUpload, getFailedEntries } = useUploadStatus();
-  const { uploadMentors, isUploading } = useBulkUpload({
-    onUploadStart: (total) => initializeUpload(total),
-    onEntryProgress: updateStatus,
-    onUploadComplete: finishUpload,
-  });
+export default function BulkMentorUploadDialog({ 
+  open, 
+  onOpenChange 
+}: BulkMentorUploadDialogProps) {
+  const { 
+    uploadMutation, 
+    jobStatus, 
+    isLoadingStatus, 
+    resetUpload, 
+    isUploading 
+  } = useBulkUpload();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
-    }
-  };
-
-  const handleUpload = async () => {
+    const file = e.target.files?.[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const csvData = e.target?.result as string;
-      uploadMentors.mutate(csvData);
-    };
-    reader.readAsText(file);
-  };
-
-  const handleExportFailed = () => {
-    const failedEntries = getFailedEntries();
-    const csvContent = [
-      "email,full_name,github_username,linkedin_profile_id,institution_name,bio,avatar_url,team_count,tech_stacks",
-      ...failedEntries.map(entry => entry.email)
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'failed_mentors.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    uploadMutation.mutate(file);
   };
 
   const downloadTemplate = () => {
@@ -71,8 +42,18 @@ export default function BulkMentorUploadDialog({ open, onOpenChange }: BulkMento
     window.URL.revokeObjectURL(url);
   };
 
+  const handleClose = () => {
+    resetUpload();
+    onOpenChange(false);
+  };
+
+  const getProgressPercentage = () => {
+    if (!jobStatus?.total_records) return 0;
+    return (jobStatus.processed_records / jobStatus.total_records) * 100;
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Bulk Upload Mentors</DialogTitle>
@@ -82,35 +63,103 @@ export default function BulkMentorUploadDialog({ open, onOpenChange }: BulkMento
         </DialogHeader>
 
         <div className="space-y-4">
-          <FileUploadSection
-            file={file}
-            onFileChange={handleFileChange}
-            isUploading={isUploading}
-            downloadTemplate={downloadTemplate}
-          />
-
-          {progress.total > 0 && (
-            <UploadProgress progress={progress} />
-          )}
-
-          {statuses.length > 0 && (
-            <StatusList statuses={statuses} />
-          )}
-
-          {summary && (
-            <UploadSummary 
-              summary={summary}
-              onExportFailed={handleExportFailed}
+          <div className="space-y-2">
+            <Input
+              type="file"
+              accept=".csv"
+              onChange={handleFileChange}
+              disabled={isUploading || !!jobStatus}
             />
-          )}
-        </div>
+            <p className="text-sm text-muted-foreground">
+              Upload a CSV file with columns: email, full_name, github_username, linkedin_profile_id, 
+              institution_name, bio, avatar_url, team_count, tech_stacks
+            </p>
+          </div>
 
-        <DialogFooter
-          onClose={() => onOpenChange(false)}
-          isUploading={isUploading}
-          file={file}
-          onUpload={handleUpload}
-        />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={downloadTemplate}
+            disabled={isUploading}
+            className="w-full"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Download Template
+          </Button>
+
+          {jobStatus && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Progress value={getProgressPercentage()} />
+                <p className="text-sm text-muted-foreground">
+                  Processing {jobStatus.processed_records} of {jobStatus.total_records} mentors
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-muted p-4">
+                <h4 className="font-medium mb-2">Upload Status</h4>
+                <div className="space-y-1">
+                  <p className="text-sm">Total: {jobStatus.total_records}</p>
+                  <p className="text-sm text-green-600">
+                    Successful: {jobStatus.successful_records}
+                  </p>
+                  <p className="text-sm text-red-600">
+                    Failed: {jobStatus.failed_records}
+                  </p>
+                </div>
+              </div>
+
+              {jobStatus.error_log.length > 0 && (
+                <ScrollArea className="h-[200px] rounded-md border p-4">
+                  <div className="space-y-2">
+                    {jobStatus.error_log.map((error, index) => (
+                      <div key={index} className="flex items-start space-x-2 text-sm">
+                        <AlertCircle className="h-4 w-4 text-red-500 mt-0.5" />
+                        <div>
+                          <p className="font-medium">{error.email}</p>
+                          <p className="text-red-500">{error.error}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
+
+              {jobStatus.status === 'completed' && (
+                <div className="flex items-center justify-center space-x-2 text-green-600">
+                  <CheckCircle className="h-5 w-5" />
+                  <span>Upload completed successfully</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex justify-end space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+            >
+              Close
+            </Button>
+            {!jobStatus && (
+              <Button
+                type="submit"
+                disabled={isUploading}
+                onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
+              >
+                {isUploading ? (
+                  "Uploading..."
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
