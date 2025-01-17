@@ -2,15 +2,19 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Json } from "@/integrations/supabase/types/database";
 
 interface BulkUploadJob {
   id: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  total_records: number;
+  total_records: number | null;
   processed_records: number;
   successful_records: number;
   failed_records: number;
-  error_log: Array<{ email: string; error: string }>;
+  error_log: Json;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string | null;
 }
 
 export function useBulkUpload() {
@@ -33,8 +37,10 @@ export function useBulkUpload() {
       return data as BulkUploadJob;
     },
     enabled: !!currentJobId,
-    refetchInterval: (data) => 
-      data?.data && (data.data.status === 'completed' || data.data.status === 'failed') ? false : 1000,
+    refetchInterval: (query) => {
+      const status = query?.status;
+      return status === 'completed' || status === 'failed' ? false : 1000;
+    },
   });
 
   const uploadMutation = useMutation({
