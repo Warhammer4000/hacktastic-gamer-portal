@@ -23,11 +23,21 @@ interface MentorData {
   tech_stacks?: string;
 }
 
-const generateRandomPassword = () => {
-  return Math.random().toString(36).slice(-12);
-};
-
 export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete }: UseBulkUploadProps) {
+  const createUploadJob = async () => {
+    const { data, error } = await supabase
+      .from('bulk_upload_jobs')
+      .insert([{ 
+        status: 'pending',
+        created_by: (await supabase.auth.getUser()).data.user?.id
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data.id;
+  };
+
   const uploadMentors = useMutation({
     mutationFn: async (csvData: string) => {
       return new Promise((resolve, reject) => {
@@ -38,116 +48,36 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
             try {
               const rows = parseResults.data;
               onUploadStart(rows.length);
-              
-              // Process in batches of 5
-              const batchSize = 5;
-              const uploadResults = [];
-              
-              for (let i = 0; i < rows.length; i += batchSize) {
-                const batch = rows.slice(i, i + batchSize);
-                const batchPromises = batch.map(async (row) => {
-                  const {
-                    email,
-                    full_name,
-                    github_username,
-                    linkedin_profile_id,
-                    institution_name,
-                    bio,
-                    avatar_url,
-                    team_count,
-                    tech_stacks
-                  } = row;
 
-                  if (!email || !full_name) return;
+              // Create upload job
+              const jobId = await createUploadJob();
 
-                  try {
-                    onEntryProgress({
-                      email,
-                      status: 'processing'
-                    });
+              // Process mentors data
+              const mentorsData = rows.map(row => ({
+                ...row,
+                tech_stacks: row.tech_stacks ? row.tech_stacks.split(';').map(s => s.trim()) : [],
+                team_count: row.team_count ? parseInt(row.team_count) : 2
+              }));
 
-                    const password = generateRandomPassword();
-                    const { data: authData, error: authError } = await supabase.auth.signUp({
-                      email,
-                      password,
-                      options: {
-                        data: {
-                          full_name,
-                          email_verified: true
-                        }
-                      }
-                    });
+              // Call edge function
+              const { data, error } = await supabase.functions.invoke('bulk-mentor-upload', {
+                body: { mentors: mentorsData, jobId }
+              });
 
-                    if (authError || !authData.user) {
-                      onEntryProgress({
-                        email,
-                        status: 'failed',
-                        error: authError?.message || 'Failed to create user'
-                      });
-                      return;
-                    }
+              if (error) throw error;
 
-                    // Find institution if provided
-                    let institutionId = null;
-                    if (institution_name) {
-                      const { data: institutions } = await supabase
-                        .from('institutions')
-                        .select('id')
-                        .eq('name', institution_name)
-                        .single();
-                      institutionId = institutions?.id;
-                    }
-
-                    // Setup mentor data
-                    const { data: setupData, error: setupError } = await supabase
-                      .rpc('setup_mentor_data', {
-                        mentor_id: authData.user.id,
-                        mentor_github_username: github_username || null,
-                        mentor_linkedin_profile_id: linkedin_profile_id || null,
-                        mentor_institution_id: institutionId,
-                        mentor_bio: bio || null,
-                        mentor_avatar_url: avatar_url || null,
-                        mentor_team_count: team_count ? parseInt(team_count) : 2,
-                        mentor_tech_stacks: tech_stacks ? tech_stacks.split(';').map(s => s.trim()) : []
-                      });
-
-                    if (setupError) {
-                      onEntryProgress({
-                        email,
-                        status: 'failed',
-                        error: setupError.message
-                      });
-                      return;
-                    }
-
-                    onEntryProgress({
-                      email,
-                      status: 'success',
-                      details: {
-                        mentorId: authData.user.id,
-                        techStacksAdded: tech_stacks ? tech_stacks.split(';').length : 0,
-                        institutionFound: !!institutionId
-                      }
-                    });
-
-                  } catch (error) {
-                    onEntryProgress({
-                      email,
-                      status: 'failed',
-                      error: error instanceof Error ? error.message : 'Unknown error'
-                    });
-                  }
+              // Process results
+              data.results.forEach((result: any) => {
+                onEntryProgress({
+                  email: result.email,
+                  status: result.success ? 'success' : 'failed',
+                  error: result.error,
+                  details: result.details
                 });
-
-                // Process batch with delay between batches
-                await Promise.all(batchPromises);
-                if (i + batchSize < rows.length) {
-                  await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay between batches
-                }
-              }
+              });
 
               onUploadComplete();
-              resolve(uploadResults);
+              resolve(data);
             } catch (error) {
               reject(error);
             }

@@ -3,9 +3,9 @@ export interface UploadStatus {
   status: 'processing' | 'success' | 'failed';
   error?: string;
   details?: {
-    mentorId: string;
-    techStacksAdded: number;
-    institutionFound: boolean;
+    mentorId?: string;
+    techStacksAdded?: number;
+    institutionFound?: boolean;
   };
 }
 
