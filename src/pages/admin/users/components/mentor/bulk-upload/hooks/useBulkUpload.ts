@@ -58,9 +58,17 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                 team_count: row.team_count ? parseInt(row.team_count) : 2
               }));
 
-              // Call edge function
+              // Call setup_mentor_data function
               const { data, error } = await supabase.functions.invoke('bulk-mentor-upload', {
-                body: { mentors: mentorsData, jobId }
+                body: { 
+                  mentors: mentorsData.map(mentor => ({
+                    ...mentor,
+                    user_id: mentor.email, // Use email as temporary user_id
+                    team_count: mentor.team_count || 2,
+                    tech_stacks: mentor.tech_stacks || []
+                  })),
+                  jobId 
+                }
               });
 
               if (error) throw error;
