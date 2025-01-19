@@ -14,8 +14,8 @@ interface MentorData {
   institution_name?: string;
   bio?: string;
   avatar_url?: string;
-  team_count?: number;
-  tech_stacks?: string[];
+  team_count: number;
+  tech_stacks: string[];
 }
 
 serve(async (req) => {
@@ -91,14 +91,14 @@ serve(async (req) => {
         const { data: setupData, error: setupError } = await supabaseAdmin.rpc(
           'setup_mentor_data',
           {
-            mentor_id: authData.user.id,
+            auth_user_id: authData.user.id,
             mentor_github_username: mentor.github_username,
             mentor_linkedin_profile_id: mentor.linkedin_profile_id,
             mentor_institution_id: institutionId,
             mentor_bio: mentor.bio,
             mentor_avatar_url: mentor.avatar_url,
-            mentor_team_count: mentor.team_count || 2,
-            mentor_tech_stacks: mentor.tech_stacks || []
+            mentor_team_count: mentor.team_count,
+            mentor_tech_stacks: mentor.tech_stacks
           }
         )
 

@@ -53,24 +53,21 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
 
               // Process mentors data
               const mentorsData = rows.map(row => ({
-                ...row,
-                tech_stacks: row.tech_stacks ? row.tech_stacks.split(';').map(s => s.trim()) : [],
-                team_count: row.team_count ? parseInt(row.team_count) : 2
+                email: row.email,
+                full_name: row.full_name,
+                github_username: row.github_username,
+                linkedin_profile_id: row.linkedin_profile_id,
+                institution_name: row.institution_name,
+                bio: row.bio,
+                avatar_url: row.avatar_url,
+                team_count: row.team_count ? parseInt(row.team_count) : 2,
+                tech_stacks: row.tech_stacks ? row.tech_stacks.split(';').map(s => s.trim()) : []
               }));
 
-              // Call setup_mentor_data function with correct parameter order
+              // Send to edge function for processing
               const { data, error } = await supabase.functions.invoke('bulk-mentor-upload', {
                 body: { 
-                  mentors: mentorsData.map(mentor => ({
-                    auth_user_id: mentor.email, // First parameter must be user ID
-                    mentor_github_username: mentor.github_username,
-                    mentor_linkedin_profile_id: mentor.linkedin_profile_id,
-                    mentor_institution_id: null, // Will be looked up in the edge function
-                    mentor_bio: mentor.bio,
-                    mentor_avatar_url: mentor.avatar_url,
-                    mentor_team_count: mentor.team_count,
-                    mentor_tech_stacks: mentor.tech_stacks
-                  })),
+                  mentors: mentorsData,
                   jobId 
                 }
               });
