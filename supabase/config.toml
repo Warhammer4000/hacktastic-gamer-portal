@@ -1,1 +1,2 @@
-project_id = "ylzabopivhusuvoavari"
+[functions.admin-operations]
+verify_jwt = true
