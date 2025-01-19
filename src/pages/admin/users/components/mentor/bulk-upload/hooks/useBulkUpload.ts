@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseAdmin } from "@/integrations/supabase/admin-client";
 import { toast } from "sonner";
 import Papa from 'papaparse';
 import { UploadStatus, UploadProgress, UploadSummary } from '../types/upload';
@@ -69,7 +69,7 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                     const password = generateRandomPassword();
                     
                     // Create user with admin API
-                    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+                    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
                       email,
                       password,
                       email_confirm: true,
@@ -91,7 +91,7 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                     // Find institution if provided
                     let institutionId = null;
                     if (institution_name) {
-                      const { data: institutions } = await supabase
+                      const { data: institutions } = await supabaseAdmin
                         .from('institutions')
                         .select('id')
                         .eq('name', institution_name)
@@ -100,7 +100,7 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                     }
 
                     // Setup mentor data
-                    const { data: setupData, error: setupError } = await supabase
+                    const { data: setupData, error: setupError } = await supabaseAdmin
                       .rpc('setup_mentor_data', {
                         mentor_id: authData.user.id,
                         mentor_github_username: github_username || null,
