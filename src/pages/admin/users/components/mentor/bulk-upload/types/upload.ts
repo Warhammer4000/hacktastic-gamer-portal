@@ -1,41 +1,24 @@
-export type UploadStatus = {
+export interface UploadStatus {
   email: string;
   status: 'processing' | 'success' | 'failed';
   error?: string;
   details?: {
+    mentorId: string;
     techStacksAdded: number;
     institutionFound: boolean;
   };
-};
+}
 
-export type UploadProgress = {
+export interface UploadProgress {
   processed: number;
   total: number;
-  currentEmail?: string;
   startTime?: Date;
-};
+  currentEmail?: string;
+}
 
-export type UploadSummary = {
+export interface UploadSummary {
   total: number;
   successful: number;
   failed: number;
   processingTime: number;
-};
-
-export type BulkUploadJob = {
-  id: string;
-  created_by: string | null;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  total_records: number | null;
-  processed_records: number;
-  successful_records: number;
-  failed_records: number;
-  error_log: Array<{ email: string; error: string }>;
-  created_at: string;
-  updated_at: string;
-};
-
-export type UploadResponse = {
-  jobId: string;
-  message: string;
-};
+}
