@@ -432,28 +432,28 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          mentor_id: string
           team_count: number
           updated_at: string
+          user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          mentor_id: string
           team_count?: number
           updated_at?: string
+          user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          mentor_id?: string
           team_count?: number
           updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "mentor_preferences_mentor_id_fkey"
-            columns: ["mentor_id"]
+            columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -464,25 +464,25 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          mentor_id: string
           tech_stack_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          mentor_id: string
           tech_stack_id: string
+          user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          mentor_id?: string
           tech_stack_id?: string
+          user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "mentor_tech_stacks_mentor_id_fkey"
-            columns: ["mentor_id"]
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1230,7 +1230,7 @@ export type Database = {
       }
       setup_mentor_data: {
         Args: {
-          mentor_id: string
+          auth_user_id: string
           mentor_github_username?: string
           mentor_linkedin_profile_id?: string
           mentor_institution_id?: string
