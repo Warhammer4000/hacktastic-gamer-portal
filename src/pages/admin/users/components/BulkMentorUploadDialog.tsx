@@ -93,7 +93,7 @@ export default function BulkMentorUploadDialog({ open, onOpenChange }: BulkMento
           const { error: prefError } = await supabase
             .from('mentor_preferences')
             .insert({
-              mentor_id: authData.user.id,
+              user_id: authData.user.id,
               team_count: parseInt(teamCount)
             });
 
