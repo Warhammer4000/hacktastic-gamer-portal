@@ -67,14 +67,15 @@ export function useBulkUpload({ onUploadStart, onEntryProgress, onUploadComplete
                     });
 
                     const password = generateRandomPassword();
-                    const { data: authData, error: authError } = await supabase.auth.signUp({
+                    
+                    // Create user with admin API
+                    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
                       email,
                       password,
-                      options: {
-                        data: {
-                          full_name,
-                          email_verified: true
-                        }
+                      email_confirm: true,
+                      user_metadata: {
+                        full_name,
+                        email_verified: true
                       }
                     });
 
