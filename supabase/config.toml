@@ -1,1 +1,4 @@
 project_id = "ylzabopivhusuvoavari"
+
+[functions.bulk-mentor-upload]
+verify_jwt = true
