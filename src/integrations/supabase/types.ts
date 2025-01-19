@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bulk_upload_jobs: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          error_log: Json | null
+          failed_records: number | null
+          id: string
+          processed_records: number | null
+          status: Database["public"]["Enums"]["bulk_upload_status"] | null
+          successful_records: number | null
+          total_records: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          error_log?: Json | null
+          failed_records?: number | null
+          id?: string
+          processed_records?: number | null
+          status?: Database["public"]["Enums"]["bulk_upload_status"] | null
+          successful_records?: number | null
+          total_records?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          error_log?: Json | null
+          failed_records?: number | null
+          id?: string
+          processed_records?: number | null
+          status?: Database["public"]["Enums"]["bulk_upload_status"] | null
+          successful_records?: number | null
+          total_records?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bulk_upload_jobs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupon_batches: {
         Row: {
           created_at: string
@@ -1217,6 +1264,7 @@ export type Database = {
       }
     }
     Enums: {
+      bulk_upload_status: "pending" | "processing" | "completed" | "failed"
       coupon_state: "unassigned" | "assigned" | "revealed"
       event_role: "mentor" | "participant" | "public"
       event_status: "draft" | "published"
