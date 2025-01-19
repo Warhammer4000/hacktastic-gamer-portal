@@ -481,7 +481,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "mentor_tech_stacks_mentor_id_fkey_profiles"
+            foreignKeyName: "mentor_tech_stacks_mentor_id_fkey"
             columns: ["mentor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
