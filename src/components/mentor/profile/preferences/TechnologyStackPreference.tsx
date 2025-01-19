@@ -31,7 +31,7 @@ export function TechnologyStackPreference() {
       const { data, error } = await supabase
         .from('mentor_tech_stacks')
         .select('tech_stack_id')
-        .eq('mentor_id', user.id);
+        .eq('user_id', user.id);
       
       if (error) throw error;
       return data.map(stack => stack.tech_stack_id);
@@ -49,7 +49,7 @@ export function TechnologyStackPreference() {
         const { error } = await supabase
           .from('mentor_tech_stacks')
           .delete()
-          .eq('mentor_id', user.id)
+          .eq('user_id', user.id)
           .eq('tech_stack_id', techStackId);
 
         if (error) throw error;
@@ -57,7 +57,7 @@ export function TechnologyStackPreference() {
         const { error } = await supabase
           .from('mentor_tech_stacks')
           .insert({
-            mentor_id: user.id,
+            user_id: user.id,
             tech_stack_id: techStackId,
           });
 

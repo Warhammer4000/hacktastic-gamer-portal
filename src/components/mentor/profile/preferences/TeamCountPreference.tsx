@@ -22,10 +22,10 @@ export function TeamCountPreference({ defaultValue }: TeamCountPreferenceProps) 
       const { error } = await supabase
         .from('mentor_preferences')
         .upsert({
-          mentor_id: user.id,
+          user_id: user.id,
           team_count: teamCount,
         }, {
-          onConflict: 'mentor_id'
+          onConflict: 'user_id'
         });
 
       if (error) throw error;

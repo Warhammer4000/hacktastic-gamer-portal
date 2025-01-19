@@ -33,11 +33,11 @@ export function useMentorList(searchQuery: string, selectedTechStacks: string[])
       if (selectedTechStacks.length > 0) {
         const mentorIds = await supabase
           .from('mentor_tech_stacks')
-          .select('mentor_id')
+          .select('user_id')
           .in('tech_stack_id', selectedTechStacks);
 
         if (mentorIds.data) {
-          query = query.in('id', mentorIds.data.map(item => item.mentor_id));
+          query = query.in('id', mentorIds.data.map(item => item.user_id));
         }
       }
 
