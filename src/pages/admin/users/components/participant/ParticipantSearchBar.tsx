@@ -12,7 +12,7 @@ export function ParticipantSearchBar({
 }: ParticipantSearchBarProps) {
   return (
     <div className="relative w-64">
-      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 h-4 w-4" />
       <Input
         type="text"
         placeholder="Search participants..."
