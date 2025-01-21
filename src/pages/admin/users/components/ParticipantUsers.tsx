@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import AddParticipantDialog from "./AddParticipantDialog";
 import BulkParticipantUploadDialog from "./BulkParticipantUploadDialog";
 import { ParticipantActionsBar } from "./participant/ParticipantActionsBar";
 import { ParticipantSearchBar } from "./participant/ParticipantSearchBar";
@@ -11,7 +10,6 @@ import { useParticipantActions } from "./participant/useParticipantActions";
 
 export default function ParticipantUsers() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showAddDialog, setShowAddDialog] = useState(false);
   const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
   const navigate = useNavigate();
   const { handleDelete } = useParticipantActions();
@@ -54,7 +52,6 @@ export default function ParticipantUsers() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <ParticipantActionsBar
-          onAddParticipant={() => setShowAddDialog(true)}
           onBulkUpload={() => setShowBulkUploadDialog(true)}
         />
         <ParticipantSearchBar
@@ -68,11 +65,6 @@ export default function ParticipantUsers() {
         isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDelete}
-      />
-
-      <AddParticipantDialog
-        open={showAddDialog}
-        onOpenChange={setShowAddDialog}
       />
       
       <BulkParticipantUploadDialog

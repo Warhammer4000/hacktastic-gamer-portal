@@ -25,7 +25,7 @@ export default function BulkParticipantUploadDialog({
   const queryClient = useQueryClient();
 
   const downloadTemplate = () => {
-    const csvContent = "email,full_name,github_username\nexample@email.com,John Doe,johndoe";
+    const csvContent = "email,full_name,github_username,institution_name,bio,avatar_url\nexample@email.com,John Doe,johndoe,Example University,A brief bio about the participant,https://example.com/avatar.jpg";
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -59,6 +59,9 @@ export default function BulkParticipantUploadDialog({
             email: values[0].trim(),
             full_name: values[1].trim(),
             github_username: values[2]?.trim() || null,
+            institution_name: values[3]?.trim() || null,
+            bio: values[4]?.trim() || null,
+            avatar_url: values[5]?.trim() || null,
             password: Math.random().toString(36).slice(-8),
           };
           participants.push(participant);
@@ -78,16 +81,34 @@ export default function BulkParticipantUploadDialog({
           if (authError) throw authError;
           if (!authData.user) continue;
 
+          // Get institution ID if provided
+          let institutionId = null;
+          if (participant.institution_name) {
+            const { data: institution } = await supabase
+              .from("institutions")
+              .select("id")
+              .eq("name", participant.institution_name)
+              .single();
+            
+            institutionId = institution?.id;
+          }
+
+          // Add participant role
           await supabase
             .from("user_roles")
             .insert([{ user_id: authData.user.id, role: "participant" }]);
 
-          if (participant.github_username) {
-            await supabase
-              .from("profiles")
-              .update({ github_username: participant.github_username })
-              .eq("id", authData.user.id);
-          }
+          // Update profile with additional information
+          await supabase
+            .from("profiles")
+            .update({
+              github_username: participant.github_username,
+              institution_id: institutionId,
+              bio: participant.bio,
+              avatar_url: participant.avatar_url,
+              status: 'pending_approval'
+            })
+            .eq("id", authData.user.id);
         }
 
         toast.success(`${participants.length} participants created successfully`);
@@ -131,8 +152,9 @@ export default function BulkParticipantUploadDialog({
           </div>
 
           <div className="text-sm text-muted-foreground">
-            Upload a CSV file with the following columns: email,
-            full_name, github_username. The github_username field is optional.
+            Upload a CSV file with the following columns: email, full_name, 
+            github_username, institution_name, bio, avatar_url. Only email and 
+            full_name are required fields.
           </div>
         </div>
       </DialogContent>
