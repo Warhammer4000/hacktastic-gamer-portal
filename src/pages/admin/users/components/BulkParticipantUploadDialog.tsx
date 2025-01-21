@@ -7,6 +7,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Download, Upload } from "lucide-react";
@@ -27,6 +36,7 @@ export default function BulkParticipantUploadDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [errors, setErrors] = useState<Array<{ email: string; error: string }>>([]);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
   const queryClient = useQueryClient();
 
   const downloadTemplate = () => {
@@ -55,6 +65,7 @@ export default function BulkParticipantUploadDialog({
     setIsLoading(true);
     setProgress(0);
     setErrors([]);
+    setShowErrorDialog(false);
     const reader = new FileReader();
 
     reader.onload = async (e) => {
@@ -129,7 +140,7 @@ export default function BulkParticipantUploadDialog({
           setErrors(failedEntries);
           
           if (failedEntries.length > 0) {
-            toast.error(`Failed to create ${failedEntries.length} participants`);
+            setShowErrorDialog(true);
           }
         }
 
@@ -184,66 +195,76 @@ export default function BulkParticipantUploadDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Bulk Upload Participants</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Bulk Upload Participants</DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-4">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={downloadTemplate}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Download Template
-          </Button>
+          <div className="space-y-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={downloadTemplate}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download Template
+            </Button>
 
-          <div className="grid w-full items-center gap-1.5">
-            <Input
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              disabled={isLoading}
-            />
-          </div>
-
-          {isLoading && (
-            <div className="space-y-2">
-              <Progress value={progress} />
-              <p className="text-sm text-muted-foreground text-center">
-                Processing... {Math.round(progress)}%
-              </p>
+            <div className="grid w-full items-center gap-1.5">
+              <Input
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                disabled={isLoading}
+              />
             </div>
-          )}
 
-          {errors.length > 0 && (
+            {isLoading && (
+              <div className="space-y-2">
+                <Progress value={progress} />
+                <p className="text-sm text-muted-foreground text-center">
+                  Processing... {Math.round(progress)}%
+                </p>
+              </div>
+            )}
+
+            <div className="text-sm text-muted-foreground">
+              Upload a CSV file with the following columns: email, full_name, 
+              github_username, institution_name, bio, avatar_url. Only email and 
+              full_name are required fields.
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Upload Errors</AlertDialogTitle>
+            <AlertDialogDescription>
+              The following participants could not be created:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <ScrollArea className="h-[200px] w-full rounded-md border p-4">
             <div className="space-y-2">
-              <Alert variant="destructive">
-                <AlertDescription>
-                  Failed to create the following participants:
-                </AlertDescription>
-              </Alert>
-              <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-                <div className="space-y-2">
-                  {errors.map((error, index) => (
-                    <div key={index} className="text-sm">
-                      <span className="font-medium">{error.email}:</span> {error.error}
-                    </div>
-                  ))}
+              {errors.map((error, index) => (
+                <div key={index} className="text-sm">
+                  <span className="font-medium">{error.email}:</span> {error.error}
                 </div>
-              </ScrollArea>
+              ))}
             </div>
-          )}
+          </ScrollArea>
 
-          <div className="text-sm text-muted-foreground">
-            Upload a CSV file with the following columns: email, full_name, 
-            github_username, institution_name, bio, avatar_url. Only email and 
-            full_name are required fields.
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowErrorDialog(false)}>
+              Close
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
