@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import * as XLSX from 'xlsx';
+import Papa from 'papaparse';
 
 export async function exportParticipants() {
   const { data: participants } = await supabase
@@ -26,27 +26,24 @@ export async function exportParticipants() {
     avatar_url: participant.avatar_url || '',
   }));
 
-  // Create worksheet
-  const ws = XLSX.utils.json_to_sheet(exportData);
-  
-  // Set column widths
-  const colWidths = [
-    { wch: 30 }, // email
-    { wch: 20 }, // full_name
-    { wch: 20 }, // github_username
-    { wch: 25 }, // institution_name
-    { wch: 40 }, // bio
-    { wch: 40 }, // avatar_url
-  ];
+  // Convert to CSV
+  const csv = Papa.unparse(exportData, {
+    quotes: true, // Wrap fields in quotes
+    header: true, // Include header row
+  });
 
-  ws['!cols'] = colWidths;
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Participants");
-  
-  // Generate filename with current date
+  // Create and download the file
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
   const date = new Date().toISOString().split('T')[0];
-  const filename = `participants_export_${date}.xlsx`;
   
-  XLSX.writeFile(wb, filename);
+  if (navigator.msSaveBlob) { // IE 10+
+    navigator.msSaveBlob(blob, `participants_export_${date}.csv`);
+  } else {
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', `participants_export_${date}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 }
