@@ -44,7 +44,11 @@ export function MentorFilters({ selectedTechStacks, onTechStacksChange }: Mentor
           <Badge
             key={stack.id}
             variant={selectedTechStacks.includes(stack.id) ? "default" : "secondary"}
-            className="cursor-pointer hover:opacity-80 flex items-center gap-2"
+            className={`cursor-pointer hover:opacity-80 flex items-center gap-2 ${
+              selectedTechStacks.includes(stack.id) 
+                ? "bg-primary text-primary-foreground" 
+                : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700"
+            }`}
             onClick={() => {
               if (selectedTechStacks.includes(stack.id)) {
                 onTechStacksChange(selectedTechStacks.filter(id => id !== stack.id));
