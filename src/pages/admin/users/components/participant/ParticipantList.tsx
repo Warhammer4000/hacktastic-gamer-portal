@@ -1,14 +1,16 @@
 import { UserCard } from "@/components/admin/users/UserCard";
 import { DeleteUserDialog } from "../DeleteUserDialog";
 import { useParticipantActions } from "./useParticipantActions";
+import { ProfilesTable } from "@/integrations/supabase/types/tables/profiles";
 
 interface ParticipantListProps {
-  participants: any[];
+  participants: ProfilesTable["Row"][];
   isLoading: boolean;
   onEdit: (userId: string) => void;
+  onDelete: (userId: string) => void;
 }
 
-export function ParticipantList({ participants, isLoading, onEdit }: ParticipantListProps) {
+export function ParticipantList({ participants, isLoading, onEdit, onDelete }: ParticipantListProps) {
   const { handleDelete, confirmDelete, isDeleteDialogOpen, setIsDeleteDialogOpen } = useParticipantActions();
 
   if (isLoading) {
@@ -22,7 +24,7 @@ export function ParticipantList({ participants, isLoading, onEdit }: Participant
           key={participant.id}
           user={participant}
           onEdit={onEdit}
-          onDelete={handleDelete}
+          onDelete={onDelete}
         />
       ))}
 

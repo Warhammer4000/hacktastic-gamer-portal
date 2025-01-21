@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { UserCard } from "@/components/admin/users/UserCard";
 import { DeleteUserDialog } from "../DeleteUserDialog";
 import { useMentorActions } from "./useMentorActions";
-import MentorHeader from "./MentorHeader";
-import MentorFilters from "./MentorFilters";
-import BulkMentorUploadDialog from "./BulkMentorUploadDialog";
+import { MentorHeader } from "./MentorHeader";
+import { MentorFilters } from "./MentorFilters";
+import BulkMentorUploadDialog from "../mentor/bulk-upload/BulkMentorUploadDialog";
+import { MentorData } from "../../types/mentor";
 
 export function MentorContent() {
   const navigate = useNavigate();
@@ -17,14 +18,30 @@ export function MentorContent() {
   const { handleDelete, confirmDelete, isDeleteDialogOpen, setIsDeleteDialogOpen } = useMentorActions();
   
   const { data: mentors, isLoading } = useQuery({
-    queryKey: ["mentors", searchQuery, selectedStatus],
+    queryKey: ["mentor-users", searchQuery, selectedStatus],
     queryFn: async () => {
       const query = supabase
-        .from("mentors")
-        .select("*");
+        .from("profiles")
+        .select(`
+          *,
+          user_roles!inner (role),
+          mentor_preferences!left (
+            team_count
+          ),
+          mentor_tech_stacks!left (
+            tech_stack_id,
+            technology_stacks (
+              name
+            )
+          ),
+          institutions (
+            name
+          )
+        `)
+        .eq('user_roles.role', 'mentor');
 
       if (searchQuery) {
-        query.ilike("full_name", `%${searchQuery}%`);
+        query.or(`email.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`);
       }
 
       if (selectedStatus) {
@@ -33,7 +50,7 @@ export function MentorContent() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data as MentorData[];
     },
   });
 
@@ -46,10 +63,10 @@ export function MentorContent() {
       <div className="flex justify-between items-center">
         <MentorHeader
           onBulkUpload={() => setShowBulkUploadDialog(true)}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
         <MentorFilters
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
           selectedStatus={selectedStatus}
           setSelectedStatus={setSelectedStatus}
         />

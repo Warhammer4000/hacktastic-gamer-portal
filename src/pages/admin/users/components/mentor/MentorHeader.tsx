@@ -4,14 +4,12 @@ import { Download, Search, Upload } from "lucide-react";
 
 interface MentorHeaderProps {
   onBulkUpload: () => void;
-  onExport: () => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
 }
 
 export function MentorHeader({
   onBulkUpload,
-  onExport,
   searchQuery,
   onSearchChange,
 }: MentorHeaderProps) {
@@ -22,10 +20,6 @@ export function MentorHeader({
           <Button variant="outline" onClick={onBulkUpload}>
             <Upload className="mr-2 h-4 w-4" />
             Bulk Upload
-          </Button>
-          <Button variant="outline" onClick={onExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
           </Button>
         </div>
       </div>
