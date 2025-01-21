@@ -36,12 +36,14 @@ export async function exportParticipants() {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   const date = new Date().toISOString().split('T')[0];
+  const filename = `participants_export_${date}.csv`;
   
-  if (navigator.msSaveBlob) { // IE 10+
-    navigator.msSaveBlob(blob, `participants_export_${date}.csv`);
+  // Handle download for all browsers
+  if (window.navigator && (window.navigator as any).msSaveOrOpenBlob) {
+    (window.navigator as any).msSaveOrOpenBlob(blob, filename);
   } else {
     link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', `participants_export_${date}.csv`);
+    link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
