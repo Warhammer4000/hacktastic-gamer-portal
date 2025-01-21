@@ -8,6 +8,8 @@ interface MentorHeaderProps {
   onExport: () => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  selectedTechStacks: string[];
+  onTechStacksChange: (techStacks: string[]) => void;
 }
 
 export function MentorHeader({
@@ -16,6 +18,8 @@ export function MentorHeader({
   onExport,
   searchQuery,
   onSearchChange,
+  selectedTechStacks,
+  onTechStacksChange,
 }: MentorHeaderProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
