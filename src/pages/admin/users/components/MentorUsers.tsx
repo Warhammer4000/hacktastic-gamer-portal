@@ -8,16 +8,18 @@ import { MentorFilters } from "./mentor/MentorFilters";
 import { MentorContent } from "./mentor/MentorContent";
 import { useMentorList } from "./mentor/useMentorList";
 import { exportMentors } from "./mentor/MentorExport";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export default function MentorUsers() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 300);
   const [isAddMentorOpen, setIsAddMentorOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [selectedTechStacks, setSelectedTechStacks] = useState<string[]>([]);
   
   const navigate = useNavigate();
   const { deleteMentor } = useMentorActions();
-  const { data: mentors, isLoading } = useMentorList(searchQuery, selectedTechStacks);
+  const { data: mentors, isLoading } = useMentorList(debouncedSearch, selectedTechStacks);
 
   const handleEdit = (mentorId: string) => {
     navigate(`/admin/mentors/edit/${mentorId}`);
@@ -47,8 +49,8 @@ export default function MentorUsers() {
         onAddMentor={() => setIsAddMentorOpen(true)}
         onBulkUpload={() => setIsBulkUploadOpen(true)}
         onExport={() => exportMentors(mentors || [])}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        searchQuery={searchInput}
+        onSearchChange={setSearchInput}
       />
 
       <MentorFilters
