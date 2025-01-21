@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import AddMentorDialog from "./AddMentorDialog";
 import BulkMentorUploadDialog from "./mentor/bulk-upload/BulkMentorUploadDialog";
@@ -8,16 +8,27 @@ import { MentorFilters } from "./mentor/MentorFilters";
 import { MentorContent } from "./mentor/MentorContent";
 import { useMentorList } from "./mentor/useMentorList";
 import { exportMentors } from "./mentor/MentorExport";
+import { useDebounce } from "../hooks/useDebounce";
 
 export default function MentorUsers() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [isAddMentorOpen, setIsAddMentorOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [selectedTechStacks, setSelectedTechStacks] = useState<string[]>([]);
   
   const navigate = useNavigate();
   const { deleteMentor } = useMentorActions();
-  const { data: mentors, isLoading } = useMentorList(searchQuery, selectedTechStacks);
+  
+  // Use debounced search value for the query
+  const debouncedSearch = useDebounce(searchInput);
+  
+  const { data: mentors, isLoading } = useMentorList(debouncedSearch, selectedTechStacks);
+
+  // Memoize filtered mentors to prevent unnecessary recalculations
+  const filteredMentors = useMemo(() => {
+    if (!mentors) return [];
+    return mentors;
+  }, [mentors]);
 
   const handleEdit = (mentorId: string) => {
     navigate(`/admin/mentors/edit/${mentorId}`);
@@ -37,18 +48,14 @@ export default function MentorUsers() {
     );
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div className="space-y-4">
       <MentorHeader
         onAddMentor={() => setIsAddMentorOpen(true)}
         onBulkUpload={() => setIsBulkUploadOpen(true)}
-        onExport={() => exportMentors(mentors || [])}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        onExport={() => exportMentors(filteredMentors)}
+        searchQuery={searchInput}
+        onSearchChange={setSearchInput}
       />
 
       <MentorFilters
@@ -57,7 +64,8 @@ export default function MentorUsers() {
       />
 
       <MentorContent
-        mentors={mentors || []}
+        mentors={filteredMentors}
+        isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
