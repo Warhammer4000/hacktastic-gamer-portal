@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface BulkParticipantUploadDialogProps {
   open: boolean;
@@ -24,6 +26,7 @@ export default function BulkParticipantUploadDialog({
 }: BulkParticipantUploadDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [errors, setErrors] = useState<Array<{ email: string; error: string }>>([]);
   const queryClient = useQueryClient();
 
   const downloadTemplate = () => {
@@ -51,6 +54,7 @@ export default function BulkParticipantUploadDialog({
 
     setIsLoading(true);
     setProgress(0);
+    setErrors([]);
     const reader = new FileReader();
 
     reader.onload = async (e) => {
@@ -120,6 +124,15 @@ export default function BulkParticipantUploadDialog({
 
         console.log("Edge function response:", data);
 
+        if (data.results) {
+          const failedEntries = data.results.filter((result: any) => !result.success);
+          setErrors(failedEntries);
+          
+          if (failedEntries.length > 0) {
+            toast.error(`Failed to create ${failedEntries.length} participants`);
+          }
+        }
+
         // Start polling for job status
         const pollInterval = setInterval(async () => {
           const { data: job } = await supabase
@@ -147,7 +160,6 @@ export default function BulkParticipantUploadDialog({
               if (job.status === 'completed') {
                 toast.success(`Successfully created ${job.successful_records} participants`);
                 if (job.failed_records > 0) {
-                  toast.error(`Failed to create ${job.failed_records} participants`);
                   console.error("Failed records:", job.error_log);
                 }
               } else {
@@ -173,7 +185,7 @@ export default function BulkParticipantUploadDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Bulk Upload Participants</DialogTitle>
         </DialogHeader>
@@ -203,6 +215,25 @@ export default function BulkParticipantUploadDialog({
               <p className="text-sm text-muted-foreground text-center">
                 Processing... {Math.round(progress)}%
               </p>
+            </div>
+          )}
+
+          {errors.length > 0 && (
+            <div className="space-y-2">
+              <Alert variant="destructive">
+                <AlertDescription>
+                  Failed to create the following participants:
+                </AlertDescription>
+              </Alert>
+              <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+                <div className="space-y-2">
+                  {errors.map((error, index) => (
+                    <div key={index} className="text-sm">
+                      <span className="font-medium">{error.email}:</span> {error.error}
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
           )}
 
