@@ -8,8 +8,7 @@ import { useMentorActions } from "./useMentorActions";
 import { MentorHeader } from "./MentorHeader";
 import { MentorFilters } from "./MentorFilters";
 import BulkMentorUploadDialog from "../mentor/bulk-upload/BulkMentorUploadDialog";
-import { MentorData } from "../../types/mentor";
-import { ProfilesTable } from "@/integrations/supabase/types/tables/profiles";
+import type { MentorData } from "../../types/mentor";
 
 export function MentorContent() {
   const navigate = useNavigate();

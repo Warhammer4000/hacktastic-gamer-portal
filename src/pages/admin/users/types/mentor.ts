@@ -1,4 +1,4 @@
-import { ProfilesTable } from "@/integrations/supabase/types/tables/profiles";
+import type { ProfilesTable } from "@/integrations/supabase/types/tables/profiles";
 
 export interface MentorPreference {
   team_count: number;
@@ -12,7 +12,7 @@ export interface MentorTechStack {
 }
 
 export type MentorData = ProfilesTable["Row"] & {
-  mentor_preferences: MentorPreference[] | null;
+  mentor_preferences: MentorPreference | null;
   mentor_tech_stacks: MentorTechStack[] | null;
   institutions: {
     name: string;
