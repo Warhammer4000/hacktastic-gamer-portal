@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Search, Upload, UserPlus } from "lucide-react";
+import { Download, Search, Upload } from "lucide-react";
 
 interface MentorHeaderProps {
-  onAddMentor: () => void;
   onBulkUpload: () => void;
   onExport: () => void;
   searchQuery: string;
@@ -11,7 +10,6 @@ interface MentorHeaderProps {
 }
 
 export function MentorHeader({
-  onAddMentor,
   onBulkUpload,
   onExport,
   searchQuery,
@@ -21,10 +19,6 @@ export function MentorHeader({
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
         <div className="space-x-2">
-          <Button onClick={onAddMentor}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add Mentor
-          </Button>
           <Button variant="outline" onClick={onBulkUpload}>
             <Upload className="mr-2 h-4 w-4" />
             Bulk Upload

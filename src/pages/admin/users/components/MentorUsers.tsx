@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import AddMentorDialog from "./AddMentorDialog";
 import BulkMentorUploadDialog from "./mentor/bulk-upload/BulkMentorUploadDialog";
 import { useMentorActions } from "./mentor/useMentorActions";
 import { MentorHeader } from "./mentor/MentorHeader";
@@ -12,7 +11,6 @@ import { useDebounce } from "../hooks/useDebounce";
 
 export default function MentorUsers() {
   const [searchInput, setSearchInput] = useState("");
-  const [isAddMentorOpen, setIsAddMentorOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [selectedTechStacks, setSelectedTechStacks] = useState<string[]>([]);
   
@@ -51,7 +49,6 @@ export default function MentorUsers() {
   return (
     <div className="space-y-4">
       <MentorHeader
-        onAddMentor={() => setIsAddMentorOpen(true)}
         onBulkUpload={() => setIsBulkUploadOpen(true)}
         onExport={() => exportMentors(filteredMentors)}
         searchQuery={searchInput}
@@ -68,11 +65,6 @@ export default function MentorUsers() {
         isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDelete}
-      />
-
-      <AddMentorDialog
-        open={isAddMentorOpen}
-        onOpenChange={setIsAddMentorOpen}
       />
       
       <BulkMentorUploadDialog
