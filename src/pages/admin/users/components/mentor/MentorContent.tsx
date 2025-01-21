@@ -9,26 +9,27 @@ import { MentorHeader } from "./MentorHeader";
 import { MentorFilters } from "./MentorFilters";
 import BulkMentorUploadDialog from "../mentor/bulk-upload/BulkMentorUploadDialog";
 import { MentorData } from "../../types/mentor";
+import { ProfilesTable } from "@/integrations/supabase/types/tables/profiles";
 
 export function MentorContent() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedTechStacks, setSelectedTechStacks] = useState<string[]>([]);
   const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
   const { handleDelete, confirmDelete, isDeleteDialogOpen, setIsDeleteDialogOpen } = useMentorActions();
-  
+
   const { data: mentors, isLoading } = useQuery({
-    queryKey: ["mentor-users", searchQuery, selectedStatus],
+    queryKey: ["mentors", searchQuery, selectedTechStacks],
     queryFn: async () => {
-      const query = supabase
-        .from("profiles")
+      let query = supabase
+        .from('profiles')
         .select(`
           *,
           user_roles!inner (role),
-          mentor_preferences!left (
+          mentor_preferences (
             team_count
           ),
-          mentor_tech_stacks!left (
+          mentor_tech_stacks (
             tech_stack_id,
             technology_stacks (
               name
@@ -41,18 +42,34 @@ export function MentorContent() {
         .eq('user_roles.role', 'mentor');
 
       if (searchQuery) {
-        query.or(`email.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`);
+        query = query.or(`email.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`);
       }
 
-      if (selectedStatus) {
-        query.eq("status", selectedStatus);
+      if (selectedTechStacks.length > 0) {
+        const mentorIds = await supabase
+          .from('mentor_tech_stacks')
+          .select('user_id')
+          .in('tech_stack_id', selectedTechStacks);
+
+        if (mentorIds.data) {
+          query = query.in('id', mentorIds.data.map(item => item.user_id));
+        }
       }
 
       const { data, error } = await query;
       if (error) throw error;
+
       return data as MentorData[];
     },
   });
+
+  const handleTechStackChange = (techStackId: string, pressed: boolean) => {
+    setSelectedTechStacks(prev =>
+      pressed
+        ? [...prev, techStackId]
+        : prev.filter(id => id !== techStackId)
+    );
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -60,17 +77,16 @@ export function MentorContent() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <MentorHeader
-          onBulkUpload={() => setShowBulkUploadDialog(true)}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-        <MentorFilters
-          selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
-        />
-      </div>
+      <MentorHeader
+        onBulkUpload={() => setShowBulkUploadDialog(true)}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
+
+      <MentorFilters
+        selectedTechStacks={selectedTechStacks}
+        onTechStackChange={handleTechStackChange}
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {mentors?.map((mentor) => (

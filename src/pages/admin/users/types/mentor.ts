@@ -21,3 +21,8 @@ export type MentorData = ProfilesTable["Row"] & {
     role: "admin" | "mentor" | "participant";
   }[];
 }
+
+export interface MentorFiltersProps {
+  selectedTechStacks: string[];
+  onTechStackChange: (techStackId: string, pressed: boolean) => void;
+}
