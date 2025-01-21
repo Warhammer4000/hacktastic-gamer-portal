@@ -11,40 +11,55 @@ export type Database = {
     Tables: {
       bulk_upload_jobs: {
         Row: {
+          completed_at: string | null
           created_at: string | null
           created_by: string | null
           error_log: Json | null
           failed_records: number | null
+          file_name: string | null
+          file_size: number | null
           id: string
           processed_records: number | null
+          started_at: string | null
           status: Database["public"]["Enums"]["bulk_upload_status"] | null
           successful_records: number | null
           total_records: number | null
           updated_at: string | null
+          upload_type: string
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string | null
           created_by?: string | null
           error_log?: Json | null
           failed_records?: number | null
+          file_name?: string | null
+          file_size?: number | null
           id?: string
           processed_records?: number | null
+          started_at?: string | null
           status?: Database["public"]["Enums"]["bulk_upload_status"] | null
           successful_records?: number | null
           total_records?: number | null
           updated_at?: string | null
+          upload_type?: string
         }
         Update: {
+          completed_at?: string | null
           created_at?: string | null
           created_by?: string | null
           error_log?: Json | null
           failed_records?: number | null
+          file_name?: string | null
+          file_size?: number | null
           id?: string
           processed_records?: number | null
+          started_at?: string | null
           status?: Database["public"]["Enums"]["bulk_upload_status"] | null
           successful_records?: number | null
           total_records?: number | null
           updated_at?: string | null
+          upload_type?: string
         }
         Relationships: [
           {

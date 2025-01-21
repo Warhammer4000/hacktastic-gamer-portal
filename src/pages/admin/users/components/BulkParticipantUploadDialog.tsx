@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Download, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 interface BulkParticipantUploadDialogProps {
   open: boolean;
@@ -22,6 +23,7 @@ export default function BulkParticipantUploadDialog({
   onOpenChange,
 }: BulkParticipantUploadDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const queryClient = useQueryClient();
 
   const downloadTemplate = () => {
@@ -42,6 +44,7 @@ export default function BulkParticipantUploadDialog({
     if (!file) return;
 
     setIsLoading(true);
+    setProgress(0);
     const reader = new FileReader();
 
     reader.onload = async (e) => {
@@ -62,62 +65,65 @@ export default function BulkParticipantUploadDialog({
             institution_name: values[3]?.trim() || null,
             bio: values[4]?.trim() || null,
             avatar_url: values[5]?.trim() || null,
-            password: Math.random().toString(36).slice(-8),
           };
           participants.push(participant);
         }
 
-        for (const participant of participants) {
-          const { data: authData, error: authError } = await supabase.auth.signUp({
-            email: participant.email,
-            password: participant.password,
-            options: {
-              data: {
-                full_name: participant.full_name,
-              },
-            },
-          });
+        // Create a bulk upload job
+        const { data: jobData, error: jobError } = await supabase
+          .from('bulk_upload_jobs')
+          .insert({
+            total_records: participants.length,
+            file_name: file.name,
+            file_size: file.size,
+            upload_type: 'participant'
+          })
+          .select()
+          .single();
 
-          if (authError) throw authError;
-          if (!authData.user) continue;
+        if (jobError) throw jobError;
 
-          // Get institution ID if provided
-          let institutionId = null;
-          if (participant.institution_name) {
-            const { data: institution } = await supabase
-              .from("institutions")
-              .select("id")
-              .eq("name", participant.institution_name)
-              .single();
-            
-            institutionId = institution?.id;
+        // Call the edge function
+        const { data, error } = await supabase.functions.invoke('bulk-participant-upload', {
+          body: { participants, jobId: jobData.id }
+        });
+
+        if (error) throw error;
+
+        // Start polling for job status
+        const pollInterval = setInterval(async () => {
+          const { data: job } = await supabase
+            .from('bulk_upload_jobs')
+            .select('*')
+            .eq('id', jobData.id)
+            .single();
+
+          if (job) {
+            const progress = (job.processed_records / job.total_records) * 100;
+            setProgress(progress);
+
+            if (job.status === 'completed' || job.status === 'failed') {
+              clearInterval(pollInterval);
+              setIsLoading(false);
+              
+              if (job.status === 'completed') {
+                toast.success(`Successfully created ${job.successful_records} participants`);
+                if (job.failed_records > 0) {
+                  toast.error(`Failed to create ${job.failed_records} participants`);
+                }
+              } else {
+                toast.error('Bulk upload failed');
+              }
+              
+              queryClient.invalidateQueries({ queryKey: ["participants"] });
+              onOpenChange(false);
+            }
           }
+        }, 1000);
 
-          // Add participant role
-          await supabase
-            .from("user_roles")
-            .insert([{ user_id: authData.user.id, role: "participant" }]);
-
-          // Update profile with additional information
-          await supabase
-            .from("profiles")
-            .update({
-              github_username: participant.github_username,
-              institution_id: institutionId,
-              bio: participant.bio,
-              avatar_url: participant.avatar_url,
-              status: 'pending_approval'
-            })
-            .eq("id", authData.user.id);
-        }
-
-        toast.success(`${participants.length} participants created successfully`);
-        queryClient.invalidateQueries({ queryKey: ["participants"] });
-        onOpenChange(false);
       } catch (error) {
         console.error("Error uploading participants:", error);
         toast.error("Failed to upload participants");
-      } finally {
         setIsLoading(false);
       }
     };
@@ -150,6 +156,15 @@ export default function BulkParticipantUploadDialog({
               disabled={isLoading}
             />
           </div>
+
+          {isLoading && (
+            <div className="space-y-2">
+              <Progress value={progress} />
+              <p className="text-sm text-muted-foreground text-center">
+                Processing... {Math.round(progress)}%
+              </p>
+            </div>
+          )}
 
           <div className="text-sm text-muted-foreground">
             Upload a CSV file with the following columns: email, full_name, 
