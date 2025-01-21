@@ -43,6 +43,12 @@ export default function BulkParticipantUploadDialog({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log("File selected:", {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
+
     setIsLoading(true);
     setProgress(0);
     const reader = new FileReader();
@@ -50,14 +56,25 @@ export default function BulkParticipantUploadDialog({
     reader.onload = async (e) => {
       try {
         const text = e.target?.result as string;
+        console.log("CSV content:", text);
+
         const rows = text.split("\n");
+        console.log("Total rows found:", rows.length);
+        
         const headers = rows[0].split(",");
+        console.log("CSV headers:", headers);
+
         const participants = [];
 
         for (let i = 1; i < rows.length; i++) {
-          if (!rows[i].trim()) continue;
+          if (!rows[i].trim()) {
+            console.log(`Skipping empty row ${i}`);
+            continue;
+          }
           
           const values = rows[i].split(",");
+          console.log(`Processing row ${i}:`, values);
+
           const participant = {
             email: values[0].trim(),
             full_name: values[1].trim(),
@@ -66,8 +83,11 @@ export default function BulkParticipantUploadDialog({
             bio: values[4]?.trim() || null,
             avatar_url: values[5]?.trim() || null,
           };
+          console.log(`Parsed participant data for row ${i}:`, participant);
           participants.push(participant);
         }
+
+        console.log("Final participants array:", participants);
 
         // Create a bulk upload job
         const { data: jobData, error: jobError } = await supabase
@@ -81,14 +101,24 @@ export default function BulkParticipantUploadDialog({
           .select()
           .single();
 
-        if (jobError) throw jobError;
+        if (jobError) {
+          console.error("Error creating bulk upload job:", jobError);
+          throw jobError;
+        }
+
+        console.log("Bulk upload job created:", jobData);
 
         // Call the edge function
         const { data, error } = await supabase.functions.invoke('bulk-participant-upload', {
           body: { participants, jobId: jobData.id }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Edge function error:", error);
+          throw error;
+        }
+
+        console.log("Edge function response:", data);
 
         // Start polling for job status
         const pollInterval = setInterval(async () => {
@@ -99,6 +129,14 @@ export default function BulkParticipantUploadDialog({
             .single();
 
           if (job) {
+            console.log("Job status update:", {
+              status: job.status,
+              processed: job.processed_records,
+              total: job.total_records,
+              successful: job.successful_records,
+              failed: job.failed_records
+            });
+
             const progress = (job.processed_records / job.total_records) * 100;
             setProgress(progress);
 
@@ -110,9 +148,11 @@ export default function BulkParticipantUploadDialog({
                 toast.success(`Successfully created ${job.successful_records} participants`);
                 if (job.failed_records > 0) {
                   toast.error(`Failed to create ${job.failed_records} participants`);
+                  console.error("Failed records:", job.error_log);
                 }
               } else {
                 toast.error('Bulk upload failed');
+                console.error("Job failed:", job.error_log);
               }
               
               queryClient.invalidateQueries({ queryKey: ["participants"] });
