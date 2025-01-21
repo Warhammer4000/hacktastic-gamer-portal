@@ -4,7 +4,12 @@ import { useParticipantActions } from "./useParticipantActions";
 import { ProfilesTable } from "@/integrations/supabase/types/tables/profiles";
 
 interface ParticipantListProps {
-  participants: ProfilesTable["Row"][];
+  participants: (ProfilesTable["Row"] & {
+    institutions?: {
+      name: string;
+      type: string;
+    } | null;
+  })[];
   isLoading: boolean;
   onEdit: (userId: string) => void;
   onDelete: (userId: string) => void;
@@ -24,7 +29,7 @@ export function ParticipantList({ participants, isLoading, onEdit, onDelete }: P
           key={participant.id}
           user={participant}
           onEdit={onEdit}
-          onDelete={onDelete}
+          onDelete={handleDelete}
         />
       ))}
 
