@@ -15,7 +15,6 @@ export default function MentorsPage() {
   const { data: mentors, isLoading } = useQuery({
     queryKey: ["public-mentors"],
     queryFn: async () => {
-      // Get mentor user IDs first
       const { data: mentorRoles, error: rolesError } = await supabase
         .from("user_roles")
         .select("user_id")
@@ -25,7 +24,6 @@ export default function MentorsPage() {
 
       const mentorIds = mentorRoles.map(role => role.user_id);
 
-      // Then get approved mentor profiles with tech stacks
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select(`
@@ -107,7 +105,7 @@ export default function MentorsPage() {
           </div>
 
           {/* Mentors Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filteredMentors?.map((mentor) => (
               <MentorCard key={mentor.id} mentor={mentor} />
             ))}
