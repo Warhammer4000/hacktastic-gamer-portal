@@ -51,6 +51,6 @@ export function useMentorList(searchQuery: string, selectedTechStacks: string[])
       })) as MentorData[];
     },
     staleTime: 30000, // Cache results for 30 seconds
-    keepPreviousData: true, // Keep showing previous data while fetching new data
+    placeholderData: (previousData) => previousData // This replaces keepPreviousData
   });
 }
