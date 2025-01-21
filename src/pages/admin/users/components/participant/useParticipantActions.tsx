@@ -1,9 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export function useParticipantActions() {
   const queryClient = useQueryClient();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
   const deleteParticipant = useMutation({
     mutationFn: async (userId: string) => {
@@ -22,6 +25,8 @@ export function useParticipantActions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['participants'] });
       toast.success('Participant removed successfully');
+      setIsDeleteDialogOpen(false);
+      setUserToDelete(null);
     },
     onError: (error: Error) => {
       console.error('Error removing participant:', error);
@@ -30,10 +35,21 @@ export function useParticipantActions() {
   });
 
   const handleDelete = (userId: string) => {
-    if (window.confirm('Are you sure you want to delete this participant?')) {
-      deleteParticipant.mutate(userId);
+    setUserToDelete(userId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (userToDelete) {
+      deleteParticipant.mutate(userToDelete);
     }
   };
 
-  return { handleDelete };
+  return { 
+    handleDelete, 
+    confirmDelete, 
+    isDeleteDialogOpen, 
+    setIsDeleteDialogOpen,
+    userToDelete 
+  };
 }
