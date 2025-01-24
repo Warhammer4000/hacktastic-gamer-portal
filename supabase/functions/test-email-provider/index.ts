@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface TestEmailRequest {
-  type: 'resend' | 'sendgrid' | 'smtp';
+  type: 'resend' | 'sendgrid' | 'smtp' | 'mailgun';
   settings: Record<string, string | null>;
 }
 
@@ -65,6 +65,31 @@ serve(async (req) => {
         if (!res.ok) {
           const error = await res.text();
           throw new Error(`SendGrid API error: ${error}`);
+        }
+        break;
+      }
+
+      case 'mailgun': {
+        const domain = settings.domain;
+        const apiKey = settings.api_key;
+        
+        const res = await fetch(`https://api.mailgun.net/v3/${domain}/messages`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Basic ${btoa(`api:${apiKey}`)}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            from: settings.from_email || `test@${domain}`,
+            to: settings.from_email || `test@${domain}`,
+            subject: 'Test Connection',
+            text: 'This is a test connection.',
+          }),
+        });
+
+        if (!res.ok) {
+          const error = await res.text();
+          throw new Error(`Mailgun API error: ${error}`);
         }
         break;
       }
