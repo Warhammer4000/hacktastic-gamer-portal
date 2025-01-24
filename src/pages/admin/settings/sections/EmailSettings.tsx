@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ExternalLink } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState } from "react";
 
 interface EmailProvider {
   id: string;
@@ -16,6 +17,7 @@ interface EmailProvider {
   is_active: boolean;
   is_default: boolean;
   settings?: EmailProviderSetting[];
+  hasTestedConnection?: boolean;
 }
 
 interface EmailProviderSetting {
@@ -28,6 +30,7 @@ interface EmailProviderSetting {
 
 export function EmailSettings() {
   const queryClient = useQueryClient();
+  const [testedProviders, setTestedProviders] = useState<Set<string>>(new Set());
   
   const { data: providers, isLoading } = useQuery({
     queryKey: ['emailProviders'],
@@ -80,6 +83,26 @@ export function EmailSettings() {
     }
   });
 
+  const saveConfiguration = async (provider: EmailProvider) => {
+    if (!testedProviders.has(provider.id)) {
+      toast.error("Please test the connection before saving");
+      return;
+    }
+
+    try {
+      // Save all settings for this provider
+      for (const setting of provider.settings || []) {
+        await updateProviderSetting.mutateAsync({
+          settingId: setting.id,
+          value: setting.value || ''
+        });
+      }
+      toast.success("Configuration saved successfully");
+    } catch (error) {
+      toast.error("Failed to save configuration");
+    }
+  };
+
   const testConnection = async (provider: EmailProvider) => {
     const settings = provider.settings?.reduce((acc, setting) => {
       acc[setting.key] = setting.value;
@@ -91,7 +114,6 @@ export function EmailSettings() {
         (async () => {
           switch (provider.type) {
             case 'resend':
-              // Test Resend connection
               const response = await fetch('/api/test-resend', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -101,7 +123,6 @@ export function EmailSettings() {
               break;
 
             case 'sendgrid':
-              // Test SendGrid connection
               const sgResponse = await fetch('/api/test-sendgrid', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -111,7 +132,6 @@ export function EmailSettings() {
               break;
 
             case 'smtp':
-              // Test SMTP connection
               const smtpResponse = await fetch('/api/test-smtp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -123,6 +143,7 @@ export function EmailSettings() {
             default:
               throw new Error('Unsupported provider type');
           }
+          setTestedProviders(prev => new Set([...prev, provider.id]));
         })(),
         {
           loading: 'Testing connection...',
@@ -181,6 +202,8 @@ export function EmailSettings() {
       <div className="grid gap-6">
         {providers?.map((provider) => {
           const guide = getProviderGuide(provider.type);
+          const hasValidSettings = provider.settings?.every(s => s.value);
+          const canSave = testedProviders.has(provider.id);
           
           return (
             <Card key={provider.id}>
@@ -236,14 +259,22 @@ export function EmailSettings() {
                   </div>
                 ))}
                 
-                <Button 
-                  variant="secondary" 
-                  onClick={() => testConnection(provider)}
-                  disabled={!provider.settings?.some(s => s.value)}
-                  className="mt-4"
-                >
-                  Test Connection
-                </Button>
+                <div className="flex gap-4 mt-4">
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => testConnection(provider)}
+                    disabled={!hasValidSettings}
+                  >
+                    Test Connection
+                  </Button>
+                  
+                  <Button
+                    onClick={() => saveConfiguration(provider)}
+                    disabled={!canSave}
+                  >
+                    Save Configuration
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           );
