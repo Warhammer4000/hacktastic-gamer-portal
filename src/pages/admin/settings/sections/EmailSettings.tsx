@@ -6,13 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ExternalLink } from "lucide-react";
+import { Loader2, ExternalLink, Mail, Send, Server } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface EmailProvider {
   id: string;
-  type: 'resend' | 'sendgrid' | 'mailgun' | 'smtp';
+  type: 'resend' | 'sendgrid' | 'smtp';
   name: string;
   is_active: boolean;
   is_default: boolean;
@@ -49,6 +50,16 @@ export function EmailSettings() {
 
   const updateProviderStatus = useMutation({
     mutationFn: async ({ providerId, isActive }: { providerId: string; isActive: boolean }) => {
+      // If enabling this provider, first disable all others
+      if (isActive) {
+        const { error: disableError } = await supabase
+          .from('email_providers')
+          .update({ is_active: false })
+          .neq('id', providerId);
+
+        if (disableError) throw disableError;
+      }
+
       const { error } = await supabase
         .from('email_providers')
         .update({ is_active: isActive })
@@ -90,7 +101,6 @@ export function EmailSettings() {
     }
 
     try {
-      // Save all settings for this provider
       for (const setting of provider.settings || []) {
         await updateProviderSetting.mutateAsync({
           settingId: setting.id,
@@ -156,6 +166,19 @@ export function EmailSettings() {
     }
   };
 
+  const getProviderIcon = (type: EmailProvider['type']) => {
+    switch (type) {
+      case 'resend':
+        return Send;
+      case 'sendgrid':
+        return Mail;
+      case 'smtp':
+        return Server;
+      default:
+        return Mail;
+    }
+  };
+
   const getProviderGuide = (type: EmailProvider['type']) => {
     switch (type) {
       case 'resend':
@@ -167,11 +190,6 @@ export function EmailSettings() {
         return {
           url: 'https://app.sendgrid.com/settings/api_keys',
           description: 'Create an API key in the SendGrid dashboard under Settings > API Keys.'
-        };
-      case 'mailgun':
-        return {
-          url: 'https://app.mailgun.com/app/account/security/api_keys',
-          description: 'Find your API key in the Mailgun dashboard under Account Settings > API Keys.'
         };
       case 'smtp':
         return {
@@ -204,16 +222,20 @@ export function EmailSettings() {
           const guide = getProviderGuide(provider.type);
           const hasValidSettings = provider.settings?.every(s => s.value);
           const canSave = testedProviders.has(provider.id);
+          const Icon = getProviderIcon(provider.type);
           
           return (
             <Card key={provider.id}>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>{provider.name}</CardTitle>
-                    <CardDescription>
-                      {provider.is_default ? 'Default Provider' : 'Additional Provider'}
-                    </CardDescription>
+                  <div className="flex items-center gap-3">
+                    <Icon className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <CardTitle>{provider.name}</CardTitle>
+                      <CardDescription>
+                        {provider.is_default ? 'Default Provider' : 'Additional Provider'}
+                      </CardDescription>
+                    </div>
                   </div>
                   <Switch
                     checked={provider.is_active}
@@ -223,7 +245,7 @@ export function EmailSettings() {
                   />
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className={cn("space-y-4", !provider.is_active && "hidden")}>
                 {guide.description && (
                   <Alert>
                     <AlertDescription className="flex items-center gap-2">
