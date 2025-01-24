@@ -1,6 +1,6 @@
 export interface EmailProvider {
   id: string;
-  type: 'resend' | 'sendgrid' | 'smtp';
+  type: 'resend' | 'sendgrid' | 'smtp' | 'mailgun';
   name: string;
   is_active: boolean;
   is_default: boolean;
