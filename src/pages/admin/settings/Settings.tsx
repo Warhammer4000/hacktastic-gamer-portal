@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegistrationSettings } from "./sections/RegistrationSettings";
 import { GitHubSettings } from "./sections/GitHubSettings";
 import { TeamSettings } from "./sections/TeamSettings";
+import { EmailSettings } from "./sections/EmailSettings";
 
 const AdminSettings = () => {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ const AdminSettings = () => {
           <TabsTrigger value="registration">Registration</TabsTrigger>
           <TabsTrigger value="teams">Teams</TabsTrigger>
           <TabsTrigger value="github">GitHub</TabsTrigger>
+          <TabsTrigger value="email">Email</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
         </TabsList>
@@ -60,6 +62,10 @@ const AdminSettings = () => {
         
         <TabsContent value="github">
           <GitHubSettings />
+        </TabsContent>
+
+        <TabsContent value="email">
+          <EmailSettings />
         </TabsContent>
 
         <TabsContent value="security">

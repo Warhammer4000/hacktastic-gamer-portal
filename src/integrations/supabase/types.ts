@@ -190,6 +190,74 @@ export type Database = {
           },
         ]
       }
+      email_provider_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_secret: boolean | null
+          key: string
+          provider_id: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_secret?: boolean | null
+          key: string
+          provider_id: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_secret?: boolean | null
+          key?: string
+          provider_id?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_provider_settings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "email_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_providers: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          type: Database["public"]["Enums"]["email_provider_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          type: Database["public"]["Enums"]["email_provider_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          type?: Database["public"]["Enums"]["email_provider_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
@@ -1267,6 +1335,7 @@ export type Database = {
     Enums: {
       bulk_upload_status: "pending" | "processing" | "completed" | "failed"
       coupon_state: "unassigned" | "assigned" | "revealed"
+      email_provider_type: "resend" | "sendgrid" | "mailgun" | "smtp"
       event_role: "mentor" | "participant" | "public"
       event_status: "draft" | "published"
       faq_status: "draft" | "published"
