@@ -45,6 +45,30 @@ serve(async (req) => {
         }
       }
 
+      case 'sendgrid': {
+        const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${settings.api_key}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            personalizations: [{ 
+              to: [{ email: settings.from_email || 'test@example.com' }] 
+            }],
+            from: { email: settings.from_email || 'test@example.com' },
+            subject: 'Test Connection',
+            content: [{ type: 'text/plain', value: 'This is a test connection.' }],
+          }),
+        });
+
+        if (!res.ok) {
+          const error = await res.text();
+          throw new Error(`SendGrid API error: ${error}`);
+        }
+        break;
+      }
+
       case 'resend': {
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -63,28 +87,6 @@ serve(async (req) => {
         if (!res.ok) {
           const error = await res.text();
           throw new Error(`Resend API error: ${error}`);
-        }
-        break;
-      }
-
-      case 'sendgrid': {
-        const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${settings.api_key}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            personalizations: [{ to: [{ email: 'test@example.com' }] }],
-            from: { email: 'test@example.com' },
-            subject: 'Test Connection',
-            content: [{ type: 'text/plain', value: 'This is a test connection.' }],
-          }),
-        });
-
-        if (!res.ok) {
-          const error = await res.text();
-          throw new Error(`SendGrid API error: ${error}`);
         }
         break;
       }

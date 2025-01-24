@@ -110,20 +110,55 @@ export function EmailProviderCard({
     );
   };
 
-  const renderSettingInput = (setting: EmailProviderSetting) => {
-    // For SMTP provider, we handle settings differently
-    if (provider.type === 'smtp') {
-      return null;
-    }
+  const renderSendGridSettings = () => {
+    if (provider.type !== 'sendgrid') return null;
+
+    const apiKeySetting = getSettingByKey('api_key');
+    const fromEmailSetting = getSettingByKey('from_email');
 
     return (
-      <Input
-        id={setting.id}
-        type={setting.is_secret ? "password" : "text"}
-        value={setting.value || ''}
-        onChange={(e) => onSettingChange(setting.id, e.target.value)}
-        placeholder={`Enter ${setting.key}`}
-      />
+      <div className="space-y-4">
+        <div className="grid gap-2">
+          <Label htmlFor={apiKeySetting?.id}>API Key</Label>
+          <Input
+            id={apiKeySetting?.id}
+            type="password"
+            value={apiKeySetting?.value || ''}
+            onChange={(e) => onSettingChange(apiKeySetting?.id || '', e.target.value)}
+            placeholder="Enter your SendGrid API key"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor={fromEmailSetting?.id}>From Email</Label>
+          <Input
+            id={fromEmailSetting?.id}
+            type="email"
+            value={fromEmailSetting?.value || ''}
+            onChange={(e) => onSettingChange(fromEmailSetting?.id || '', e.target.value)}
+            placeholder="Enter verified sender email"
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const renderResendSettings = () => {
+    if (provider.type !== 'resend') return null;
+
+    const apiKeySetting = getSettingByKey('api_key');
+
+    return (
+      <div className="grid gap-2">
+        <Label htmlFor={apiKeySetting?.id}>API Key</Label>
+        <Input
+          id={apiKeySetting?.id}
+          type="password"
+          value={apiKeySetting?.value || ''}
+          onChange={(e) => onSettingChange(apiKeySetting?.id || '', e.target.value)}
+          placeholder="Enter your Resend API key"
+        />
+      </div>
     );
   };
 
@@ -166,18 +201,9 @@ export function EmailProviderCard({
           </Alert>
         )}
         
-        {provider.type === 'smtp' ? (
-          renderSmtpSettings()
-        ) : (
-          provider.settings?.map((setting) => (
-            <div key={setting.id} className="grid gap-2">
-              <Label htmlFor={setting.id}>
-                {setting.key.charAt(0).toUpperCase() + setting.key.slice(1)}
-              </Label>
-              {renderSettingInput(setting)}
-            </div>
-          ))
-        )}
+        {provider.type === 'smtp' && renderSmtpSettings()}
+        {provider.type === 'sendgrid' && renderSendGridSettings()}
+        {provider.type === 'resend' && renderResendSettings()}
         
         <div className="flex gap-4 mt-4">
           <Button 

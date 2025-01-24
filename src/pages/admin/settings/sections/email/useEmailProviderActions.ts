@@ -25,7 +25,7 @@ export function useEmailProviderActions() {
       case 'sendgrid':
         return {
           url: 'https://app.sendgrid.com/settings/api_keys',
-          description: 'Create an API key in the SendGrid dashboard under Settings > API Keys.'
+          description: 'Create an API key in the SendGrid dashboard under Settings > API Keys. You\'ll also need to verify your sender email.'
         };
       case 'smtp':
         return {
@@ -52,7 +52,8 @@ export function useEmailProviderActions() {
         ];
       case 'sendgrid':
         return [
-          { key: 'api_key', value: '', is_secret: true }
+          { key: 'api_key', value: '', is_secret: true },
+          { key: 'from_email', value: '', is_secret: false }
         ];
       default:
         return [];
