@@ -27,6 +27,14 @@ export function EmailSettings() {
 
   const updateProviderStatus = useMutation({
     mutationFn: async ({ providerId, isActive }: { providerId: string; isActive: boolean }) => {
+      // If trying to disable a provider, check if it's the last active one
+      if (!isActive) {
+        const activeProviders = providers?.filter(p => p.is_active && p.id !== providerId) || [];
+        if (activeProviders.length === 0) {
+          throw new Error("At least one provider must remain active");
+        }
+      }
+
       if (isActive) {
         const { error: disableError } = await supabase
           .from('email_providers')
@@ -47,8 +55,8 @@ export function EmailSettings() {
       queryClient.invalidateQueries({ queryKey: ['emailProviders'] });
       toast.success("Provider status updated successfully");
     },
-    onError: () => {
-      toast.error("Failed to update provider status");
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to update provider status");
     }
   });
 
@@ -90,10 +98,11 @@ export function EmailSettings() {
           if (!data?.success) throw new Error('Connection test failed');
 
           setTestedProviders(prev => new Set([...prev, provider.id]));
+          return "Connection test successful!";
         })(),
         {
           loading: 'Testing connection...',
-          success: 'Connection test successful!',
+          success: (message) => message,
           error: (err) => `Connection test failed: ${err.message}`
         }
       );
