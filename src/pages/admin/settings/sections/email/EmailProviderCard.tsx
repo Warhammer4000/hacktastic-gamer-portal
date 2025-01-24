@@ -34,31 +34,92 @@ export function EmailProviderCard({
   const hasValidSettings = provider.settings?.every(s => s.value);
   const canSave = testedProviders.has(provider.id);
 
-  const renderSettingInput = (setting: EmailProviderSetting) => {
-    if (setting.key === 'secure' && provider.type === 'smtp') {
-      return (
+  const getSettingByKey = (key: string) => {
+    return provider.settings?.find(s => s.key === key);
+  };
+
+  const renderSmtpSettings = () => {
+    if (provider.type !== 'smtp') return null;
+
+    const hostSetting = getSettingByKey('host');
+    const portSetting = getSettingByKey('port');
+    const usernameSetting = getSettingByKey('username');
+    const passwordSetting = getSettingByKey('password');
+    const secureSetting = getSettingByKey('secure');
+
+    return (
+      <div className="space-y-4">
+        <div className="grid gap-2">
+          <Label htmlFor={hostSetting?.id}>SMTP Host</Label>
+          <Input
+            id={hostSetting?.id}
+            value={hostSetting?.value || ''}
+            onChange={(e) => onSettingChange(hostSetting?.id || '', e.target.value)}
+            placeholder="smtp.gmail.com"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor={portSetting?.id}>SMTP Port</Label>
+          <Input
+            id={portSetting?.id}
+            type="number"
+            value={portSetting?.value || ''}
+            onChange={(e) => onSettingChange(portSetting?.id || '', e.target.value)}
+            placeholder="587"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor={usernameSetting?.id}>SMTP Username</Label>
+          <Input
+            id={usernameSetting?.id}
+            value={usernameSetting?.value || ''}
+            onChange={(e) => onSettingChange(usernameSetting?.id || '', e.target.value)}
+            placeholder="your-email@gmail.com"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor={passwordSetting?.id}>SMTP Password</Label>
+          <Input
+            id={passwordSetting?.id}
+            type="password"
+            value={passwordSetting?.value || ''}
+            onChange={(e) => onSettingChange(passwordSetting?.id || '', e.target.value)}
+            placeholder="Enter SMTP password or app-specific password"
+          />
+        </div>
+
         <div className="flex items-center space-x-2">
           <Checkbox
-            id={setting.id}
-            checked={setting.value === 'true'}
+            id={secureSetting?.id}
+            checked={secureSetting?.value === 'true'}
             onCheckedChange={(checked) => 
-              onSettingChange(setting.id, checked ? 'true' : 'false')
+              onSettingChange(secureSetting?.id || '', checked ? 'true' : 'false')
             }
           />
           <label
-            htmlFor={setting.id}
+            htmlFor={secureSetting?.id}
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             Use SSL/TLS
           </label>
         </div>
-      );
+      </div>
+    );
+  };
+
+  const renderSettingInput = (setting: EmailProviderSetting) => {
+    // For SMTP provider, we handle settings differently
+    if (provider.type === 'smtp') {
+      return null;
     }
 
     return (
       <Input
         id={setting.id}
-        type={setting.is_secret ? "password" : setting.key === 'port' ? "number" : "text"}
+        type={setting.is_secret ? "password" : "text"}
         value={setting.value || ''}
         onChange={(e) => onSettingChange(setting.id, e.target.value)}
         placeholder={`Enter ${setting.key}`}
@@ -105,14 +166,18 @@ export function EmailProviderCard({
           </Alert>
         )}
         
-        {provider.settings?.map((setting) => (
-          <div key={setting.id} className="grid gap-2">
-            <Label htmlFor={setting.id}>
-              {setting.key.charAt(0).toUpperCase() + setting.key.slice(1)}
-            </Label>
-            {renderSettingInput(setting)}
-          </div>
-        ))}
+        {provider.type === 'smtp' ? (
+          renderSmtpSettings()
+        ) : (
+          provider.settings?.map((setting) => (
+            <div key={setting.id} className="grid gap-2">
+              <Label htmlFor={setting.id}>
+                {setting.key.charAt(0).toUpperCase() + setting.key.slice(1)}
+              </Label>
+              {renderSettingInput(setting)}
+            </div>
+          ))
+        )}
         
         <div className="flex gap-4 mt-4">
           <Button 
