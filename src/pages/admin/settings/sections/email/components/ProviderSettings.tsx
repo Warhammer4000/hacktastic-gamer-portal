@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { EmailProvider, EmailProviderSetting } from "../types";
+import { EmailProvider } from "../types";
 
 interface ProviderSettingsProps {
   provider: EmailProvider;
@@ -162,11 +162,56 @@ export function ProviderSettings({ provider, onSettingChange }: ProviderSettings
     );
   };
 
+  const renderMailgunSettings = () => {
+    if (provider.type !== 'mailgun') return null;
+
+    const apiKeySetting = getSettingByKey('api_key');
+    const domainSetting = getSettingByKey('domain');
+    const fromEmailSetting = getSettingByKey('from_email');
+
+    return (
+      <div className="space-y-4">
+        <div className="grid gap-2">
+          <Label htmlFor={apiKeySetting?.id}>API Key</Label>
+          <Input
+            id={apiKeySetting?.id}
+            type="password"
+            value={apiKeySetting?.value || ''}
+            onChange={(e) => onSettingChange(apiKeySetting?.id || '', e.target.value)}
+            placeholder="Enter your Mailgun API key"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor={domainSetting?.id}>Domain</Label>
+          <Input
+            id={domainSetting?.id}
+            value={domainSetting?.value || ''}
+            onChange={(e) => onSettingChange(domainSetting?.id || '', e.target.value)}
+            placeholder="mg.yourdomain.com"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor={fromEmailSetting?.id}>From Email</Label>
+          <Input
+            id={fromEmailSetting?.id}
+            type="email"
+            value={fromEmailSetting?.value || ''}
+            onChange={(e) => onSettingChange(fromEmailSetting?.id || '', e.target.value)}
+            placeholder="noreply@yourdomain.com"
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       {renderSmtpSettings()}
       {renderSendGridSettings()}
       {renderResendSettings()}
+      {renderMailgunSettings()}
     </>
   );
 }

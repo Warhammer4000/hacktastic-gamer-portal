@@ -72,6 +72,13 @@ serve(async (req) => {
       case 'mailgun': {
         const domain = settings.domain;
         const apiKey = settings.api_key;
+        const fromEmail = settings.from_email || `test@${domain}`;
+        
+        console.log('Testing Mailgun connection with:', {
+          domain,
+          fromEmail,
+          hasApiKey: !!apiKey
+        });
         
         const res = await fetch(`https://api.mailgun.net/v3/${domain}/messages`, {
           method: 'POST',
@@ -80,8 +87,8 @@ serve(async (req) => {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
           body: new URLSearchParams({
-            from: settings.from_email || `test@${domain}`,
-            to: settings.from_email || `test@${domain}`,
+            from: fromEmail,
+            to: fromEmail,
             subject: 'Test Connection',
             text: 'This is a test connection.',
           }),
@@ -89,8 +96,11 @@ serve(async (req) => {
 
         if (!res.ok) {
           const error = await res.text();
+          console.error('Mailgun API error:', error);
           throw new Error(`Mailgun API error: ${error}`);
         }
+        
+        console.log('Mailgun test successful');
         break;
       }
 
@@ -102,8 +112,8 @@ serve(async (req) => {
             'Authorization': `Bearer ${settings.api_key}`,
           },
           body: JSON.stringify({
-            from: 'test@resend.dev',
-            to: 'test@resend.dev',
+            from: settings.from_email ? `${settings.from_name} <${settings.from_email}>` : 'test@resend.dev',
+            to: ['test@resend.dev'],
             subject: 'Test Connection',
             text: 'This is a test connection.',
           }),
