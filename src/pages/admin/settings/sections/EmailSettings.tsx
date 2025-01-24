@@ -122,37 +122,16 @@ export function EmailSettings() {
     try {
       toast.promise(
         (async () => {
-          switch (provider.type) {
-            case 'resend':
-              const response = await fetch('/api/test-resend', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings)
-              });
-              if (!response.ok) throw new Error('Failed to connect to Resend');
-              break;
+          const { data, error } = await supabase.functions.invoke('test-email-provider', {
+            body: {
+              type: provider.type,
+              settings
+            }
+          });
 
-            case 'sendgrid':
-              const sgResponse = await fetch('/api/test-sendgrid', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings)
-              });
-              if (!sgResponse.ok) throw new Error('Failed to connect to SendGrid');
-              break;
+          if (error) throw new Error(error.message);
+          if (!data?.success) throw new Error('Connection test failed');
 
-            case 'smtp':
-              const smtpResponse = await fetch('/api/test-smtp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings)
-              });
-              if (!smtpResponse.ok) throw new Error('Failed to connect to SMTP server');
-              break;
-
-            default:
-              throw new Error('Unsupported provider type');
-          }
           setTestedProviders(prev => new Set([...prev, provider.id]));
         })(),
         {
