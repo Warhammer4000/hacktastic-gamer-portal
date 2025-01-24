@@ -35,8 +35,6 @@ export function CouponBenefit({ coupon }: CouponBenefitProps) {
         const { error } = await supabase
           .from('coupons')
           .update({ 
-            state: 'revealed',
-            assigned_at: new Date().toISOString(),
             reveal_date: new Date().toISOString()
           })
           .eq('id', coupon.id);
