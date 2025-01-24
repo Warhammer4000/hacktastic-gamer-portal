@@ -55,7 +55,9 @@ export function useEmailProviderActions() {
         ];
       case 'resend':
         return [
-          { key: 'api_key', value: '', is_secret: true }
+          { key: 'api_key', value: '', is_secret: true },
+          { key: 'from_email', value: '', is_secret: false },
+          { key: 'from_name', value: '', is_secret: false }
         ];
       case 'sendgrid':
         return [

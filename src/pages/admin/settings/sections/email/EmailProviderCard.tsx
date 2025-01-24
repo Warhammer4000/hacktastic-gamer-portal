@@ -147,17 +147,42 @@ export function EmailProviderCard({
     if (provider.type !== 'resend') return null;
 
     const apiKeySetting = getSettingByKey('api_key');
+    const fromEmailSetting = getSettingByKey('from_email');
+    const fromNameSetting = getSettingByKey('from_name');
 
     return (
-      <div className="grid gap-2">
-        <Label htmlFor={apiKeySetting?.id}>API Key</Label>
-        <Input
-          id={apiKeySetting?.id}
-          type="password"
-          value={apiKeySetting?.value || ''}
-          onChange={(e) => onSettingChange(apiKeySetting?.id || '', e.target.value)}
-          placeholder="Enter your Resend API key"
-        />
+      <div className="space-y-4">
+        <div className="grid gap-2">
+          <Label htmlFor={apiKeySetting?.id}>API Key</Label>
+          <Input
+            id={apiKeySetting?.id}
+            type="password"
+            value={apiKeySetting?.value || ''}
+            onChange={(e) => onSettingChange(apiKeySetting?.id || '', e.target.value)}
+            placeholder="Enter your Resend API key"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor={fromEmailSetting?.id}>From Email</Label>
+          <Input
+            id={fromEmailSetting?.id}
+            type="email"
+            value={fromEmailSetting?.value || ''}
+            onChange={(e) => onSettingChange(fromEmailSetting?.id || '', e.target.value)}
+            placeholder="noreply@yourdomain.com"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor={fromNameSetting?.id}>From Name</Label>
+          <Input
+            id={fromNameSetting?.id}
+            value={fromNameSetting?.value || ''}
+            onChange={(e) => onSettingChange(fromNameSetting?.id || '', e.target.value)}
+            placeholder="Your Company Name"
+          />
+        </div>
       </div>
     );
   };
