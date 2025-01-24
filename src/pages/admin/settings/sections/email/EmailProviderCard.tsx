@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExternalLink, Mail, Send, Server } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EmailProvider, EmailProviderSetting } from "./types";
 import { useEmailProviderActions } from "./useEmailProviderActions";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface EmailProviderCardProps {
   provider: EmailProvider;
@@ -32,6 +33,38 @@ export function EmailProviderCard({
   const guide = getProviderGuide(provider.type);
   const hasValidSettings = provider.settings?.every(s => s.value);
   const canSave = testedProviders.has(provider.id);
+
+  const renderSettingInput = (setting: EmailProviderSetting) => {
+    if (setting.key === 'secure' && provider.type === 'smtp') {
+      return (
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id={setting.id}
+            checked={setting.value === 'true'}
+            onCheckedChange={(checked) => 
+              onSettingChange(setting.id, checked ? 'true' : 'false')
+            }
+          />
+          <label
+            htmlFor={setting.id}
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Use SSL/TLS
+          </label>
+        </div>
+      );
+    }
+
+    return (
+      <Input
+        id={setting.id}
+        type={setting.is_secret ? "password" : setting.key === 'port' ? "number" : "text"}
+        value={setting.value || ''}
+        onChange={(e) => onSettingChange(setting.id, e.target.value)}
+        placeholder={`Enter ${setting.key}`}
+      />
+    );
+  };
 
   return (
     <Card>
@@ -74,14 +107,10 @@ export function EmailProviderCard({
         
         {provider.settings?.map((setting) => (
           <div key={setting.id} className="grid gap-2">
-            <Label htmlFor={setting.id}>{setting.key}</Label>
-            <Input
-              id={setting.id}
-              type={setting.is_secret ? "password" : "text"}
-              value={setting.value || ''}
-              onChange={(e) => onSettingChange(setting.id, e.target.value)}
-              placeholder={`Enter ${setting.key}`}
-            />
+            <Label htmlFor={setting.id}>
+              {setting.key.charAt(0).toUpperCase() + setting.key.slice(1)}
+            </Label>
+            {renderSettingInput(setting)}
           </div>
         ))}
         

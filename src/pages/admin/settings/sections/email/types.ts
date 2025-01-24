@@ -14,3 +14,11 @@ export interface EmailProviderSetting {
   value: string | null;
   is_secret: boolean;
 }
+
+export interface SmtpSettings {
+  host: string;
+  port: string;
+  username: string;
+  password: string;
+  secure: boolean;
+}

@@ -29,15 +29,39 @@ export function useEmailProviderActions() {
         };
       case 'smtp':
         return {
-          description: 'Configure your SMTP settings using your email service provider credentials.'
+          description: 'Configure your SMTP settings using your email service provider credentials. Common providers include Gmail, Outlook, or your custom email server.'
         };
       default:
         return { description: '' };
     }
   };
 
+  const getDefaultSettings = (type: EmailProvider['type']) => {
+    switch (type) {
+      case 'smtp':
+        return [
+          { key: 'host', value: '', is_secret: false },
+          { key: 'port', value: '587', is_secret: false },
+          { key: 'username', value: '', is_secret: false },
+          { key: 'password', value: '', is_secret: true },
+          { key: 'secure', value: 'false', is_secret: false }
+        ];
+      case 'resend':
+        return [
+          { key: 'api_key', value: '', is_secret: true }
+        ];
+      case 'sendgrid':
+        return [
+          { key: 'api_key', value: '', is_secret: true }
+        ];
+      default:
+        return [];
+    }
+  };
+
   return {
     getProviderIcon,
-    getProviderGuide
+    getProviderGuide,
+    getDefaultSettings
   };
 }
